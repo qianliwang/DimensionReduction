@@ -29,13 +29,13 @@ class SVMClf(object):
         skfCV = StratifiedKFold(n_splits=10,shuffle=True);
         
         # 2). Grid search, with the C and gamma parameters.
-        C_range = np.logspace(-1, 5, 7);
+        C_range = np.logspace(-5, 15, 10,base = 10.0);
         #print C_range;
-        gamma_range = np.logspace(-15, -10, 6);
+        gamma_range = np.logspace(-15, 3, 9, base=10.0);
         #print gamma_range;
         param_grid = dict(gamma=gamma_range, C=C_range);
         # Notice here that the svm.SVC is just for searching for the parameter, we didn't really train the model yet.  
-        grid = GridSearchCV(svm.SVC(kernel='rbf'), param_grid=param_grid, n_jobs =2, cv=skfCV);
+        grid = GridSearchCV(svm.SVC(kernel='rbf'), param_grid=param_grid, scoring="f1", n_jobs =2, cv=skfCV);
         #grid.fit(ldaProjTrainingData, trainingLabel);
         grid.fit(trainingData, trainingLabel);
         print("The best parameters are %s with a score of %0.2f"
