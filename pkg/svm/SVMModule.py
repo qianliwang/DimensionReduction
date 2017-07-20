@@ -70,8 +70,8 @@ class SVMClf(object):
                 else:
                     FP = FP + 1;
         precision = 1.0*TP/(TP+FP) if (TP+FP)!=0 else 0;
-        print "TruePositive: %d "% TP;
-        print "FalsePositive: %d "% FP;
+        #print "TruePositive: %d "% TP;
+        #print "FalsePositive: %d "% FP;
         print "Precision: %f" % precision;
         recall = 1.0*TP/(TP+FN) if (TP+FN)!=0 else 0;
         print "Recall: %f" % recall;
