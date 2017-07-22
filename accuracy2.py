@@ -83,7 +83,7 @@ def myGlobalPCA(folderPath):
 
 if __name__ == "__main__":
     
-    dataset = "australian";
+    dataset = "german";
     datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
     outputFolderPath = datasetPath+"_referPaper2/plaintext/";
     trainingDataPath = datasetPath+"_training";
@@ -91,8 +91,9 @@ if __name__ == "__main__":
     #for i in range(10):
     
     cprResult = np.zeros((11,2));
+    totalRound = 10;
     
-    for j in range(10):
+    for j in range(totalRound):
         gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
         
         trainingData = np.loadtxt(trainingDataPath,delimiter=",");
@@ -148,5 +149,5 @@ if __name__ == "__main__":
     
     print "******************************";
     for i in range(0,len(cprResult)):
-        print "%f , %f" % (cprResult[i][0]/2,cprResult[i][1]/2);
+        print "%f , %f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound);
     
