@@ -90,45 +90,63 @@ if __name__ == "__main__":
     testingDataPath = datasetPath+"_testing";
     #for i in range(10):
     
-    gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
-    numOfTrunks = 20;
-    gf.splitAndSaveDatasets(trainingDataPath,outputFolderPath,numOfTrunks);
-
-
-    trainingData = np.loadtxt(trainingDataPath,delimiter=",");
-    pureTrainingData = trainingData[:,1:];
-    trainingLabel = trainingData[:,0];
+    cprResult = np.zeros((11,2));
     
-    #pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-    #print pcaImpl.projMatrix[:,0];
-    
-    testingData = np.loadtxt(testingDataPath,delimiter=",");
-    pureTestingData = testingData[:,1:];
-    testingLabel = testingData[:,0];
-    projMatrix = myGlobalPCA(outputFolderPath);
-    pgResultList=[];
-    myResultList=[];
-    
-    
-    #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
-    #print result;
-    
-    for k in range(1,10):
-        pgProjMatrix = privateGlobalPCA(outputFolderPath,k); 
-        #print pgProjMatrix.shape;   
-        projTrainingData = np.dot(pureTrainingData,pgProjMatrix);
-        projTestingData = np.dot(pureTestingData,pgProjMatrix);
+    for j in range(10):
+        gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
         
-        result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
-        pgResultList.append(result);
+        trainingData = np.loadtxt(trainingDataPath,delimiter=",");
+        pureTrainingData = trainingData[:,1:];
+        trainingLabel = trainingData[:,0];
         
-        kProjMatrix = projMatrix[:,0:k];
-        projTrainingData = np.dot(pureTrainingData,kProjMatrix);
-        projTestingData = np.dot(pureTestingData,kProjMatrix);
-        result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
-        myResultList.append(result);
-        print "===========================";
-
-    for i in range(0,len(pgResultList)):
-        print "%f , %f" % (pgResultList[i][2],myResultList[i][2]);
+        #numOfFeature = trainingData.shape[1];
+        #numOfDataPerOwner = np.floor(numOfFeature/5.0);
+        #numOfTrunks = int(np.ceil(trainingData.shape[0]/numOfDataPerOwner));
+        numOfTrunks = int(np.ceil(trainingData.shape[0]/2));
+        print "The number of trunks is: %d" % numOfTrunks;
+        gf.splitAndSaveDatasets(trainingDataPath,outputFolderPath,numOfTrunks);
+        
+        #pcaImpl = PCAModule.PCAImpl(pureTrainingData);
+        #print pcaImpl.projMatrix[:,0];
+        
+        testingData = np.loadtxt(testingDataPath,delimiter=",");
+        pureTestingData = testingData[:,1:];
+        
+        #trainingColMean = np.mean(pureTrainingData,axis=0);
+        #trainingColDeviation = np.std(pureTrainingData, axis=0);
+        
+        #scaledTrainingData = np.divide((pureTrainingData - trainingColMean),trainingColDeviation);
+        #scaledTestingData = np.divide((pureTestingData - trainingColMean),trainingColDeviation);
+        
+        testingLabel = testingData[:,0];
+        projMatrix = myGlobalPCA(outputFolderPath);
+        
+        
+        #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
+        #print result;
+        
+        for k in range(1,11):
+            pgProjMatrix = privateGlobalPCA(outputFolderPath,k); 
+            #print pgProjMatrix.shape;   
+            projTrainingData = np.dot(pureTrainingData,pgProjMatrix);
+            projTestingData = np.dot(pureTestingData,pgProjMatrix);
+            #print projTrainingData.shape;
+            
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
+            cprResult[k-1][0] = cprResult[k-1][0]+result[2];
+            
+            kProjMatrix = projMatrix[:,0:k];
+            projTrainingData = np.dot(pureTrainingData,kProjMatrix);
+            projTestingData = np.dot(pureTestingData,kProjMatrix);
+            #print projTestingData.shape;
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
+            cprResult[k-1][1] = cprResult[k-1][1]+result[2];
+            print "===========================";
+    
+        for i in range(0,len(cprResult)):
+            print "%f , %f" % (cprResult[i][0],cprResult[i][1]);
+    
+    print "******************************";
+    for i in range(0,len(cprResult)):
+        print "%f , %f" % (cprResult[i][0]/2,cprResult[i][1]/2);
     

@@ -99,7 +99,7 @@ class DataOwnerImpl(object):
             data = self.data;
             
         k = np.minimum(k,LA.matrix_rank(data));
-            #print "Change k to: %d" % k;
+        #print "In each data owner, the k is: %d" % k;
             
         C = np.dot(data.T,data);
         """

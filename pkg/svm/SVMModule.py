@@ -29,27 +29,39 @@ class SVMClf(object):
         skfCV = StratifiedKFold(n_splits=10,shuffle=True);
         
         # 2). Grid search, with the C and gamma parameters.
-        C_range = np.logspace(-5, 15, 10,base = 10.0);
+        C_range = np.logspace(-3, 4, 8,base = 10.0);
         #print C_range;
-        gamma_range = np.logspace(-15, 3, 9, base=10.0);
+        gamma_range = np.logspace(-12, 2, 15, base=10.0);
         #print gamma_range;
         param_grid = dict(gamma=gamma_range, C=C_range);
         # Notice here that the svm.SVC is just for searching for the parameter, we didn't really train the model yet.  
-        grid = GridSearchCV(svm.SVC(kernel='rbf'), param_grid=param_grid, scoring="f1", n_jobs =2, cv=skfCV);
+        grid = GridSearchCV(svm.SVC(kernel='rbf',class_weight="balanced"), param_grid=param_grid, scoring="f1", n_jobs =2, cv=skfCV);
         #grid.fit(ldaProjTrainingData, trainingLabel);
         grid.fit(trainingData, trainingLabel);
+        
+        #print "Grid search support vectors:";
+        #print grid.best_estimator_.support_;
+        
         print("The best parameters are %s with a score of %0.2f"
               % (grid.best_params_, grid.best_score_));
+        '''
+        Actually, the GridSearchCV supports refitting data with the best found parameters, so we don't need to initialize
+        a new SVC again to do the work, just call the GridSearchCV functions, which is written below.
         
         # 3). Train the SVM model using the parameters from grid search. 
         svmClf = svm.SVC(C = grid.best_params_['C'], gamma = grid.best_params_['gamma'], kernel='rbf');
         svmClf.fit(trainingData,trainingLabel);
+        #print "SVM support vectors:";
+        #print svmClf.support_;
         accuracy_train = svmClf.score(trainingData,trainingLabel);
         print "Training Score: %f" % accuracy_train; 
         #print svmClf.support_;
         # 4). Predict the testing data and calculate the f1 score.
         svmPred = svmClf.predict(testingData);
+        '''
+        svmPred = grid.predict(testingData);
         result = SVMClf.calcF1Score(testingLabel,svmPred);
+        #print "Grid Score: %f" % grid.score(testingData,testingLabel);
         return result;
     
     @classmethod
