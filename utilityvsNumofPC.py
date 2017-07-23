@@ -12,46 +12,49 @@ if __name__ == "__main__":
     testingDataPath = datasetPath+"_testing";
     #for i in range(10):
     
-    cprResult = np.zeros((10,3));
     totalRound = 10;
     
-    for j in range(totalRound):
-        gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
-        trainingData = np.loadtxt(trainingDataPath,delimiter=",");
-        pureTrainingData = trainingData[:,1:];
-        trainingLabel = trainingData[:,0];
+    gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
+    trainingData = np.loadtxt(trainingDataPath,delimiter=",");
+    pureTrainingData = trainingData[:,1:];
+    trainingLabel = trainingData[:,0];
+    
+    #trainingColMean = np.mean(pureTrainingData,axis=0);
+    #trainingColDeviation = np.std(pureTrainingData, axis=0);
+    
+    #scaledTrainingData = np.divide((pureTrainingData - trainingColMean),trainingColDeviation);
+    #scaledTestingData = np.divide((pureTestingData - trainingColMean),trainingColDeviation);
+    
+    testingData = np.loadtxt(testingDataPath,delimiter=",");
+    pureTestingData = testingData[:,1:];
+    testingLabel = testingData[:,0];
+    
+    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
+    pcaImpl.getPCs();
+    
+    numOfDimension = trainingData.shape[1]-1;
+    
+    epsilon = 0.5;
+    delta = 0.01;
+    
+    isGaussianDist = True;
+    dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
+    
+    
+    isGaussianDist = False;
+    dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
+    
+    cprResult = np.zeros((numOfDimension-1,3));
+    
+    for k in range(1,numOfDimension):
         
-        #trainingColMean = np.mean(pureTrainingData,axis=0);
-        #trainingColDeviation = np.std(pureTrainingData, axis=0);
-        
-        #scaledTrainingData = np.divide((pureTrainingData - trainingColMean),trainingColDeviation);
-        #scaledTestingData = np.divide((pureTestingData - trainingColMean),trainingColDeviation);
-        
-        testingData = np.loadtxt(testingDataPath,delimiter=",");
-        pureTestingData = testingData[:,1:];
-        testingLabel = testingData[:,0];
-        
-        pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-        pcaImpl.getPCs();
         #print pcaImpl.projMatrix[:,0];
-        
-        epsilon = 0.5;
-        delta = 0.01;
-        
-        isGaussianDist = True;
-        dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-        dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
-        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
-        
-        isGaussianDist = False;
-        dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-        dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
-        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
-        
         #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
         #print result;
         
-        for k in range(1,trainingData.shape[1]):
+        for j in range(totalRound):
             projTrainingData1 = np.dot(pureTrainingData,pcaImpl.projMatrix[:,0:k]);
             projTestingData1 = np.dot(pureTestingData,pcaImpl.projMatrix[:,0:k]);
             #print projTrainingData.shape;
@@ -59,13 +62,16 @@ if __name__ == "__main__":
             result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
             cprResult[k-1][0] = cprResult[k-1][0]+result[2];
             
-            
+            isGaussianDist = True;
+            dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
             projTrainingData2 = np.dot(pureTrainingData,dpGaussianPCAImpl.projMatrix[:,0:k]);
             projTestingData2 = np.dot(pureTestingData,dpGaussianPCAImpl.projMatrix[:,0:k]);
             #print projTestingData.shape;
             result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
             cprResult[k-1][1] = cprResult[k-1][1]+result[2];
             
+            isGaussianDist = False;
+            dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
             projTrainingData3 = np.dot(pureTrainingData,dpWishartPCAImpl.projMatrix[:,0:k]);
             projTestingData3 = np.dot(pureTestingData,dpWishartPCAImpl.projMatrix[:,0:k]);
             #print projTestingData.shape;

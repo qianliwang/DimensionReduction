@@ -6,7 +6,7 @@ class DiffPrivImpl(object):
     @classmethod
     def SymmGaussian(cls,epsilon,delta,dimension,deltaF=1):
         standardDeviation = np.sqrt(2*np.log(1.25/delta))*deltaF/epsilon;
-        print "Standard deviation is %f." % standardDeviation;
+        print "Gaussian Standard deviation is %f." % standardDeviation;
         noiseMatrix = np.random.normal(0, standardDeviation, (dimension,dimension));
         #Copy upper triangle to lower triangle in a matrix.
         i_lower = np.tril_indices(dimension, -1);
