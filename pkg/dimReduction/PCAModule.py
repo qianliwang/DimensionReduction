@@ -4,11 +4,12 @@ from numpy import linalg as LA;
 class PCAImpl(object):
     
     def __init__(self,scaledData):
-        self.eigValues,self.projMatrix = self.__getPCs(scaledData);
-        self.energies = self.__getEigValueEnergies(self.eigValues);
+        self.data = scaledData; 
+        self.eigValues = None;
+        self.projMatrix = None;
         
-    def __getPCs(self,scaledData):
-        covMatrix = np.dot(scaledData.T,scaledData);
+    def getPCs(self):
+        covMatrix = np.dot(self.data.T,self.data);
         w, v = LA.eig(covMatrix);    
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
@@ -17,7 +18,8 @@ class PCAImpl(object):
         #print sortedW;
         sortedV = v[:,idx];
         
-        return sortedW,sortedV;
+        self.eigValues = sortedW;
+        self.projMatrix = sortedV;
     
     def __getApproxEigval(self,covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);

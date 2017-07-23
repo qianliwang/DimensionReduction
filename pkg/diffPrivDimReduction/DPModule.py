@@ -23,3 +23,13 @@ class DiffPrivImpl(object):
         wishart = invwishart.wishartrand(df,sigma);
         #print wishart;
         return wishart;
+    
+    @classmethod
+    def SymmWishart_withDelta(cls,epsilon,delta,dimension,sensitivity):
+        df = dimension+int(np.floor(14.0/(epsilon*epsilon)*(2.0*np.log(4.0/delta))));
+        sigma = (sensitivity*sensitivity)*np.identity(dimension);
+        #print sigma;
+        wishart = invwishart.wishartrand(df,sigma);
+        #print wishart;
+        return wishart;
+    
