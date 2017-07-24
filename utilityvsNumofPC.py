@@ -81,8 +81,8 @@ if __name__ == "__main__":
             print "===========================";
     
         for i in range(0,len(cprResult)):
-            print "%f , %f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
+            print "%f , %f, %f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
     
     print "******************************";
     for i in range(0,len(cprResult)):
-        print "%f , %f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
+        print "%f , %f, %f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
