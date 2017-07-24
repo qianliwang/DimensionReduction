@@ -7,10 +7,10 @@ import numpy as np;
 if __name__ == "__main__":
     
     datasets = ['australian','diabetes','german', 'ionosphere'];
-    for dataset in datasets:
     
-        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
+    for dataset in datasets:
         
+        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
         datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
         trainingDataPath = datasetPath+"_training";
         testingDataPath = datasetPath+"_testing";
@@ -19,10 +19,12 @@ if __name__ == "__main__":
         totalRound = 10;
         
         gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
+        
         trainingData = np.loadtxt(trainingDataPath,delimiter=",");
         pureTrainingData = trainingData[:,1:];
         trainingLabel = trainingData[:,0];
         
+        numOfDimension = int(trainingData.shape[1]/2.0);
         #trainingColMean = np.mean(pureTrainingData,axis=0);
         #trainingColDeviation = np.std(pureTrainingData, axis=0);
         
@@ -36,49 +38,44 @@ if __name__ == "__main__":
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
         pcaImpl.getPCs();
         
-        numOfDimension = trainingData.shape[1]-1;
-        
-        epsilon = 0.5;
-        delta = 0.01;
-        
-        isGaussianDist = True;
         dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-        dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
-        
-        
-        isGaussianDist = False;
         dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-        dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
+              
+        cprResult = np.zeros((9,3));       
         
-        cprResult = np.zeros((numOfDimension-1,3));
-        
-        
-        for k in range(1,numOfDimension):
-            
+        for k in range(1,10):
             #print pcaImpl.projMatrix[:,0];
-            #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
-            #print result;
+            
+            epsilon = 0.1;
+            delta = 0.01;
+            epsilon = 0.1*k;
             
             for j in range(totalRound):
-                projTrainingData1 = np.dot(pureTrainingData,pcaImpl.projMatrix[:,0:k]);
-                projTestingData1 = np.dot(pureTestingData,pcaImpl.projMatrix[:,0:k]);
+                    
+                isGaussianDist = True;
+                dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
+                dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
+                
+                isGaussianDist = False;
+                dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
+                dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
+                
+                projTrainingData1 = np.dot(pureTrainingData,pcaImpl.projMatrix[:,0:numOfDimension]);
+                projTestingData1 = np.dot(pureTestingData,pcaImpl.projMatrix[:,0:numOfDimension]);
                 #print projTrainingData.shape;
                 
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
                 cprResult[k-1][0] = cprResult[k-1][0]+result[2];
                 
-                isGaussianDist = True;
-                dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
-                projTrainingData2 = np.dot(pureTrainingData,dpGaussianPCAImpl.projMatrix[:,0:k]);
-                projTestingData2 = np.dot(pureTestingData,dpGaussianPCAImpl.projMatrix[:,0:k]);
+                
+                projTrainingData2 = np.dot(pureTrainingData,dpGaussianPCAImpl.projMatrix[:,0:numOfDimension]);
+                projTestingData2 = np.dot(pureTestingData,dpGaussianPCAImpl.projMatrix[:,0:numOfDimension]);
                 #print projTestingData.shape;
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
                 cprResult[k-1][1] = cprResult[k-1][1]+result[2];
                 
-                isGaussianDist = False;
-                dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
-                projTrainingData3 = np.dot(pureTrainingData,dpWishartPCAImpl.projMatrix[:,0:k]);
-                projTestingData3 = np.dot(pureTestingData,dpWishartPCAImpl.projMatrix[:,0:k]);
+                projTrainingData3 = np.dot(pureTrainingData,dpWishartPCAImpl.projMatrix[:,0:numOfDimension]);
+                projTestingData3 = np.dot(pureTestingData,dpWishartPCAImpl.projMatrix[:,0:numOfDimension]);
                 #print projTestingData.shape;
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
                 cprResult[k-1][2] = cprResult[k-1][2]+result[2];
@@ -90,5 +87,5 @@ if __name__ == "__main__":
         
         print "******************************";
         for i in range(0,len(cprResult)):
-            print "%f , %f, %f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
+            print "%f , %f, %f " % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
             
