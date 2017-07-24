@@ -1,0 +1,1988 @@
+Number of testing samples: 87
+Number of positive samples: 49
+Number of negative samples: 38
+Number of training samples: 263
+Number of positive samples: 175
+Number of negative samples: 88
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.001, 'gamma': 0.10000000000000001} with a score of 0.81
+Precision: 0.563218
+Recall: 1.000000
+F1Score: 0.720588
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 100.0} with a score of 0.81
+Precision: 0.567901
+Recall: 0.938776
+F1Score: 0.707692
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 0.01} with a score of 0.86
+Precision: 0.687500
+Recall: 0.897959
+F1Score: 0.778761
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.803571
+Recall: 0.918367
+F1Score: 0.857143
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.94
+Precision: 0.807018
+Recall: 0.938776
+F1Score: 0.867925
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.86
+Precision: 0.784314
+Recall: 0.816327
+F1Score: 0.800000
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.793103
+Recall: 0.938776
+F1Score: 0.859813
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.86
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.839286
+Recall: 0.959184
+F1Score: 0.895238
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.810345
+Recall: 0.959184
+F1Score: 0.878505
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.94
+Precision: 0.783333
+Recall: 0.959184
+F1Score: 0.862385
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.810345
+Recall: 0.959184
+F1Score: 0.878505
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.86
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.94
+Precision: 0.810345
+Recall: 0.959184
+F1Score: 0.878505
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.781818
+Recall: 0.877551
+F1Score: 0.826923
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.810345
+Recall: 0.959184
+F1Score: 0.878505
+===========================
+0.720588 , 0.707692
+0.778761 , 0.857143
+0.826923 , 0.867925
+0.800000 , 0.859813
+0.826923 , 0.895238
+0.826923 , 0.878505
+0.826923 , 0.862385
+0.826923 , 0.878505
+0.826923 , 0.878505
+0.826923 , 0.878505
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 60
+Number of negative samples: 27
+Number of training samples: 263
+Number of positive samples: 165
+Number of negative samples: 98
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 9.9999999999999998e-13} with a score of 0.77
+Precision: 0.689655
+Recall: 1.000000
+F1Score: 0.816327
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 9.9999999999999998e-13} with a score of 0.77
+Precision: 0.689655
+Recall: 1.000000
+F1Score: 0.816327
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.85
+Precision: 0.907407
+Recall: 0.816667
+F1Score: 0.859649
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.91
+Precision: 0.919355
+Recall: 0.950000
+F1Score: 0.934426
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.931034
+Recall: 0.900000
+F1Score: 0.915254
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.932203
+Recall: 0.916667
+F1Score: 0.924370
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.913793
+Recall: 0.883333
+F1Score: 0.898305
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.919355
+Recall: 0.950000
+F1Score: 0.934426
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.931034
+Recall: 0.900000
+F1Score: 0.915254
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.950000
+F1Score: 0.942149
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.913793
+Recall: 0.883333
+F1Score: 0.898305
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.950000
+F1Score: 0.942149
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.913793
+Recall: 0.883333
+F1Score: 0.898305
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.950000
+F1Score: 0.942149
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.913793
+Recall: 0.883333
+F1Score: 0.898305
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.950000
+F1Score: 0.942149
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.931034
+Recall: 0.900000
+F1Score: 0.915254
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.950000
+F1Score: 0.942149
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.913793
+Recall: 0.883333
+F1Score: 0.898305
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.950000
+F1Score: 0.942149
+===========================
+1.536915 , 1.524019
+1.638410 , 1.791569
+1.742177 , 1.792294
+1.698305 , 1.794239
+1.742177 , 1.837387
+1.725228 , 1.820653
+1.725228 , 1.804534
+1.725228 , 1.820653
+1.742177 , 1.820653
+1.725228 , 1.820653
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 52
+Number of negative samples: 35
+Number of training samples: 263
+Number of positive samples: 172
+Number of negative samples: 91
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.01} with a score of 0.80
+Precision: 0.750000
+Recall: 0.750000
+F1Score: 0.750000
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 1.0} with a score of 0.79
+Precision: 0.595238
+Recall: 0.961538
+F1Score: 0.735294
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.833333
+Recall: 0.865385
+F1Score: 0.849057
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.01} with a score of 0.92
+Precision: 0.909091
+Recall: 0.961538
+F1Score: 0.934579
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.875000
+Recall: 0.942308
+F1Score: 0.907407
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.90
+Precision: 0.875000
+Recall: 0.942308
+F1Score: 0.907407
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.91
+Precision: 0.892857
+Recall: 0.961538
+F1Score: 0.925926
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.90
+Precision: 0.875000
+Recall: 0.942308
+F1Score: 0.907407
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.925926
+Recall: 0.961538
+F1Score: 0.943396
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.909091
+Recall: 0.961538
+F1Score: 0.934579
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.859649
+Recall: 0.942308
+F1Score: 0.899083
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.894737
+Recall: 0.980769
+F1Score: 0.935780
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.90
+Precision: 0.875000
+Recall: 0.942308
+F1Score: 0.907407
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.925926
+Recall: 0.961538
+F1Score: 0.943396
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.925926
+Recall: 0.961538
+F1Score: 0.943396
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.836364
+Recall: 0.884615
+F1Score: 0.859813
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.925926
+Recall: 0.961538
+F1Score: 0.943396
+===========================
+2.286915 , 2.259313
+2.487467 , 2.726149
+2.649585 , 2.715371
+2.605712 , 2.720165
+2.649585 , 2.780783
+2.649756 , 2.755233
+2.624311 , 2.740314
+2.632636 , 2.764050
+2.666706 , 2.764050
+2.585041 , 2.764050
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 55
+Number of negative samples: 32
+Number of training samples: 263
+Number of positive samples: 169
+Number of negative samples: 94
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 1.0} with a score of 0.79
+Precision: 0.642857
+Recall: 0.163636
+F1Score: 0.260870
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 1.0} with a score of 0.79
+Precision: 0.666667
+Recall: 0.145455
+F1Score: 0.238806
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.01} with a score of 0.92
+Precision: 0.909091
+Recall: 0.909091
+F1Score: 0.909091
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.905660
+Recall: 0.872727
+F1Score: 0.888889
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.894737
+Recall: 0.927273
+F1Score: 0.910714
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.91
+Precision: 0.879310
+Recall: 0.927273
+F1Score: 0.902655
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.894737
+Recall: 0.927273
+F1Score: 0.910714
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.870370
+Recall: 0.854545
+F1Score: 0.862385
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.870370
+Recall: 0.854545
+F1Score: 0.862385
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.910714
+Recall: 0.927273
+F1Score: 0.918919
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.894737
+Recall: 0.927273
+F1Score: 0.910714
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.910714
+Recall: 0.927273
+F1Score: 0.918919
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.894737
+Recall: 0.927273
+F1Score: 0.910714
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.927273
+Recall: 0.927273
+F1Score: 0.927273
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.894737
+Recall: 0.927273
+F1Score: 0.910714
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.927273
+Recall: 0.927273
+F1Score: 0.927273
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.01} with a score of 0.92
+Precision: 0.925926
+Recall: 0.909091
+F1Score: 0.917431
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.927273
+Recall: 0.927273
+F1Score: 0.927273
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.927273
+Recall: 0.927273
+F1Score: 0.927273
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.927273
+Recall: 0.927273
+F1Score: 0.927273
+===========================
+2.547784 , 2.498119
+3.396558 , 3.615037
+3.560299 , 3.618026
+3.516427 , 3.582551
+3.511970 , 3.699702
+3.560471 , 3.674152
+3.535025 , 3.667587
+3.543350 , 3.691322
+3.584137 , 3.691322
+3.512314 , 3.691322
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 47
+Number of negative samples: 40
+Number of training samples: 263
+Number of positive samples: 177
+Number of negative samples: 86
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 100.0} with a score of 0.78
+Precision: 0.558442
+Recall: 0.914894
+F1Score: 0.693548
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 100.0} with a score of 0.78
+Precision: 0.537500
+Recall: 0.914894
+F1Score: 0.677165
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 9.9999999999999995e-07} with a score of 0.91
+Precision: 0.865385
+Recall: 0.957447
+F1Score: 0.909091
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.91
+Precision: 0.836364
+Recall: 0.978723
+F1Score: 0.901961
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.901961
+Recall: 0.978723
+F1Score: 0.938776
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.818182
+Recall: 0.957447
+F1Score: 0.882353
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.867925
+Recall: 0.978723
+F1Score: 0.920000
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.884615
+Recall: 0.978723
+F1Score: 0.929293
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.901961
+Recall: 0.978723
+F1Score: 0.938776
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.93
+Precision: 0.867925
+Recall: 0.978723
+F1Score: 0.920000
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.884615
+Recall: 0.978723
+F1Score: 0.929293
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.94
+Precision: 0.849057
+Recall: 0.957447
+F1Score: 0.900000
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.901961
+Recall: 0.978723
+F1Score: 0.938776
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 9.9999999999999995e-07} with a score of 0.93
+Precision: 0.846154
+Recall: 0.936170
+F1Score: 0.888889
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.867925
+Recall: 0.978723
+F1Score: 0.920000
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.884615
+Recall: 0.978723
+F1Score: 0.929293
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.901961
+Recall: 0.978723
+F1Score: 0.938776
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 1.0000000000000001e-05} with a score of 0.94
+Precision: 0.836364
+Recall: 0.978723
+F1Score: 0.901961
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.901961
+Recall: 0.978723
+F1Score: 0.938776
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.94
+Precision: 0.901961
+Recall: 0.978723
+F1Score: 0.938776
+===========================
+3.241333 , 3.175284
+4.305649 , 4.516998
+4.499075 , 4.500379
+4.436427 , 4.511843
+4.450746 , 4.619702
+4.489764 , 4.574152
+4.473801 , 4.556476
+4.463350 , 4.620615
+4.522912 , 4.593283
+4.451089 , 4.630098
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 49
+Number of negative samples: 38
+Number of training samples: 263
+Number of positive samples: 175
+Number of negative samples: 88
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.001, 'gamma': 9.9999999999999998e-13} with a score of 0.81
+Precision: 0.563218
+Recall: 1.000000
+F1Score: 0.720588
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.001, 'gamma': 0.0001} with a score of 0.80
+Precision: 0.563218
+Recall: 1.000000
+F1Score: 0.720588
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.846154
+Recall: 0.897959
+F1Score: 0.871287
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.859649
+Recall: 1.000000
+F1Score: 0.924528
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.833333
+Recall: 0.918367
+F1Score: 0.873786
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 9.9999999999999995e-07} with a score of 0.91
+Precision: 0.851852
+Recall: 0.938776
+F1Score: 0.893204
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.789474
+Recall: 0.918367
+F1Score: 0.849057
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.865385
+Recall: 0.918367
+F1Score: 0.891089
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.01} with a score of 0.90
+Precision: 0.741379
+Recall: 0.877551
+F1Score: 0.803738
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.851852
+Recall: 0.938776
+F1Score: 0.893204
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.01} with a score of 0.91
+Precision: 0.741379
+Recall: 0.877551
+F1Score: 0.803738
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.872727
+Recall: 0.979592
+F1Score: 0.923077
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.833333
+Recall: 0.918367
+F1Score: 0.873786
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.857143
+Recall: 0.979592
+F1Score: 0.914286
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.833333
+Recall: 0.918367
+F1Score: 0.873786
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.872727
+Recall: 0.979592
+F1Score: 0.923077
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.01} with a score of 0.90
+Precision: 0.741379
+Recall: 0.877551
+F1Score: 0.803738
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.872727
+Recall: 0.979592
+F1Score: 0.923077
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.789474
+Recall: 0.918367
+F1Score: 0.849057
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.94
+Precision: 0.872727
+Recall: 0.979592
+F1Score: 0.923077
+===========================
+3.961921 , 3.895873
+5.176936 , 5.441527
+5.372861 , 5.393583
+5.285483 , 5.402933
+5.254484 , 5.512906
+5.293502 , 5.497229
+5.347587 , 5.470761
+5.337136 , 5.543692
+5.326651 , 5.516360
+5.300146 , 5.553175
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 58
+Number of negative samples: 29
+Number of training samples: 263
+Number of positive samples: 166
+Number of negative samples: 97
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 9.9999999999999998e-13} with a score of 0.78
+Precision: 0.666667
+Recall: 1.000000
+F1Score: 0.800000
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 9.9999999999999998e-13} with a score of 0.78
+Precision: 0.666667
+Recall: 1.000000
+F1Score: 0.800000
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.83
+Precision: 0.851852
+Recall: 0.793103
+F1Score: 0.821429
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.866667
+Recall: 0.896552
+F1Score: 0.881356
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.91
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.866667
+Recall: 0.896552
+F1Score: 0.881356
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.879310
+Recall: 0.879310
+F1Score: 0.879310
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.879310
+Recall: 0.879310
+F1Score: 0.879310
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.87
+Precision: 0.879310
+Recall: 0.879310
+F1Score: 0.879310
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.94
+Precision: 0.883333
+Recall: 0.913793
+F1Score: 0.898305
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.866667
+Recall: 0.896552
+F1Score: 0.881356
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.866667
+Recall: 0.896552
+F1Score: 0.881356
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.866667
+Recall: 0.896552
+F1Score: 0.881356
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.888889
+Recall: 0.965517
+F1Score: 0.925620
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.88
+Precision: 0.879310
+Recall: 0.879310
+F1Score: 0.879310
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+===========================
+4.761921 , 4.695873
+5.998364 , 6.358193
+6.254217 , 6.311616
+6.166839 , 6.282243
+6.133794 , 6.430939
+6.172812 , 6.395534
+6.228943 , 6.388794
+6.218492 , 6.461725
+6.208007 , 6.441980
+6.179456 , 6.471208
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 59
+Number of negative samples: 28
+Number of training samples: 263
+Number of positive samples: 165
+Number of negative samples: 98
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 9.9999999999999998e-13} with a score of 0.77
+Precision: 0.678161
+Recall: 1.000000
+F1Score: 0.808219
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 1.0} with a score of 0.77
+Precision: 0.678161
+Recall: 1.000000
+F1Score: 0.808219
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.87
+Precision: 0.913793
+Recall: 0.898305
+F1Score: 0.905983
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.91
+Precision: 0.901639
+Recall: 0.932203
+F1Score: 0.916667
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 9.9999999999999995e-07} with a score of 0.91
+Precision: 0.861538
+Recall: 0.949153
+F1Score: 0.903226
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.92
+Precision: 0.901639
+Recall: 0.932203
+F1Score: 0.916667
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.91
+Precision: 0.861538
+Recall: 0.949153
+F1Score: 0.903226
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.904762
+Recall: 0.966102
+F1Score: 0.934426
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.888889
+Recall: 0.949153
+F1Score: 0.918033
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.919355
+Recall: 0.966102
+F1Score: 0.942149
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.91
+Precision: 0.861538
+Recall: 0.949153
+F1Score: 0.903226
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.966102
+F1Score: 0.950000
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.888889
+Recall: 0.949153
+F1Score: 0.918033
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 1.0000000000000001e-05} with a score of 0.93
+Precision: 0.919355
+Recall: 0.966102
+F1Score: 0.942149
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 9.9999999999999995e-07} with a score of 0.91
+Precision: 0.861538
+Recall: 0.949153
+F1Score: 0.903226
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.966102
+F1Score: 0.950000
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.888889
+Recall: 0.949153
+F1Score: 0.918033
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.934426
+Recall: 0.966102
+F1Score: 0.950000
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.888889
+Recall: 0.949153
+F1Score: 0.918033
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.934426
+Recall: 0.966102
+F1Score: 0.950000
+===========================
+5.570140 , 5.504092
+6.904347 , 7.274860
+7.157443 , 7.228282
+7.070065 , 7.216669
+7.051827 , 7.373087
+7.076038 , 7.345534
+7.146976 , 7.330943
+7.121718 , 7.411725
+7.126039 , 7.391980
+7.097489 , 7.421208
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 58
+Number of negative samples: 29
+Number of training samples: 263
+Number of positive samples: 167
+Number of negative samples: 96
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 100.0} with a score of 0.76
+Precision: 0.662338
+Recall: 0.879310
+F1Score: 0.755556
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 0.001} with a score of 0.76
+Precision: 0.829787
+Recall: 0.672414
+F1Score: 0.742857
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.883333
+Recall: 0.913793
+F1Score: 0.898305
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.857143
+Recall: 0.931034
+F1Score: 0.892562
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.870968
+Recall: 0.931034
+F1Score: 0.900000
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.873016
+Recall: 0.948276
+F1Score: 0.909091
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.92
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.898305
+Recall: 0.913793
+F1Score: 0.905983
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.01} with a score of 0.92
+Precision: 0.885246
+Recall: 0.931034
+F1Score: 0.907563
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.93
+Precision: 0.875000
+Recall: 0.965517
+F1Score: 0.918033
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.888889
+Recall: 0.965517
+F1Score: 0.925620
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.92
+Precision: 0.898305
+Recall: 0.913793
+F1Score: 0.905983
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.01} with a score of 0.91
+Precision: 0.885246
+Recall: 0.931034
+F1Score: 0.907563
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.95
+Precision: 0.887097
+Recall: 0.948276
+F1Score: 0.916667
+===========================
+6.325696 , 6.246949
+7.802652 , 8.167422
+8.075475 , 8.128282
+7.986732 , 8.125760
+7.968494 , 8.289754
+7.982021 , 8.262200
+8.054539 , 8.247609
+8.039751 , 8.337345
+8.032022 , 8.308647
+8.005052 , 8.337874
+0.000000 , 0.000000
+Number of testing samples: 87
+Number of positive samples: 52
+Number of negative samples: 35
+Number of training samples: 263
+Number of positive samples: 173
+Number of negative samples: 90
+The number of trunks is: 131
+1
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 0.10000000000000001, 'gamma': 1.0000000000000001e-05} with a score of 0.76
+Precision: 0.880952
+Recall: 0.711538
+F1Score: 0.787234
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 100.0} with a score of 0.78
+Precision: 0.637500
+Recall: 0.980769
+F1Score: 0.772727
+===========================
+2
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.90
+Precision: 0.941176
+Recall: 0.923077
+F1Score: 0.932039
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.886792
+Recall: 0.903846
+F1Score: 0.895238
+===========================
+3
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.90
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1000.0, 'gamma': 0.0001} with a score of 0.91
+Precision: 0.940000
+Recall: 0.903846
+F1Score: 0.921569
+===========================
+4
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.0001} with a score of 0.89
+Precision: 0.940000
+Recall: 0.903846
+F1Score: 0.921569
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+===========================
+5
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10000.0, 'gamma': 0.001} with a score of 0.90
+Precision: 0.854545
+Recall: 0.903846
+F1Score: 0.878505
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+===========================
+6
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+===========================
+7
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 100.0, 'gamma': 0.0001} with a score of 0.90
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+===========================
+8
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.88
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.93
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+===========================
+9
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.905660
+Recall: 0.923077
+F1Score: 0.914286
+===========================
+10
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 10.0, 'gamma': 0.001} with a score of 0.89
+Precision: 0.923077
+Recall: 0.923077
+F1Score: 0.923077
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/usr/local/lib/python2.7/dist-packages/sklearn/metrics/classification.py:1113: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+The best parameters are {'C': 1.0, 'gamma': 0.001} with a score of 0.94
+Precision: 0.907407
+Recall: 0.942308
+F1Score: 0.924528
+===========================
+7.112930 , 7.019676
+8.734691 , 9.062660
+8.998552 , 9.049851
+8.908300 , 9.050288
+8.846998 , 9.214282
+8.905098 , 9.186729
+8.977616 , 9.172138
+8.962828 , 9.261873
+8.955099 , 9.222932
+8.928129 , 9.262403
+0.000000 , 0.000000
+******************************
+0.711293 , 0.701968
+0.873469 , 0.906266
+0.899855 , 0.904985
+0.890830 , 0.905029
+0.884700 , 0.921428
+0.890510 , 0.918673
+0.897762 , 0.917214
+0.896283 , 0.926187
+0.895510 , 0.922293
+0.892813 , 0.926240
+0.000000 , 0.000000
