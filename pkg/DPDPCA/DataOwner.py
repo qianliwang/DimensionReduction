@@ -102,15 +102,15 @@ class DataOwnerImpl(object):
         #print "In each data owner, the k is: %d" % k;
             
         C = np.dot(data.T,data);
-        """
+        
         df = len(C)+1;
         sigma = 1/epsilon*np.identity(len(C));
         #print sigma;
         wishart = invwishart.wishartrand(df,sigma);
     
         U, s, V = np.linalg.svd(C+wishart);
-        """
-        U, s, V = LA.svd(C);
+        
+        #U, s, V = LA.svd(C);
         S = np.diagflat(np.sqrt(s));
     #    print U[:,0:k].shape;
     #    print S[0:k,0:k].shape;
