@@ -49,7 +49,32 @@ def privateGlobalPCA(folderPath,k,epsilon):
 
     #print P[:,0];
     return P;
+def globalPCA_NoNoise(folderPath):
+    dataFileList = glob.glob(folderPath+"/*");
+    data = np.loadtxt(dataFileList[0],delimiter=",");
+    sumR = None;
+    sumV = None;
+    sumN = 0;
+    for path in dataFileList:
+        dataOwner = DataOwnerImpl(path);
+        R = np.dot(dataOwner.data.T,dataOwner.data);       
+        v = np.sum(dataOwner.data,axis=0);
+        N = dataOwner.data.shape[0];
+        if sumR is None:
+            sumR = R;
+            sumV = v;
+        else:
+            sumR = sumR + R;
+            sumV = sumV + v;
+            sumN = sumN + N;
+            
+    ScatterMatrix = sumR - np.divide(np.outer(v,v),sumN);
+    U, s, V = np.linalg.svd(ScatterMatrix);
     
+    S = np.diagflat(np.sqrt(s));
+    #print U.dot(S)[:,0];
+    return U.dot(S);
+
 def myGlobalPCA(folderPath,epsilon):
     dataFileList = glob.glob(folderPath+"/*");
     data = np.loadtxt(dataFileList[0],delimiter=",");
@@ -106,7 +131,7 @@ if __name__ == "__main__":
         testingDataPath = datasetPath+"_testing";
         #for i in range(10):
         
-        cprResult = np.zeros((11,2));
+        cprResult = np.zeros((11,3));
         totalRound = 10;
         epsilon = 0.5;
         
@@ -139,13 +164,22 @@ if __name__ == "__main__":
             
             testingLabel = testingData[:,0];
             projMatrix = myGlobalPCA(outputFolderPath,epsilon);
-            
+            projMatrix_NoNoise = globalPCA_NoNoise(outputFolderPath);
             #print projMatrix[:,0:10].shape;
             
             #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
             #print result;
             
             for k in range(1,11):
+                
+                kProjMatrix_NoNoise = projMatrix_NoNoise[:,0:k];
+                projTrainingData = np.dot(pureTrainingData,kProjMatrix_NoNoise);
+                projTestingData = np.dot(pureTestingData,kProjMatrix_NoNoise);
+                #print projTestingData.shape;
+                result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
+                cprResult[k-1][0] = cprResult[k-1][0]+result[2];
+                
+                
                 pgProjMatrix = privateGlobalPCA(outputFolderPath,k,epsilon); 
                 #print pgProjMatrix.shape;   
                 projTrainingData = np.dot(pureTrainingData,pgProjMatrix);
@@ -153,20 +187,21 @@ if __name__ == "__main__":
                 #print projTrainingData.shape;
                 
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
-                cprResult[k-1][0] = cprResult[k-1][0]+result[2];
+                cprResult[k-1][1] = cprResult[k-1][1]+result[2];
                 
                 kProjMatrix = projMatrix[:,0:k];
                 projTrainingData = np.dot(pureTrainingData,kProjMatrix);
                 projTestingData = np.dot(pureTestingData,kProjMatrix);
                 #print projTestingData.shape;
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
-                cprResult[k-1][1] = cprResult[k-1][1]+result[2];
+                cprResult[k-1][2] = cprResult[k-1][2]+result[2];
+                
                 print "===========================";
         
             for i in range(0,len(cprResult)):
-                print "%f , %f" % (cprResult[i][0],cprResult[i][1]);
+                print "%f,%f,%f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
         
         print "******************************";
         for i in range(0,len(cprResult)):
-            print "%f , %f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound);
+            print "%f,%f,%f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
         
