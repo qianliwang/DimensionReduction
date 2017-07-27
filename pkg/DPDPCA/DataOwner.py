@@ -1,4 +1,5 @@
 import numpy as np;
+import os;
 from ..paillier import paillierImpl;
 from ..wishart import invwishart;
 from ..global_functions import globalFunction;
@@ -83,6 +84,12 @@ class DataOwnerImpl(object):
         encRFilePath = encFolderPath+"encR/"+fileName;
         encVFilePath = encFolderPath+"encV/"+fileName;
         encNFilePath = encFolderPath+"encN/"+fileName;
+        
+        if not os.path.exists(encFolderPath+"encR/"):
+            os.mkdir(encFolderPath+"encR/");
+            os.mkdir(encFolderPath+"encV/");
+            os.mkdir(encFolderPath+"encN/");
+        
         self.__saveEncrypedData(encRFilePath,encR);
         self.__saveEncrypedData(encVFilePath,encV);
         self.__saveEncrypedData(encNFilePath,encN);
@@ -102,14 +109,14 @@ class DataOwnerImpl(object):
         #print "In each data owner, the k is: %d" % k;
             
         C = np.dot(data.T,data);
-        
-        df = len(C)+1;
-        sigma = 1/epsilon*np.identity(len(C));
-        #print sigma;
-        wishart = invwishart.wishartrand(df,sigma);
-    
-        U, s, V = np.linalg.svd(C+wishart);
-        
+        if epsilon is not 0:
+            df = len(C)+1;
+            sigma = 1/epsilon*np.identity(len(C));
+            #print sigma;
+            wishart = invwishart.wishartrand(df,sigma);
+            U, s, V = np.linalg.svd(C+wishart);
+        else:
+            U, s, V = np.linalg.svd(C);
         #U, s, V = LA.svd(C);
         S = np.diagflat(np.sqrt(s));
     #    print U[:,0:k].shape;
