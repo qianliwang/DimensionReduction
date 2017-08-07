@@ -2,11 +2,10 @@ import os;
 import numpy as np;
 import glob;
 import copy;
-from ..paillier import paillierImpl;
+from paillierImpl import *;
 from multiprocessing import Pool;
 import time;
 import decimal;
-
 
 '''
 def aggrtDataOwnerShares(folderPath):
@@ -63,12 +62,12 @@ def addEncryptedData(sumEnc,enc,pub):
     if enc.ndim == 2:
         for i in range(0,enc.shape[0]):
             for j in range(0,enc.shape[1]):
-                sumEnc[i,j] = paillierImpl.e_add(pub, sumEnc[i,j], enc[i,j]);
+                sumEnc[i,j] = e_add(pub, sumEnc[i,j], enc[i,j]);
     elif enc.ndim == 1:
         for i in range(0,enc.shape[0]):
-            sumEnc[i] = paillierImpl.e_add(pub, sumEnc[i], enc[i]);
+            sumEnc[i] = e_add(pub, sumEnc[i], enc[i]);
     else:
-        sumEnc = paillierImpl.e_add(pub, sumEnc, enc);
+        sumEnc = e_add(pub, sumEnc, enc);
     return sumEnc;
     
 def split_list(alist, wanted_parts=1):
@@ -98,14 +97,14 @@ def paraTask(fileList,pub):
         #print sumEnc.shape;
     else:
         for res in results[1:]:
-            sumEnc = paillierImpl.e_add(pub, sumEnc, res.get());
+            sumEnc = e_add(pub, sumEnc, res.get());
     
+    p.close();
     return sumEnc;
     
 def paraAggrtEncryptedData(encFolderPath,pub):
     
     print str(int(round(time.time() * 1000)))+", Proxy parallel aggregation start...";
-    
     encRList = glob.glob(encFolderPath+"encR/*");
     sumEncR = paraTask(encRList,pub);
     encVList = glob.glob(encFolderPath+"encV/*");
@@ -121,10 +120,10 @@ def initFolders(encFolderPath):
     encVFolderPath = encFolderPath+"encV";
     encNFolderPath = encFolderPath+"encN";
     
-    if not os.path.exists(encFolderPath+"encR"):        
-        os.mkdir(encRFolderPath);
-        os.mkdir(encVFolderPath);
-        os.mkdir(encNFolderPath);
+    if not os.path.exists(encFolderPath+"encR"):
+        os.system('mkdir -p %s' % encRFolderPath);
+        os.system('mkdir -p %s' % encVFolderPath);
+        os.system('mkdir -p %s' % encNFolderPath);      
     
     return encRFolderPath,encVFolderPath,encNFolderPath;
 

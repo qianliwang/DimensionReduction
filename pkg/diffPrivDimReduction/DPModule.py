@@ -1,6 +1,6 @@
 import numpy as np;
 from numpy import linalg as LA;
-from ..wishart import invwishart;
+from invwishart import *;
 
 class DiffPrivImpl(object):
     @classmethod
@@ -20,7 +20,7 @@ class DiffPrivImpl(object):
         df = dimension+1;
         sigma = 1/epsilon*np.identity(dimension);
         #print sigma;
-        wishart = invwishart.wishartrand(df,sigma);
+        wishart = wishartrand(df,sigma);
         #print wishart;
         return wishart;
     
@@ -29,7 +29,7 @@ class DiffPrivImpl(object):
         df = dimension+int(np.floor(14.0/(epsilon*epsilon)*(2.0*np.log(4.0/delta))));
         sigma = (sensitivity*sensitivity)*np.identity(dimension);
         #print sigma;
-        wishart = invwishart.wishartrand(df,sigma);
+        wishart = wishartrand(df,sigma);
         #print wishart;
         return wishart;
     

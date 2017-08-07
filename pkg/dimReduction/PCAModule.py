@@ -60,9 +60,10 @@ class PCAImpl(object):
             k = k+1;            
         return np.asarray(eigVectors).T;
     
-    def __getEigValueEnergies(self,w):
-        totalEnergy = np.sum(w);
-        return [elem/totalEnergy for elem in w];
+    def getEigValueEnergies(self):
+        absEigValues = np.absolute(self.eigValues);
+        totalEnergy = np.sum(absEigValues);
+        return [elem/totalEnergy for elem in absEigValues];
     
     def transform(self,scaledData,numOfComponents):
         if(numOfComponents>len(self.eigValues)):

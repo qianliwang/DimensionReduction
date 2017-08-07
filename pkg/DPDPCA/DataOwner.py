@@ -1,7 +1,7 @@
 import numpy as np;
 import os;
-from ..paillier import paillierImpl;
-from ..wishart import invwishart;
+from paillierImpl import *;
+from ..diffPriveDimReduction.invwishart import *;
 from ..global_functions import globalFunction;
 from numpy import linalg as LA;
 import math;
@@ -43,7 +43,7 @@ class DataOwnerImpl(object):
         encR = np.empty((R.shape[0],R.shape[1]),dtype=np.dtype(decimal.Decimal));
         for i in range(0,R.shape[0]):
             for j in range(0,R.shape[1]):
-                encR[i,j] = paillierImpl.encrypt(self.pub,R[i,j]);
+                encR[i,j] = encrypt(self.pub,R[i,j]);
         '''        
         it = np.nditer(R, flags=['multi_index']);
         while not it.finished:
@@ -55,7 +55,7 @@ class DataOwnerImpl(object):
         #print "Encrypt v:";
         encV = np.empty(v.shape[0],dtype=np.dtype(decimal.Decimal));
         for i in range(0,len(v)):
-            encV[i] = paillierImpl.encrypt(self.pub,v[i]);
+            encV[i] = encrypt(self.pub,v[i]);
         '''
         it = np.nditer(v, flags=['multi_index'])
         while not it.finished:
@@ -63,7 +63,7 @@ class DataOwnerImpl(object):
             encV[it.multi_index] = encrypt(pub,it[0]);
             it.iternext();
         '''
-        encN = paillierImpl.encrypt(self.pub,N);
+        encN = encrypt(self.pub,N);
         return encR,encV,(encN,);
     
     def discretize(self,R):
@@ -86,9 +86,9 @@ class DataOwnerImpl(object):
         encNFilePath = encFolderPath+"encN/"+fileName;
         
         if not os.path.exists(encFolderPath+"encR/"):
-            os.mkdir(encFolderPath+"encR/");
-            os.mkdir(encFolderPath+"encV/");
-            os.mkdir(encFolderPath+"encN/");
+            os.system('mkdir -p %s' % (encFolderPath+"encR/"));
+            os.system('mkdir -p %s' % (encFolderPath+"encV/"));
+            os.system('mkdir -p %s' % (encFolderPath+"encN/"));
         
         self.__saveEncrypedData(encRFilePath,encR);
         self.__saveEncrypedData(encVFilePath,encV);
@@ -113,7 +113,7 @@ class DataOwnerImpl(object):
             df = len(C)+1;
             sigma = 1/epsilon*np.identity(len(C));
             #print sigma;
-            wishart = invwishart.wishartrand(df,sigma);
+            wishart = wishartrand(df,sigma);
             U, s, V = np.linalg.svd(C+wishart);
         else:
             U, s, V = np.linalg.svd(C);

@@ -9,10 +9,13 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         
         PCAModule.PCAImpl.__init__(self,scaledData);
         
-        self.maxGaussianSensitivity = self.__calcGaussianSensitivity();
-        self.maxWishartSensitivity = self.__calcWishartSensitivity();
+        #self.maxGaussianSensitivity = self.__calcGaussianSensitivity();
+        #self.maxWishartSensitivity = self.__calcWishartSensitivity();
         self.epsilon = 0;
         self.delta = 0;
+        self.sensitivity = self.__calcSensitivity();
+        #self.maxGaussianSensitivity = 1;
+        #self.maxWishartSensitivity = 1;
         
     def setEpsilonAndGamma(self,epsilon,delta):
         self.epsilon = epsilon;
@@ -23,9 +26,9 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         covMatrix = np.dot(self.data.T,self.data);
         
         if isGaussianNoise:
-            noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,len(covMatrix),self.maxGaussianSensitivity);
+            noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,len(covMatrix),self.sensitivity);
         else:
-            noiseMatrix = DiffPrivImpl.SymmWishart_withDelta(self.epsilon,self.delta,len(covMatrix),self.maxWishartSensitivity);
+            noiseMatrix = DiffPrivImpl.SymmWishart_withDelta(self.epsilon,self.delta,len(covMatrix),self.sensitivity);
             
         #print wishart;
         noisyCovMatrix = covMatrix+noiseMatrix;
@@ -54,12 +57,14 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         return maxSensitivity;
     
     def __calcWishartSensitivity(self):
-        maxL2Norm = 0;
-        tmpL2Norm = 0;
-        for i in range(0,len(self.data)):
-            tmpL2Norm = LA.norm(self.data[i],2);
-            if tmpL2Norm > maxL2Norm:
-                maxL2Norm = tmpL2Norm;
+        rowsNorm = LA.norm(self.data, axis=1);
+        maxL2Norm = np.amax(rowsNorm);
         print "The Wishart sensitivity of PCA implementation is %f." % maxL2Norm;
+        return maxL2Norm;
+    
+    def __calcSensitivity(self):
+        rowsNorm = LA.norm(self.data, axis=1);
+        maxL2Norm = np.amax(rowsNorm);
+        print "The sensitivity of PCA implementation is %f." % maxL2Norm;
         return maxL2Norm;
     

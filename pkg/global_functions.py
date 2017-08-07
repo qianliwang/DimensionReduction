@@ -1,20 +1,18 @@
 #!/usr/bin/env python
-
 import numpy as np;
 from numpy import linalg as LA;
-from wishart import invwishart;
+from pkg.diffPrivDimReduction import invwishart;
 import os;
 from numpy.linalg import norm;
 
 class globalFunction(object):
-    @classmethod
-    def normByRow(cls,data):
-        
-        for i in range(0,data.shape[0]):
-            rowNorm = norm(data[i,:], ord=2);
-            data[i,:] = data[i,:]/rowNorm;
-        return data;
     
+    @classmethod
+    def normByRow(cls,data): 
+        rowsNorm = LA.norm(data, axis=1);
+        #maxNorm = np.amax(rowsNorm);
+        result = np.divide(data,np.reshape(rowsNorm,(-1,1)));
+        return result;
     @classmethod
     def genCovMatrix(cls,trainingDataPath):
         data = np.loadtxt(trainingDataPath,delimiter=",");
@@ -245,7 +243,7 @@ class globalFunction(object):
         shuffleData = np.random.permutation(data);
         
         if not os.path.exists(outputFolderPath):
-            os.makedirs(outputFolderPath);
+            os.system('mkdir -p %s' % outputFolderPath);
         
         subDataSets = np.array_split(shuffleData,numOfTrunks);
         for i in range(0,numOfTrunks):
