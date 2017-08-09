@@ -6,7 +6,7 @@ import numpy as np;
 
 if __name__ == "__main__":
     
-    datasets = ['australian','diabetes','german', 'ionosphere'];
+    datasets = ['diabetes','german','ionosphere'];
     for dataset in datasets:
     
         print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
@@ -23,14 +23,15 @@ if __name__ == "__main__":
         pureTrainingData = trainingData[:,1:];
         trainingLabel = trainingData[:,0];
         
-        #trainingColMean = np.mean(pureTrainingData,axis=0);
+        trainingColMean = np.mean(pureTrainingData,axis=0);
         #trainingColDeviation = np.std(pureTrainingData, axis=0);
         
         #scaledTrainingData = np.divide((pureTrainingData - trainingColMean),trainingColDeviation);
         #scaledTestingData = np.divide((pureTestingData - trainingColMean),trainingColDeviation);
-        
+        pureTrainingData = pureTrainingData - trainingColMean;
         testingData = np.loadtxt(testingDataPath,delimiter=",");
         pureTestingData = testingData[:,1:];
+        pureTestingData = pureTestingData - trainingColMean;
         testingLabel = testingData[:,0];
         
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
@@ -86,9 +87,9 @@ if __name__ == "__main__":
                 print "===========================";
         
             for i in range(0,len(cprResult)):
-                print "%f , %f, %f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
+                print "%f,%f,%f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
         
         print "******************************";
         for i in range(0,len(cprResult)):
-            print "%f , %f, %f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
+            print "%f,%f,%f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
             
