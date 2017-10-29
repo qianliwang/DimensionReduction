@@ -6,6 +6,9 @@ from sklearn.metrics import recall_score;
 from sklearn.metrics import precision_score;
 import numpy as np;
 
+'''
+Wrap up the sklearn methods for Linear SVM and RBF-kernel SVM, also with a self-implemented F1 score calculation.
+'''
 class SVMClf(object):
     
     @classmethod
