@@ -3,7 +3,8 @@ from numpy import linalg as LA;
 
 """
 Self-implemented Principal Component Analysis. Important notice: 
-    1) The input data should be already centered.
+    1) The input data should be already centered. (To do, should change to no centered, since mean vector should also be part 
+    of the implementation, since mean vecotr is needed in the transform function).
     2) EigenDecomposition is adopted.
 """
 class PCAImpl(object):
