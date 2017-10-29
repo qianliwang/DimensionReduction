@@ -1,14 +1,24 @@
 import numpy as np;
 from numpy import linalg as LA;
 
+"""
+Self-implemented Principal Component Analysis. Important notice: 
+    1) The input data should be already centered.
+    2) EigenDecomposition is adopted.
+"""
 class PCAImpl(object):
     
     def __init__(self,scaledData):
         self.data = scaledData; 
         self.eigValues = None;
         self.projMatrix = None;
-        
+          
     def getPCs(self):
+        '''
+        1) Compute the covariance matrix.
+        2) EigenDecomposition.
+        3) Sort the eigenvalues in non-decreasing order and output corresponding eigenvectors with that order.  
+        '''
         covMatrix = np.dot(self.data.T,self.data);
         w, v = LA.eig(covMatrix);    
         # Sorting the eigenvalues in descending order.
@@ -29,6 +39,10 @@ class PCAImpl(object):
         return eigVal;
 
     def genEigenvectors_power(self,covMatrix):
+        '''
+        Compute the eigenvector with power iteration method, multiplying covariance with random vector, 
+        converge threshold is setted through epsilon.
+        '''
     #    r0 = np.random.rand(covMatrix.shape[0],1);
         epsilon = 0.01;
         eigVectors = [];
@@ -61,11 +75,18 @@ class PCAImpl(object):
         return np.asarray(eigVectors).T;
     
     def getEigValueEnergies(self):
+        '''
+        Once eigenvalues are computed, computing the percentage of each eigenvalue over the sum of eigenvalues. 
+        '''
         absEigValues = np.absolute(self.eigValues);
         totalEnergy = np.sum(absEigValues);
         return [elem/totalEnergy for elem in absEigValues];
     
     def transform(self,scaledData,numOfComponents):
+        '''
+        Given a set of centered data, reduding the data to specified dimensions. Notice that the data should also be 
+        centered already.
+        '''
         if(numOfComponents>len(self.eigValues)):
             print "This PCA could only project data up to %d dimension." % len(self.eigValues);
         tmpNumOfComponents = len(self.eigValues) if numOfComponents>len(self.eigValues) else numOfComponents;
