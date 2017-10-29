@@ -2,9 +2,14 @@ import numpy as np;
 from numpy import linalg as LA;
 from LDAModule import LDAImpl;
 
+'''
+Self-implemented Discriminant Analysis, which is inherited from LDA. Comparint to LDA, DCA has two ridge parameters,
+rho and rho_prime, the scatter matrix is also different from LDA.
+'''
 class DCAImpl(LDAImpl):
     
     def __init__(self,scaledData,labels):
+        
         LDAImpl.__init__(self,scaledData,labels);
         self.rho = 0;
         self.rho_prime = 0;
@@ -19,7 +24,7 @@ class DCAImpl(LDAImpl):
         
     def __getDCAPCs(self):
         '''
-        Self implemented DCA.
+        Self implemented DCA. Notice the calculation of S_prime, which is different from LDA's scatter matrix.
         '''
         print "DCA Implementation.";
         
