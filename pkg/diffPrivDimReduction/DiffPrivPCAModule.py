@@ -3,6 +3,11 @@ from numpy import linalg as LA;
 from ..dimReduction import PCAModule;
 from DPModule import DiffPrivImpl;
 
+'''
+Differentially private PCA implementation, with both Gaussian noise and Wishart noise, details of the noise is in DPModule.py.
+It is inherited from PCAImpl. In the paper, the data should be both centered and normalized, once normalized, the sensitivity 
+is taken with the upper bound 1; here I just centered, then calculate the sensitivity from the centered data.
+'''
 class DiffPrivPCAImpl(PCAModule.PCAImpl):
     
     def __init__(self,scaledData):
