@@ -2,17 +2,25 @@ import numpy as np;
 from numpy import linalg as LA;
 from scipy.spatial.distance import pdist, squareform, cdist
 
+'''
+RBF kernel PCA implementation, may need to change the name to give an accurate description. Notice:
+1) The input data should be centered, the implementation doesn't have a kernel matrix centralization.
+'''
 class KernelPCAImpl(object):
     
     def __init__(self,scaledData):
+        '''
+        Tuning parameter, gamma is hard-coded.
+        '''
         self.scaledData = scaledData;
         self.gamma = 15;
         self.eigValues,self.projMatrix = self.__getPCs(scaledData);
         self.normEigvectors = self.projMatrix/self.eigValues;
         
     def __getPCs(self,scaledData):
-        # Calculate the squared Euclidean distance of each pairs of 
-        # sacledData, then make the distance in a symmetric matrix.
+        '''
+        Calculate the squared Euclidean distance of each pairs of sacledData, then make the distance in a symmetric matrix.
+        '''
         distMatrix = cdist(scaledData,scaledData,'sqeuclidean');
         
         kernelMatrix = np.exp(-self.gamma * distMatrix);
@@ -40,8 +48,7 @@ class KernelPCAImpl(object):
     
     def transformNewData(self,newScaledData,numOfComponents):
         '''
-        No need of the training kernel matrix, just need the eigenvectors of the training kernel matrix.
-        I guess that's the kernel trick. Still means I didn't understand the kernel PCA.
+        No need of the training kernel matrix, just need the eigenvectors of the training kernel matrix, due to the kernel trick.
         '''
         newDistMatrix = cdist(newScaledData, self.scaledData, 'sqeuclidean');
         
