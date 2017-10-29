@@ -1,6 +1,13 @@
 import numpy as np;
 from numpy import linalg as LA;
 
+'''
+Self-implemented Linear Discriminant Analysis. Notice:
+    1) The raw data is no needed to be centered.
+    2) The data and corresponding labels are separated as input, they are concatenated together in the constructor. The
+       reason is to align with PCA.
+'''
+
 class LDAImpl(object):
     
     def __init__(self,scaledData,labels):
@@ -34,7 +41,7 @@ class LDAImpl(object):
     
     def __getSwAndSb(self,labeledData):
         '''
-        Compute the withinClass covariance and betweenClass covariance.
+        Compute the withinClass covariance and betweenClass covariance from the labelled data.
         '''
         # Using a dictionary to categorize the data.
         labelDict = {};
