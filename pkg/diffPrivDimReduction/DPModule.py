@@ -2,6 +2,10 @@ import numpy as np;
 from numpy import linalg as LA;
 from invwishart import *;
 
+'''
+Two differentially private noise to add into the covariance, one using Gaussian distribution, the other one is based on 
+Wishart distribution, from two different papers respectively, mentioned in README.
+'''
 class DiffPrivImpl(object):
     @classmethod
     def SymmGaussian(cls,epsilon,delta,dimension,deltaF=1):
