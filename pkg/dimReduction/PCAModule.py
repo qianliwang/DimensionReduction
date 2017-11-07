@@ -11,6 +11,7 @@ class PCAImpl(object):
     
     def __init__(self,scaledData):
         self.data = scaledData; 
+        self.mean = None;
         self.eigValues = None;
         self.projMatrix = None;
           
@@ -20,14 +21,17 @@ class PCAImpl(object):
         2) EigenDecomposition.
         3) Sort the eigenvalues in non-decreasing order and output corresponding eigenvectors with that order.  
         '''
-        covMatrix = np.dot(self.data.T,self.data);
+        self.mean = np.mean(self.data,axis=0);
+        meanCenteredData = self.data - self.mean;
+        covMatrix = np.dot(meanCenteredData.T,meanCenteredData);
         w, v = LA.eig(covMatrix);    
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
         sortedW = w[idx];
         #print sortedW;
-        sortedV = v[:,idx];
+        realV = np.real(v);
+        sortedV = realV[:,idx];
         
         self.eigValues = sortedW;
         self.projMatrix = sortedV;
@@ -92,4 +96,5 @@ class PCAImpl(object):
             print "This PCA could only project data up to %d dimension." % len(self.eigValues);
         tmpNumOfComponents = len(self.eigValues) if numOfComponents>len(self.eigValues) else numOfComponents;
         tmpProjMatrix = self.projMatrix[:,0:tmpNumOfComponents];
-        return np.dot(scaledData,tmpProjMatrix);
+        centeredScaledData = scaledData - self.mean;
+        return np.dot(centeredScaledData,tmpProjMatrix);
