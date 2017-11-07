@@ -24,17 +24,16 @@ class PCAImpl(object):
         self.mean = np.mean(self.data,axis=0);
         meanCenteredData = self.data - self.mean;
         covMatrix = np.dot(meanCenteredData.T,meanCenteredData);
-        w, v = LA.eig(covMatrix);    
+        w, v = LA.eig(covMatrix);  
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
         sortedW = w[idx];
         #print sortedW;
-        realV = np.real(v);
-        sortedV = realV[:,idx];
+        sortedV = v[:,idx];
         
-        self.eigValues = sortedW;
-        self.projMatrix = sortedV;
+        self.eigValues = np.real(sortedW);
+        self.projMatrix = np.real(sortedV);
     
     def __getApproxEigval(self,covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
