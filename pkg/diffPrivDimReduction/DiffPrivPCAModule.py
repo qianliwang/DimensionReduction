@@ -13,6 +13,9 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
     def __init__(self,scaledData):
         
         PCAModule.PCAImpl.__init__(self,scaledData);
+        self.mean = np.mean(self.data,axis=0);
+        meanCenteredData = self.data - self.mean;
+        self.covMatrix = np.dot(meanCenteredData.T,meanCenteredData);
         
         #self.maxGaussianSensitivity = self.__calcGaussianSensitivity();
         #self.maxWishartSensitivity = self.__calcWishartSensitivity();
@@ -28,24 +31,22 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         
     def getDiffPrivPCs(self,isGaussianNoise):
         
-        covMatrix = np.dot(self.data.T,self.data);
-        
         if isGaussianNoise:
-            noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,len(covMatrix),self.sensitivity);
+            noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,len(self.covMatrix),self.sensitivity);
         else:
-            noiseMatrix = DiffPrivImpl.SymmWishart_withDelta(self.epsilon,self.delta,len(covMatrix),self.sensitivity);
+            noiseMatrix = DiffPrivImpl.SymmWishart_withDelta(self.epsilon,self.delta,len(self.covMatrix),self.sensitivity);
             
         #print wishart;
-        noisyCovMatrix = covMatrix+noiseMatrix;
+        noisyCovMatrix = self.covMatrix+noiseMatrix;
         w, v = LA.eig(noisyCovMatrix);    
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
         sortedW = w[idx];
-        self.eigValues = sortedW;
+        self.eigValues = np.real(sortedW);
         #print sortedW;
         sortedV = v[:,idx];
-        self.projMatrix = sortedV;
+        self.projMatrix = np.real(sortedV);
         
     def __calcGaussianSensitivity(self):
         norms = [];
@@ -73,3 +74,5 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         print "The sensitivity of PCA implementation is %f." % maxL2Norm;
         return maxL2Norm;
     
+    def transform(self,scaledData,numOfComponents):
+        return PCAModule.PCAImpl.transform(self,scaledData,numOfComponents);

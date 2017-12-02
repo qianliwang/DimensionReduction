@@ -1,95 +1,131 @@
-from pkg.global_functions import globalFunction as gf;
 from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
+from sklearn.model_selection import ShuffleSplit;
+import matplotlib.pyplot as plt;
 
-if __name__ == "__main__":
+def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path,delimiter=",");
+    xBound = len(data)+1;
+    x = range(1,xBound);
+    minVector = np.amin(data,axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data,axis=0);
+    yMax = max(maxVector);
     
-    datasets = ['diabetes','german','ionosphere'];
-    for dataset in datasets:
+    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
+    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
+    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
+    y1Line,y2Line,y3Line = plt.plot(x, data[:,0], 'bo-', x, data[:,1], 'r^-',x, data[:,2], 'gs-');
     
-        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
+    plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=4);
+    plt.axis([0,xBound,yMin,yMax]);
+    #plt.axis([0,10,0.4,1.0]);
+    plt.xlabel('Number of Principal Components',fontsize=18);
+    plt.ylabel('F1-Score',fontsize=18);
+    plt.title(datasetTitle+' Dataset', fontsize=18);
+    plt.xticks(x);
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
+
+def doExp(datasetPath,numOfRounds,isLinearSVM=True):
+    data = np.loadtxt(datasetPath,delimiter=",");
+    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data);
+    numOfFeature = data.shape[1]-1;
+    
+    cprResult = np.zeros((numOfFeature-1,3));
+    
+    for train_index, test_index in rs.split(data):
         
-        datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
-        trainingDataPath = datasetPath+"_training";
-        testingDataPath = datasetPath+"_testing";
-        #for i in range(10):
-        
-        totalRound = 10;
-        
-        gf.genTrainingTestingData(datasetPath,trainingDataPath,testingDataPath);
-        trainingData = np.loadtxt(trainingDataPath,delimiter=",");
+        trainingData = data[train_index];
         pureTrainingData = trainingData[:,1:];
         trainingLabel = trainingData[:,0];
         
-        trainingColMean = np.mean(pureTrainingData,axis=0);
-        #trainingColDeviation = np.std(pureTrainingData, axis=0);
-        
-        #scaledTrainingData = np.divide((pureTrainingData - trainingColMean),trainingColDeviation);
-        #scaledTestingData = np.divide((pureTestingData - trainingColMean),trainingColDeviation);
-        pureTrainingData = pureTrainingData - trainingColMean;
-        testingData = np.loadtxt(testingDataPath,delimiter=",");
+        testingData = data[test_index];
         pureTestingData = testingData[:,1:];
-        pureTestingData = pureTestingData - trainingColMean;
         testingLabel = testingData[:,0];
+        
+        numOfTrainingSamples = trainingData.shape[0];
         
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
         pcaImpl.getPCs();
         
-        numOfDimension = trainingData.shape[1]-1;
-        
         epsilon = 0.5;
-        delta = 0.01;
+        delta = np.divide(1.0,numOfTrainingSamples);
+        print "epsilon: %.2f, delta: %f" % (epsilon,delta);
+        
         
         isGaussianDist = True;
         dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
         dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
         
-        
         isGaussianDist = False;
         dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
         dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
         
-        cprResult = np.zeros((numOfDimension-1,3));
-        
-        
-        for k in range(1,numOfDimension):
+        for k in range(1,numOfFeature):
             
             #print pcaImpl.projMatrix[:,0];
             #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
             #print result;
             
-            for j in range(totalRound):
-                projTrainingData1 = np.dot(pureTrainingData,pcaImpl.projMatrix[:,0:k]);
-                projTestingData1 = np.dot(pureTestingData,pcaImpl.projMatrix[:,0:k]);
-                #print projTrainingData.shape;
-                
+            projTrainingData1 = pcaImpl.transform(pureTrainingData,k);
+            projTestingData1 = pcaImpl.transform(pureTestingData,k);
+            #print projTrainingData.shape;
+            if isLinearSVM:
+                result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+            else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-                cprResult[k-1][0] = cprResult[k-1][0]+result[2];
-                
-                isGaussianDist = True;
-                dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
-                projTrainingData2 = np.dot(pureTrainingData,dpGaussianPCAImpl.projMatrix[:,0:k]);
-                projTestingData2 = np.dot(pureTestingData,dpGaussianPCAImpl.projMatrix[:,0:k]);
-                #print projTestingData.shape;
+            
+            cprResult[k-1][0] = cprResult[k-1][0]+result[2];
+            
+            isGaussianDist = True;
+            dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
+            projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,k);
+            projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,k);
+            #print projTestingData.shape;
+            if isLinearSVM:
+                result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+            else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-                cprResult[k-1][1] = cprResult[k-1][1]+result[2];
-                
-                isGaussianDist = False;
-                dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
-                projTrainingData3 = np.dot(pureTrainingData,dpWishartPCAImpl.projMatrix[:,0:k]);
-                projTestingData3 = np.dot(pureTestingData,dpWishartPCAImpl.projMatrix[:,0:k]);
-                #print projTestingData.shape;
+            cprResult[k-1][1] = cprResult[k-1][1]+result[2];
+            
+            isGaussianDist = False;
+            dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
+            projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,k);
+            projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,k);
+            #print projTestingData.shape;
+            if isLinearSVM:
+                result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+            else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-                cprResult[k-1][2] = cprResult[k-1][2]+result[2];
-                
-                print "===========================";
-        
+            cprResult[k-1][2] = cprResult[k-1][2]+result[2];
+            
+            print "===========================";
+            """
             for i in range(0,len(cprResult)):
                 print "%f,%f,%f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
+            """
+    print "******************************";
+    avgCprResult = cprResult/numOfRounds;
+    for i in range(0,len(cprResult)):
+        print "%.3f,%.3f,%.3f" % (avgCprResult[i][0],avgCprResult[i][1],avgCprResult[i][2]);
+    return avgCprResult;
+if __name__ == "__main__":
+    
+    datasets = ['diabetes','german','ionosphere'];
+    numOfRounds = 10;
+    figSavedPath = "./log/";
+    for dataset in datasets:
+    
+        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
         
-        print "******************************";
-        for i in range(0,len(cprResult)):
-            print "%f,%f,%f" % (cprResult[i][0]/totalRound,cprResult[i][1]/totalRound,cprResult[i][2]/totalRound);
-            
+        datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+        result = doExp(datasetPath,numOfRounds,isLinearSVM=True);
+        drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    

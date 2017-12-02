@@ -14,7 +14,8 @@ class PCAImpl(object):
         self.mean = None;
         self.eigValues = None;
         self.projMatrix = None;
-          
+        self.covMatrix = None;
+        
     def getPCs(self):
         '''
         1) Compute the covariance matrix.
@@ -23,8 +24,8 @@ class PCAImpl(object):
         '''
         self.mean = np.mean(self.data,axis=0);
         meanCenteredData = self.data - self.mean;
-        covMatrix = np.dot(meanCenteredData.T,meanCenteredData);
-        w, v = LA.eig(covMatrix);  
+        self.covMatrix = np.dot(meanCenteredData.T,meanCenteredData);
+        w, v = LA.eig(self.covMatrix);  
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
@@ -86,9 +87,23 @@ class PCAImpl(object):
         totalEnergy = np.sum(absEigValues);
         return [elem/totalEnergy for elem in absEigValues];
     
+    def getNumOfPCwithKPercentVariance(self,k):
+        '''
+        Once eigenvalues are computed, computing the num of principal components which explains k percent of whole variance,0<k<=1. 
+        '''
+        numOfDimension = 0;
+        pcaEnergies = self.getEigValueEnergies();
+        tmpSumEnergy = 0;
+        for energy in pcaEnergies:
+            tmpSumEnergy = tmpSumEnergy + energy;
+            numOfDimension = numOfDimension + 1;
+            if tmpSumEnergy > k:
+                break;
+        return numOfDimension;
+    
     def transform(self,scaledData,numOfComponents):
         '''
-        Given a set of centered data, reduding the data to specified dimensions. Notice that the data should also be 
+        Given a set of centered data, reducing the data to specified dimensions. Notice that the data should also be 
         centered already.
         '''
         if(numOfComponents>len(self.eigValues)):
@@ -97,3 +112,12 @@ class PCAImpl(object):
         tmpProjMatrix = self.projMatrix[:,0:tmpNumOfComponents];
         centeredScaledData = scaledData - self.mean;
         return np.dot(centeredScaledData,tmpProjMatrix);
+    
+    def reconstruct(self,reducedData):
+        '''
+        Reconstruct the data using the transpose of the projection matrix.
+        '''
+        reducedDim = reducedData.shape[1];
+        reconData = reducedData.dot(self.projMatrix[:,0:reducedDim].T) + self.mean;
+        #reconData = reducedData.dot(self.projMatrix[:,0:reducedDim].T);
+        return reconData; 
