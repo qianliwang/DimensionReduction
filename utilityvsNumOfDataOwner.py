@@ -8,22 +8,23 @@ from numpy.linalg import norm;
 from sklearn.model_selection import ShuffleSplit;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
 import matplotlib.pyplot as plt;
+import sys;
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
     xBound = len(data)+1;
-    x = range(1,xBound);
-    minVector = np.amin(data,axis=0);
+    x = data[:,0];
+    minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
-    maxVector = np.amax(data,axis=0);
+    maxVector = np.amax(data[:,1:],axis=0);
     yMax = max(maxVector);
     
     yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
     yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
     #x = [10,40,70,100,130,160,190,220,250,280,310,340];
-    y1Line,y2Line,y3Line = plt.plot(x, data[:,2], 'bo-', x, data[:,5], 'r^-',x, data[:,8], 'gs-');
+    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
     if datasetTitle is 'Ionosphere':
         plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=4);
     else:
@@ -65,15 +66,20 @@ def simulatePrivateGlobalPCA(data,numOfSamples,maxDim,epsilon):
         P = PPrime;
     return P;
 
-def doExp(datasetPath,numOfRounds,epsilon,numOfSamples,isLinearSVM=True):
+def doExp(datasetPath,epsilon,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=True):
     data = np.loadtxt(datasetPath,delimiter=",");
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
     
     numOfFeature = data.shape[1]-1;
     
-    cprResult = np.zeros((numOfFeature-1,9));
-    epsilon = 0.5;
+    if numOfDimensions > numOfFeature:
+        numOfDimensions = numOfFeature;
+        dataRange = 1;
+    else:
+        dataRange = numOfFeature/numOfDimensions;
+    
+    cprResult = np.zeros((numOfDimensions-1,4));
     
     for train_index, test_index in rs.split(data):
         
@@ -103,12 +109,14 @@ def doExp(datasetPath,numOfRounds,epsilon,numOfSamples,isLinearSVM=True):
         noisyProjMatrix = np.real(v[:,idx]);
         
         #print projTrainingData.shape;
-    
-        for k in range(1,numOfFeature):
+        
+        for k in range(1,numOfDimensions):
             #print pcaImpl.projMatrix[:,0];
-            print "Features %d:" % (k);   
-            projTrainingData1 = pcaImpl.transform(normalizedTrainingData,k);
-            projTestingData1 = pcaImpl.transform(normalizedTestingData,k);
+            targetDimension = k*dataRange;
+            print "Dimensions %d:" % (targetDimension);
+            cprResult[k-1][0] = cprResult[k-1][0]+targetDimension;
+            projTrainingData1 = pcaImpl.transform(normalizedTrainingData,targetDimension);
+            projTestingData1 = pcaImpl.transform(normalizedTestingData,targetDimension);
         
             print "-PCA SVM training";
             if isLinearSVM:
@@ -116,13 +124,10 @@ def doExp(datasetPath,numOfRounds,epsilon,numOfSamples,isLinearSVM=True):
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
             
-            cprResult[k-1][0] = cprResult[k-1][0]+result[0];
-            cprResult[k-1][1] = cprResult[k-1][1]+result[1];
-            cprResult[k-1][2] = cprResult[k-1][2]+result[2];
+            cprResult[k-1][1] = cprResult[k-1][1]+result[2];
             
-            
-            projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:k]);
-            projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:k]);
+            projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:targetDimension]);
+            projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:targetDimension]);
             
             print "My Wishart-DPPCA SVM training";
             if isLinearSVM:
@@ -130,11 +135,9 @@ def doExp(datasetPath,numOfRounds,epsilon,numOfSamples,isLinearSVM=True):
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
             
-            cprResult[k-1][3] = cprResult[k-1][3]+result[0];
-            cprResult[k-1][4] = cprResult[k-1][4]+result[1];
-            cprResult[k-1][5] = cprResult[k-1][5]+result[2];
+            cprResult[k-1][2] = cprResult[k-1][2]+result[2];
             
-            pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,k,epsilon);
+            pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,targetDimension,epsilon);
             projTrainingData3 = np.dot(normalizedTrainingData,pgProjMatrix);
             projTestingData3 = np.dot(normalizedTestingData,pgProjMatrix);
             
@@ -143,9 +146,7 @@ def doExp(datasetPath,numOfRounds,epsilon,numOfSamples,isLinearSVM=True):
                 result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            cprResult[k-1][6] = cprResult[k-1][6]+result[0];
-            cprResult[k-1][7] = cprResult[k-1][7]+result[1];
-            cprResult[k-1][8] = cprResult[k-1][8]+result[2];
+            cprResult[k-1][3] = cprResult[k-1][3]+result[2];
             
             print "===========================";
         """
@@ -266,16 +267,22 @@ def myGlobalPCA(folderPath,epsilon):
 """
 if __name__ == "__main__":
     
-    datasets = ['diabetes','australian','german', 'ionosphere', 'madelon'];
-    numOfRounds = 10;
+    numOfRounds = 2;
     epsilon = 0.5;
     numOfSamples = 2;
+    numOfDimensions = 40;
     figSavedPath = "./log/";
-    for dataset in datasets:
-        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-        datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
-        result = doExp(datasetPath,numOfRounds,epsilon,numOfSamples,isLinearSVM=True);
-        drawF1Score(dataset,result,figSavedPath=figSavedPath);
+    if len(sys.argv) > 1:
+        datasetPath = sys.argv[1];
+        print "+++ using passed in arguments: %s" % (datasetPath);
+        result = doExp(datasetPath,epsilon,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=True);
+    else:
+        datasets = ['diabetes','australian','german', 'ionosphere', 'madelon'];
+        for dataset in datasets:
+            print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
+            datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+            result = doExp(datasetPath,epsilon,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=True);
+            drawF1Score(dataset,result,figSavedPath=figSavedPath);
         """
         outputFolderPath = datasetPath+"_referPaper2/plaintext/";
         trainingDataPath = datasetPath+"_training";

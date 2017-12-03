@@ -4,6 +4,8 @@ from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
 import matplotlib.pyplot as plt;
+import sys;
+
 def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     
     plt.clf();
@@ -163,14 +165,18 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     return avgResult;    
 if __name__ == "__main__":
     
-    datasets = ['diabetes','german','ionosphere'];
     numOfRounds = 10;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
-    
-    for dataset in datasets:    
-        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-        datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+    if len(sys.argv) > 1:
+        datasetPath = sys.argv[1];
+        print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True);
-        drawF1Score(dataset,data=result,figSavedPath=figSavedPath);
-        drawPrecisionRecall(dataset,data=result,figSavedPath=figSavedPath);
+    else:
+        datasets = ['diabetes','german','ionosphere'];
+        for dataset in datasets:    
+            print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
+            datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+            result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True);
+            drawF1Score(dataset,data=result,figSavedPath=figSavedPath);
+            drawPrecisionRecall(dataset,data=result,figSavedPath=figSavedPath);

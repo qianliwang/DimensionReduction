@@ -4,6 +4,7 @@ from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
 import matplotlib.pyplot as plt;
+import sys;
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
@@ -11,7 +12,7 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
         data = np.loadtxt(path,delimiter=",");
     xBound = len(data)+1;
     x = data[:,0];
-    print x;
+    
     minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
     maxVector = np.amax(data[:,1:],axis=0);
@@ -34,7 +35,7 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-def doExp(datasetPath,numOfRounds,numOfDimensions,isLinearSVM=True):
+def doExp(datasetPath,epsilon,numOfRounds,numOfDimensions,isLinearSVM=True):
     data = np.loadtxt(datasetPath,delimiter=",");
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
@@ -63,7 +64,6 @@ def doExp(datasetPath,numOfRounds,numOfDimensions,isLinearSVM=True):
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
         pcaImpl.getPCs();
         
-        epsilon = 0.5;
         delta = np.divide(1.0,numOfTrainingSamples);
         print "epsilon: %.2f, delta: %f" % (epsilon,delta);
         
@@ -126,16 +126,19 @@ def doExp(datasetPath,numOfRounds,numOfDimensions,isLinearSVM=True):
         print "%d,%.3f,%.3f,%.3f" % (avgCprResult[i][0],avgCprResult[i][1],avgCprResult[i][2],avgCprResult[i][3]);
     return avgCprResult;
 if __name__ == "__main__":
-    
     #datasets = ['diabetes','german','ionosphere'];
-    datasets = ['diabetes','CNAE_1',];
-    numOfRounds = 10;
+    numOfRounds = 2;
     figSavedPath = "./log/";
-    numOfDimensions = 20;
-    for dataset in datasets:
-    
-        print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-        
-        datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
-        result = doExp(datasetPath,numOfRounds,numOfDimensions,isLinearSVM=True);
-        drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    
+    numOfDimensions = 40;
+    epsilon = 0.2;
+    if len(sys.argv) > 1:
+        datasetPath = sys.argv[1];
+        print "+++ using passed in arguments: %s" % (datasetPath);
+        result = doExp(datasetPath,epsilon,numOfRounds,numOfDimensions,isLinearSVM=True);
+    else:
+        datasets = ['face','CNAE_2','CNAE_3','CNAE_5','CNAE_7','CNAE_8','CNAE_9'];
+        for dataset in datasets:
+            print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
+            datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+            result = doExp(datasetPath,epsilon,numOfRounds,numOfDimensions,isLinearSVM=True);
+            drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    
