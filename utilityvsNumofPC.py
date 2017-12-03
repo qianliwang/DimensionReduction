@@ -123,7 +123,7 @@ def doExp(datasetPath,numOfRounds,numOfDimensions,isLinearSVM=True):
     print "******************************";
     avgCprResult = cprResult/numOfRounds;
     for i in range(0,len(cprResult)):
-        print "%.3f,%.3f,%.3f" % (avgCprResult[i][0],avgCprResult[i][1],avgCprResult[i][2]);
+        print "%d,%.3f,%.3f,%.3f" % (avgCprResult[i][0],avgCprResult[i][1],avgCprResult[i][2],avgCprResult[i][3]);
     return avgCprResult;
 if __name__ == "__main__":
     
