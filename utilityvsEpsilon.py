@@ -79,7 +79,6 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     cprResult = np.zeros((9,10)); 
     
     for train_index, test_index in rs.split(data):
-        
         trainingData = data[train_index];
         pureTrainingData = trainingData[:,1:];
         trainingLabel = trainingData[:,0];
@@ -124,10 +123,10 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
             
-            cprResult[k][0] = cprResult[k][0]+targetEpsilon;
-            cprResult[k][1] = cprResult[k][1]+result[0];
-            cprResult[k][2] = cprResult[k][2]+result[1];
-            cprResult[k][3] = cprResult[k][3]+result[2];
+            cprResult[k][0] += targetEpsilon;
+            cprResult[k][1] += result[0];
+            cprResult[k][2] += result[1];
+            cprResult[k][3] += result[2];
             
             projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,numOfDimension);
             projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,numOfDimension);
@@ -137,9 +136,9 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
                 result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-            cprResult[k][4] = cprResult[k][4]+result[0];
-            cprResult[k][5] = cprResult[k][5]+result[1];
-            cprResult[k][6] = cprResult[k][6]+result[2];
+            cprResult[k][4] += result[0];
+            cprResult[k][5] += result[1];
+            cprResult[k][6] += result[2];
             
             projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,numOfDimension);
             projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,numOfDimension);
@@ -149,9 +148,9 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
                 result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            cprResult[k][7] = cprResult[k][7]+result[0];
-            cprResult[k][8] = cprResult[k][8]+result[1];
-            cprResult[k][9] = cprResult[k][9]+result[2];
+            cprResult[k][7] += result[0];
+            cprResult[k][8] += result[1];
+            cprResult[k][9] += result[2];
             
             print "===========================";
         """

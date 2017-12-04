@@ -83,8 +83,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
             #print pcaImpl.projMatrix[:,0];
             #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
             #print k;
-            #targetDimension = k*dataRange;
-            cprResult[k][0] = cprResult[k][0]+targetDimension;
+            cprResult[k][0] += targetDimension;
             projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
             projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
             print "Non-noise PCA %d" % targetDimension;
@@ -93,7 +92,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
             
-            cprResult[k][1] = cprResult[k][1]+result[2];
+            cprResult[k][1] += result[2];
             
             isGaussianDist = True;
             dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
@@ -105,7 +104,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
                 result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-            cprResult[k][2] = cprResult[k][2]+result[2];
+            cprResult[k][2] += result[2];
             
             isGaussianDist = False;
             dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
@@ -117,7 +116,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
                 result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            cprResult[k][3] = cprResult[k][3]+result[2];
+            cprResult[k][3] += result[2];
             
             print "===========================";
             """
@@ -143,7 +142,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True);
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",");
     else:
-        datasets = ['Amazon_3','face2','madelon','CNAE_2',];
+        datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2',];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

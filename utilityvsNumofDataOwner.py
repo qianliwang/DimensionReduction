@@ -118,7 +118,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
         #for k in range(1,numOfDimensions):
         for k, targetDimension in np.ndenumerate(xDimensions):
             #print pcaImpl.projMatrix[:,0];
-            cprResult[k][0] = cprResult[k][0]+targetDimension;
+            cprResult[k][0] += targetDimension;
             projTrainingData1 = pcaImpl.transform(normalizedTrainingData,targetDimension);
             projTestingData1 = pcaImpl.transform(normalizedTestingData,targetDimension);
             print "Non-noise PCA %d" % targetDimension;
@@ -127,7 +127,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
             
-            cprResult[k][1] = cprResult[k][1]+result[2];
+            cprResult[k][1] += result[2];
             
             projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:targetDimension]);
             projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:targetDimension]);
@@ -138,7 +138,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
             
-            cprResult[k][2] = cprResult[k][2]+result[2];
+            cprResult[k][2] += result[2];
             
             pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,targetDimension,epsilon);
             projTrainingData3 = np.dot(normalizedTrainingData,pgProjMatrix);
@@ -149,7 +149,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
                 result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
             else:
                 result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            cprResult[k][3] = cprResult[k][3]+result[2];
+            cprResult[k][3] += result[2];
             
             print "===========================";
         """
