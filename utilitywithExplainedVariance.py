@@ -4,19 +4,19 @@ import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
 import matplotlib.pyplot as plt;
 import sys;
+import os;
 
 def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
-    x = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
+    x = data[:,0];
     '''
     gaussianPercent,wishartPercent is the percentage over the non-noise PCA.
     '''
-    gaussianPercent = data[:,1]/data[:,0];
-    wishartPercent = data[:,2]/data[:,0];
+    gaussianPercent = data[:,2]/data[:,1];
+    wishartPercent = data[:,3]/data[:,1];
     
-    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
     y1Line,y2Line = plt.plot(x, gaussianPercent, 'bo-', x, wishartPercent, 'r^-');
     if datasetTitle is 'german':
         plt.legend([y1Line,y2Line], ['Gaussian Noise','Wishart Noise'],loc=2);
@@ -39,10 +39,10 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
     
-    cprResult = np.zeros((9,3)); 
-    
+    xEpsilons = np.arange(0.1,1.0,0.1);
+    cprResult = np.zeros((len(xEpsilons),4));
+    #print xDimensions;
     for train_index, test_index in rs.split(data):
-        
         trainingData = data[train_index];
         pureTrainingData = trainingData[:,1:];
         #trainingLabel = trainingData[:,0];
@@ -73,53 +73,54 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
         pcaEnergies = pcaImpl.getEigValueEnergies();
         
         delta = np.divide(1.0,numOfTrainingSamples);
-        for k in range(1,10):
+        #for k in range(1,10):
+        for k, targetEpsilon in np.ndenumerate(xEpsilons):
             #print pcaImpl.projMatrix[:,0];
             
-            epsilon = 0.1*k;
-            print "epsilon: %.2f, delta: %f" % (epsilon,delta);           
+            print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);           
             isGaussianDist = True;
-            dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
+            dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
             dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
             
             isGaussianDist = False;
-            dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
+            dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
             dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
             
-            
-            cprResult[k-1][0] = cprResult[k-1][0]+np.sum(pcaEnergies[:numOfDimension]);
-            
-            cprResult[k-1][1] = cprResult[k-1][1]+np.sum(dpGaussianPCAImpl.getEigValueEnergies()[:numOfDimension]);
-            
-            cprResult[k-1][2] = cprResult[k-1][2]+np.sum(dpWishartPCAImpl.getEigValueEnergies()[:numOfDimension]);
+            cprResult[k][0] = cprResult[k][0]+targetEpsilon;
+            cprResult[k][1] = cprResult[k][1]+np.sum(pcaEnergies[:numOfDimension]);
+            cprResult[k][2] = cprResult[k][2]+np.sum(dpGaussianPCAImpl.getEigValueEnergies()[:numOfDimension]);
+            cprResult[k][3] = cprResult[k][3]+np.sum(dpWishartPCAImpl.getEigValueEnergies()[:numOfDimension]);
             
             print "===========================";
-        
+    """    
     for i in range(0,len(cprResult)):
         print "%.4f,%.4f,%.4f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
     print "******************************";
-    
+    """
     # Compute the average value after numOfRounds experiments.
     avgCprResult = cprResult/numOfRounds;
-    for i in range(0,len(cprResult)):
-        print "%.3f,%.3f,%.3f" % (avgCprResult[i][0],avgCprResult[i][1],avgCprResult[i][2]);  
+    for result in avgCprResult:
+        print "%.2f,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);  
     
     return avgCprResult;
 
 if __name__ == "__main__":
     
     #datasets = ['diabetes','german', 'ionosphere'];
-    numOfRounds = 10;
+    numOfRounds = 4;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
+    resultSavedPath = "./log/";
     if len(sys.argv) >1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds);
+        np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",");
     else:
-        datasets = ['CNAE_1'];
+        datasets = ['Amazon_3','face2','madelon','CNAE_2'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds);
-            drawExplainedVariance(dataset,data=result,figSavedPath=figSavedPath);
+            np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",");
+            #drawExplainedVariance(dataset,data=result,figSavedPath=figSavedPath);
