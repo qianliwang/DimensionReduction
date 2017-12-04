@@ -286,7 +286,7 @@ if __name__ == "__main__":
         datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+            datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=True);
             np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",");
             #drawF1Score(dataset,result,figSavedPath=figSavedPath);

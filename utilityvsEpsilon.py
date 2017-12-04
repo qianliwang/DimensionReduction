@@ -179,7 +179,7 @@ if __name__ == "__main__":
         datasets = ['Amazon_3','face2','madelon','CNAE_2'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "../distr_dp_pca/experiment/input/"+dataset+"_prePCA";
+            datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True);
             np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",");
             #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);
