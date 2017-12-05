@@ -1,6 +1,6 @@
 import numpy as np;
 from numpy import linalg as LA;
-
+import scipy.sparse as sparse;
 """
 Self-implemented Principal Component Analysis. Important notice: 
     1) The input is raw data, MxN format, M number of samples, N number of features
@@ -23,8 +23,9 @@ class PCAImpl(object):
             #self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
             self.eigValues,self.projMatrix = self.svdSolver(self.centeredData);
         elif topK is not None:
-            print "Power Iteration to find top %d principal components." % topK;
-            self.eigValues,self.projMatrix = self.genEigenvectors_power(self.covMatrix,topK);
+            self.eigValues,self.projMatrix = self.scipyEvdSolver(self.covMatrix,topK);
+            #print "Power Iteration to find top %d principal components." % topK;
+            #self.eigValues,self.projMatrix = self.genEigenvectors_power(self.covMatrix,topK);
         else:
             #print "Eigenvalue decomposition";
             self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
@@ -50,15 +51,19 @@ class PCAImpl(object):
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
+        sortedW = np.real(w[idx]);
+        #print sortedW;
+        sortedV = np.real(v[:,idx]);
+        return sortedW,sortedV;
+    
+    def scipyEvdSolver(self,covMatrix,topK):
+        w,v = sparse.linalg.eigs(covMatrix, k=topK);
+        idx = np.absolute(w).argsort()[::-1];
+        #print idx;
         sortedW = w[idx];
         #print sortedW;
         sortedV = v[:,idx];
-        
-        eigValues = np.real(sortedW);
-        #print eigValues[:20];
-        eigVectors = np.real(sortedV);
-        #print eigVectors[:20,1];
-        return eigValues,eigVectors;
+        return sortedW,sortedV;
     
     def __getApproxEigval(self,covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);

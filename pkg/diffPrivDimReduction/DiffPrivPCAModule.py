@@ -36,8 +36,9 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
             #print "Eigenvalue decomposition";
             self.eigValues,self.projMatrix = self.evdSolver(noisyCovMatrix);
         else:
-            print "Power Iteration to find top %d principal components." % topK;
-            self.eigValues,self.projMatrix = PCAModule.PCAImpl.genEigenvectors_power(self,noisyCovMatrix,topK); 
+            self.eigValues,self.projMatrix = PCAModule.PCAImpl.scipyEvdSolver(self,noisyCovMatrix,topK);
+            #print "Power Iteration to find top %d principal components." % topK;
+            #self.eigValues,self.projMatrix = PCAModule.PCAImpl.genEigenvectors_power(self,noisyCovMatrix,topK); 
          
         #print self.projMatrix[:20,1];
         
