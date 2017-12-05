@@ -64,7 +64,7 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
     def __calcL2Sensitivity(self,data):
         rowsNorm = LA.norm(data, axis=1);
         maxL2Norm = np.amax(rowsNorm);
-        print "The L2 sensitivity of the data is %f." % maxL2Norm;
+        #print "The L2 sensitivity of the data is %f." % maxL2Norm;
         return maxL2Norm;
     
     def transform(self,rawData,numOfComponents):

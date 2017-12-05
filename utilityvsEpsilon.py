@@ -6,6 +6,7 @@ from sklearn.model_selection import ShuffleSplit;
 import matplotlib.pyplot as plt;
 import sys;
 import os;
+from multiprocessing import Pool;
 
 def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     
@@ -70,6 +71,78 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"epsilon_pr_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
+def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM):
+    pureTrainingData = trainingData[:,1:];
+    trainingLabel = trainingData[:,0];
+    
+    numOfTrainingSamples = trainingData.shape[0];
+    
+    pureTestingData = testingData[:,1:];
+    testingLabel = testingData[:,0];
+    
+    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
+    pcaImpl.getPCs(largestReducedFeature);
+    
+    dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    
+    delta = np.divide(1.0,numOfTrainingSamples);
+    projTrainingData1 = pcaImpl.transform(pureTrainingData,largestReducedFeature);
+    projTestingData1 = pcaImpl.transform(pureTestingData,largestReducedFeature);
+    #print projTrainingData.shape;
+    cprResult = np.zeros((len(xEpsilons),10)); 
+    
+    for k, targetEpsilon in np.ndenumerate(xEpsilons):
+        #print pcaImpl.projMatrix[:,0];    
+        print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
+                
+        isGaussianDist = True;
+        dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
+        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
+        
+        isGaussianDist = False;
+        dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
+        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
+        '''
+        We don't need to project the data multiple times.
+        '''
+        print "non noise PCA SVM training";
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        
+        cprResult[k][0] += targetEpsilon;
+        cprResult[k][1] += result[0];
+        cprResult[k][2] += result[1];
+        cprResult[k][3] += result[2];
+        
+        projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
+        projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
+        print "Gaussian-DPDPCA SVM training";
+        
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+        cprResult[k][4] += result[0];
+        cprResult[k][5] += result[1];
+        cprResult[k][6] += result[2];
+        
+        projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,largestReducedFeature);
+        projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,largestReducedFeature);
+        #print projTestingData.shape;
+        print "Wishart-DPPCA SVM training";
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+        cprResult[k][7] += result[0];
+        cprResult[k][8] += result[1];
+        cprResult[k][9] += result[2];
+        
+    return cprResult;
+    
 def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     
     data = np.loadtxt(datasetPath,delimiter=",");
@@ -82,85 +155,17 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     
     xEpsilons = np.arange(0.1,1.0,0.1);
     cprResult = np.zeros((len(xEpsilons),10)); 
+    p = Pool(numOfRounds);
     
     for train_index, test_index in rs.split(data):
         trainingData = data[train_index];
-        pureTrainingData = trainingData[:,1:];
-        trainingLabel = trainingData[:,0];
-        
-        numOfTrainingSamples = trainingData.shape[0];
-        
         testingData = data[test_index];
-        pureTestingData = testingData[:,1:];
-        testingLabel = testingData[:,0];
+        tmpResult = p.apply_async(singleExp, (xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM));
+        cprResult += tmpResult.get();
         
-        pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-        pcaImpl.getPCs(largestReducedFeature);
-        
-        dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-        dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-        
-        delta = np.divide(1.0,numOfTrainingSamples);
-        projTrainingData1 = pcaImpl.transform(pureTrainingData,largestReducedFeature);
-        projTestingData1 = pcaImpl.transform(pureTestingData,largestReducedFeature);
-        #print projTrainingData.shape;
-        
-        for k, targetEpsilon in np.ndenumerate(xEpsilons):
-            #print pcaImpl.projMatrix[:,0];    
-            print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
-                    
-            isGaussianDist = True;
-            dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-            dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
-            
-            isGaussianDist = False;
-            dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-            dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
-            '''
-            We don't need to project the data multiple times.
-            '''
-            print "non noise PCA SVM training";
-            if isLinearSVM:
-                result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-            else:
-                result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-            
-            cprResult[k][0] += targetEpsilon;
-            cprResult[k][1] += result[0];
-            cprResult[k][2] += result[1];
-            cprResult[k][3] += result[2];
-            
-            projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
-            projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
-            print "Gaussian-DPDPCA SVM training";
-            
-            if isLinearSVM:
-                result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-            else:
-                result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-            cprResult[k][4] += result[0];
-            cprResult[k][5] += result[1];
-            cprResult[k][6] += result[2];
-            
-            projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,largestReducedFeature);
-            projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,largestReducedFeature);
-            #print projTestingData.shape;
-            print "Wishart-DPPCA SVM training";
-            if isLinearSVM:
-                result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            else:
-                result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            cprResult[k][7] += result[0];
-            cprResult[k][8] += result[1];
-            cprResult[k][9] += result[2];
-            
-            print "===========================";
-        """
-        for i in range(0,len(cprResult)):
-            print ','.join(['%.3f' % num for num in cprResult[i]]);
-        """
     avgResult = cprResult/numOfRounds;
-    
+    p.close();
+    p.join();
     for result in avgResult:
         print ','.join(['%.3f' % num for num in result]);
     
@@ -178,7 +183,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['ionosphere','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

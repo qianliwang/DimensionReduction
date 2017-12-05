@@ -10,6 +10,7 @@ from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
 import matplotlib.pyplot as plt;
 import sys;
 import os;
+from multiprocessing import Pool;
 """
 def privateGlobalPCA(folderPath,k,epsilon):
     # Get the folder, which contains all the horizontal data.
@@ -214,6 +215,70 @@ def simulatePrivateGlobalPCA(data,numOfSamples,maxDim,epsilon):
             P = simulatePrivateLocalPCA(tmpSummary,k_prime,epsilon);
         P = PPrime;
     return P;
+def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
+    
+    pureTrainingData = trainingData[:,1:];
+    trainingLabel = trainingData[:,0];
+    normalizedTrainingData = normByRow(pureTrainingData);
+    
+    pureTestingData = testingData[:,1:];
+    testingLabel = testingData[:,0];
+    normalizedTestingData = normByRow(pureTestingData);
+    
+    numOfFeature = trainingData.shape[1]-1;
+    cprResult = np.zeros((len(xDimensions),4));
+    
+    pcaImpl = PCAModule.PCAImpl(normalizedTrainingData);
+    pcaImpl.getPCs(topK);
+    
+    '''
+    To get a Wishart Noise projection matrix.
+    '''
+    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,numOfFeature);
+    noisyCovMatrix = pcaImpl.covMatrix + WishartNoiseMatrix;
+    #w, v = LA.eig(noisyCovMatrix);  
+    # Sorting the eigenvalues in descending order.
+    #idx = np.absolute(w).argsort()[::-1];
+    #noisyProjMatrix = np.real(v[:,idx]);
+    noisyEigValues,noisyProjMatrix = genEigenvectors_power(noisyCovMatrix,topK);
+    #print projTrainingData.shape;
+    #for k in range(1,numOfDimensions):
+    for k, targetDimension in np.ndenumerate(xDimensions):
+        #print pcaImpl.projMatrix[:,0];
+        cprResult[k][0] += targetDimension;
+        projTrainingData1 = pcaImpl.transform(normalizedTrainingData,targetDimension);
+        projTestingData1 = pcaImpl.transform(normalizedTestingData,targetDimension);
+        print "Non-noise PCA %d" % targetDimension;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        
+        cprResult[k][1] += result[2];
+        
+        projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:targetDimension]);
+        projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:targetDimension]);
+        
+        print "DPDPCA %d" % targetDimension;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+        
+        cprResult[k][2] += result[2];
+        
+        pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,targetDimension,epsilon);
+        projTrainingData3 = np.dot(normalizedTrainingData,pgProjMatrix);
+        projTestingData3 = np.dot(normalizedTestingData,pgProjMatrix);
+        
+        print "PrivateLocalPCA %d" % targetDimension;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+        cprResult[k][3] += result[2];
+        
+    return cprResult;
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=True):
     data = np.loadtxt(datasetPath,delimiter=",");
@@ -227,87 +292,32 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
         xDimensions = np.arange(1,numOfFeature);
         topK=numOfFeature;
     else:
-        xDimensions = np.arange(1,largestReducedFeature,largestReducedFeature/numOfDimensions);
+        xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
         topK=largestReducedFeature;
     cprResult = np.zeros((len(xDimensions),4));
     
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
     
+    p = Pool(numOfRounds);
+    
     for train_index, test_index in rs.split(data):
         
         trainingData = data[train_index];
-        pureTrainingData = trainingData[:,1:];
-        trainingLabel = trainingData[:,0];
-        normalizedTrainingData = normByRow(pureTrainingData);
-        
-        numOfFeature = trainingData.shape[1]-1;
-        
         testingData = data[test_index];
-        pureTestingData = testingData[:,1:];
-        testingLabel = testingData[:,0];
-        normalizedTestingData = normByRow(pureTestingData);
+        tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
+        cprResult += tmpResult.get();
         
-        pcaImpl = PCAModule.PCAImpl(normalizedTrainingData);
-        pcaImpl.getPCs(topK);
-        
-        '''
-        To get a Wishart Noise projection matrix.
-        '''
-        WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,numOfFeature);
-        noisyCovMatrix = pcaImpl.covMatrix + WishartNoiseMatrix;
-        #w, v = LA.eig(noisyCovMatrix);  
-        # Sorting the eigenvalues in descending order.
-        #idx = np.absolute(w).argsort()[::-1];
-        #noisyProjMatrix = np.real(v[:,idx]);
-        noisyEigValues,noisyProjMatrix = genEigenvectors_power(noisyCovMatrix,topK);
-        #print projTrainingData.shape;
-        #for k in range(1,numOfDimensions):
-        for k, targetDimension in np.ndenumerate(xDimensions):
-            #print pcaImpl.projMatrix[:,0];
-            cprResult[k][0] += targetDimension;
-            projTrainingData1 = pcaImpl.transform(normalizedTrainingData,targetDimension);
-            projTestingData1 = pcaImpl.transform(normalizedTestingData,targetDimension);
-            print "Non-noise PCA %d" % targetDimension;
-            if isLinearSVM:
-                result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-            else:
-                result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-            
-            cprResult[k][1] += result[2];
-            
-            projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:targetDimension]);
-            projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:targetDimension]);
-            
-            print "DPDPCA %d" % targetDimension;
-            if isLinearSVM:
-                result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-            else:
-                result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-            
-            cprResult[k][2] += result[2];
-            
-            pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,targetDimension,epsilon);
-            projTrainingData3 = np.dot(normalizedTrainingData,pgProjMatrix);
-            projTestingData3 = np.dot(normalizedTestingData,pgProjMatrix);
-            
-            print "PrivateLocalPCA %d" % targetDimension;
-            if isLinearSVM:
-                result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            else:
-                result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-            cprResult[k][3] += result[2];
-            
-            print "===========================";
         """
         for i in range(0,len(cprResult)):
             print ','.join(['%.3f' % num for num in cprResult[i]]);
         """
     avgResult = cprResult/numOfRounds;
-    
+    p.close();
+    p.join();
     for result in avgResult:
         print ','.join(['%.3f' % num for num in result]);
-    
+
     return avgResult;
 
 def normByRow(data):
@@ -331,7 +341,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['Australian','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

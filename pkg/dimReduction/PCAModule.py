@@ -20,6 +20,7 @@ class PCAImpl(object):
     def getPCs(self,topK=None):
         if self.centeredData.shape[1]<500:
             #print "Singular Value Decomposition"
+            #self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
             self.eigValues,self.projMatrix = self.svdSolver(self.centeredData);
         elif topK is not None:
             print "Power Iteration to find top %d principal components." % topK;
