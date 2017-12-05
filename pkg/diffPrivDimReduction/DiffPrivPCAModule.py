@@ -32,9 +32,11 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
             
         #print wishart;
         noisyCovMatrix = self.covMatrix+noiseMatrix;
-        if topK is None:
+        if self.centeredData.shape[1]<500:
+            print "Eigenvalue decomposition";
             self.eigValues,self.projMatrix = self.evdSolver(noisyCovMatrix);
         else:
+            print "Power Iteration to find top %d principal components." % topK;
             self.eigValues,self.projMatrix = PCAModule.PCAImpl.genEigenvectors_power(self,noisyCovMatrix,topK); 
          
         #print self.projMatrix[:20,1];

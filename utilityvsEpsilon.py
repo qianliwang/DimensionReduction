@@ -178,7 +178,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2'];
+        datasets = ['diabetes','madelon','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

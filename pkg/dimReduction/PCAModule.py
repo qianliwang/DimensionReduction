@@ -18,12 +18,12 @@ class PCAImpl(object):
         self.projMatrix = None;
         
     def getPCs(self,topK=None):
-        if topK is not None:
-            print "Power Iteration to find top %d principal components." % topK;
-            self.eigValues,self.projMatrix = self.genEigenvectors_power(self.covMatrix,topK);
-        elif self.centeredData.shape[1]>100:
+        if self.centeredData.shape[1]<500:
             print "Singular Value Decomposition"
             self.eigValues,self.projMatrix = self.svdSolver(self.centeredData);
+        elif topK is not None:
+            print "Power Iteration to find top %d principal components." % topK;
+            self.eigValues,self.projMatrix = self.genEigenvectors_power(self.covMatrix,topK);
         else:
             print "Eigenvalue decomposition";
             self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
@@ -75,9 +75,10 @@ class PCAImpl(object):
         epsilon = 0.01;
         eigValues = np.zeros(topK);
         eigVectors = None;
+        convergeRounds = [];
         k=0;
         vecLength = covMatrix.shape[0];
-        bound = max(10,vecLength*2);
+        bound = max(1000,vecLength);
         while k<topK:
             r0 = np.random.rand(vecLength,1);
             count=0;
@@ -103,9 +104,11 @@ class PCAImpl(object):
                 eigVectors = r1;
             else:
                 eigVectors = np.append(eigVectors,r1,axis=1);
+            convergeRounds.append(count);
             np.put(eigValues,k,eigVal);
             covMatrix -= eigVal*np.outer(r1,r1);
-            k += 1;            
+            k += 1;
+        print "converge rounds: %s" % convergeRounds;         
         return eigValues,eigVectors;
     
     def getEigValueEnergies(self):
