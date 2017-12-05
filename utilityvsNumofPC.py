@@ -39,15 +39,18 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
     data = np.loadtxt(datasetPath,delimiter=",");
     globalPCA = PCAModule.PCAImpl(data[:,1:]);
-    globalPCA.getPCs();
+    
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
+    topK=0;
     xDimensions = None;
     if numOfDimensions > numOfFeature:
         xDimensions = np.arange(1,numOfFeature);
+        topK=numOfFeature;
     else:
         xDimensions = np.arange(1,largestReducedFeature,largestReducedFeature/numOfDimensions);
+        topK = largestReducedFeature;
     #print xDimensions;
     cprResult = np.zeros((len(xDimensions),4));
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
@@ -64,9 +67,10 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
         testingLabel = testingData[:,0];
         
         numOfTrainingSamples = trainingData.shape[0];
-        
+
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-        pcaImpl.getPCs();
+        
+        pcaImpl.getPCs(topK);
         
         delta = np.divide(1.0,numOfTrainingSamples);
         print "epsilon: %.2f, delta: %f" % (epsilon,delta);
@@ -74,10 +78,12 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
         isGaussianDist = True;
         dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
         dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
+        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,topK);
         
         isGaussianDist = False;
         dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
         dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
+        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,topK);
         
         for k, targetDimension in np.ndenumerate(xDimensions):    
             #print pcaImpl.projMatrix[:,0];
@@ -95,7 +101,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
             cprResult[k][1] += result[2];
             
             isGaussianDist = True;
-            dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
+            #dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
             projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,targetDimension);
             projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,targetDimension);
             #print projTestingData.shape;
@@ -107,7 +113,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
             cprResult[k][2] += result[2];
             
             isGaussianDist = False;
-            dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
+            #dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
             projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
             projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,targetDimension);
             #print projTestingData.shape;
@@ -136,16 +142,18 @@ if __name__ == "__main__":
     numOfDimensions = 30;
     epsilon = 0.3;
     varianceRatio = 0.9;
+    isLinearSVM = True;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True);
-        np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",");
+        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+        np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2',];
+        #datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2',];
+        datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True);
-            np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",");
+            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+            np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    

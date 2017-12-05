@@ -1,6 +1,7 @@
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
+from numpy import linalg as LA;
 from sklearn.model_selection import ShuffleSplit;
 import matplotlib.pyplot as plt;
 import sys;
@@ -38,6 +39,13 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     data = np.loadtxt(datasetPath,delimiter=",");
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
+    globalPCA = PCAModule.PCAImpl(data[:,1:]);
+    numOfFeature = data.shape[1]-1;
+    matrixRank = LA.matrix_rank(data[:,1:]);
+
+    print "Matrix rank of the data is %d." % matrixRank;
+    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     
     xEpsilons = np.arange(0.1,1.0,0.1);
     cprResult = np.zeros((len(xEpsilons),4));
@@ -48,24 +56,9 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
         #trainingLabel = trainingData[:,0];
         numOfTrainingSamples = trainingData.shape[0];
         numOfFeature = trainingData.shape[1]-1;
-        # Normalize data to mean 0 and standard deviation.
-        #trainingColMean = np.mean(pureTrainingData,axis=0);
-        #pureTrainingData = pureTrainingData - trainingColMean;
-        #trainingColDeviation = np.std(pureTrainingData, axis=0);
-    
-        #scaledTrainingData = np.divide((pureTrainingData - trainingColMean),trainingColDeviation);
-        #scaledTestingData = np.divide((pureTestingData - trainingColMean),trainingColDeviation);
-    
-        # Making each row unit l2 norm.
-        #pureTrainingData = gf.normByRow(pureTrainingData);
-        #testingData = data[test_index];
-        #pureTestingData = testingData[:,1:];
-        #testingLabel = testingData[:,0];
         
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-        pcaImpl.getPCs();
-        numOfDimension = pcaImpl.getNumOfPCwithKPercentVariance(varianceRatio);
-        print "%d/%d dimensions captures %.2f variance." % (numOfDimension,numOfFeature,varianceRatio);
+        pcaImpl.getPCs(numOfFeature);
         
         dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
         dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
@@ -77,22 +70,22 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
         for k, targetEpsilon in np.ndenumerate(xEpsilons):
             #print pcaImpl.projMatrix[:,0];
             
-            print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);           
+            #print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);           
             isGaussianDist = True;
             dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-            dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
+            dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank);
             
             isGaussianDist = False;
             dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-            dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
+            dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank);
             
             cprResult[k][0] = cprResult[k][0]+targetEpsilon;
-            cprResult[k][1] = cprResult[k][1]+np.sum(pcaEnergies[:numOfDimension]);
-            cprResult[k][2] = cprResult[k][2]+np.sum(dpGaussianPCAImpl.getEigValueEnergies()[:numOfDimension]);
-            cprResult[k][3] = cprResult[k][3]+np.sum(dpWishartPCAImpl.getEigValueEnergies()[:numOfDimension]);
+            cprResult[k][1] = cprResult[k][1]+np.sum(pcaEnergies[:largestReducedFeature]);
+            cprResult[k][2] = cprResult[k][2]+np.sum(dpGaussianPCAImpl.getEigValueEnergies()[:largestReducedFeature]);
+            cprResult[k][3] = cprResult[k][3]+np.sum(dpWishartPCAImpl.getEigValueEnergies()[:largestReducedFeature]);
             
-            print "===========================";
-    """    
+            #print "===========================";
+    """
     for i in range(0,len(cprResult)):
         print "%.4f,%.4f,%.4f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
     print "******************************";
@@ -115,12 +108,12 @@ if __name__ == "__main__":
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds);
-        np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",");
+        np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['Amazon_3','face2','madelon','CNAE_2'];
+        datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds);
-            np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",");
+            np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawExplainedVariance(dataset,data=result,figSavedPath=figSavedPath);

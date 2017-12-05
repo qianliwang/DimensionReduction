@@ -3,29 +3,49 @@ from numpy import linalg as LA;
 
 """
 Self-implemented Principal Component Analysis. Important notice: 
-    1) The input data should be already centered. (To do, should change to no centered, since mean vector should also be part 
-    of the implementation, since mean vecotr is needed in the transform function).
-    2) EigenDecomposition is adopted.
+    1) The input is raw data, MxN format, M number of samples, N number of features
+    2) EigenDecomposition is implemented.
+    3) SingularValueDecomposition is implemented.
+    4) Power Iteration is implemented.
 """
 class PCAImpl(object):
     
-    def __init__(self,scaledData):
-        self.data = scaledData; 
-        self.mean = None;
+    def __init__(self,rawData):
+        self.mean = np.mean(rawData,axis=0);
+        self.centeredData = rawData-self.mean; 
+        self.covMatrix = np.dot(self.centeredData.T,self.centeredData);
         self.eigValues = None;
         self.projMatrix = None;
-        self.covMatrix = None;
         
-    def getPCs(self):
+    def getPCs(self,topK=None):
+        if topK is not None:
+            print "Power Iteration to find top %d principal components." % topK;
+            self.eigValues,self.projMatrix = self.genEigenvectors_power(self.covMatrix,topK);
+        elif self.centeredData.shape[1]>100:
+            print "Singular Value Decomposition"
+            self.eigValues,self.projMatrix = self.svdSolver(self.centeredData);
+        else:
+            print "Eigenvalue decomposition";
+            self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
+    def svdSolver(self,meanCenteredData):
         '''
-        1) Compute the covariance matrix.
+        Using Singular Value Decomposition to find the eigenvalues and principal components.
+        '''
+        U, s, V = LA.svd(meanCenteredData, full_matrices=False)
+        
+        eigValues = np.square(s);
+        #print eigValues[:20];
+        eigVectors = np.real(V.T);
+        #print eigVectors[:20,1];
+        return eigValues,eigVectors;
+    
+    def evdSolver(self,covMatrix):
+        '''
+        1) Using the already computed covariance matrix.
         2) EigenDecomposition.
         3) Sort the eigenvalues in non-decreasing order and output corresponding eigenvectors with that order.  
         '''
-        self.mean = np.mean(self.data,axis=0);
-        meanCenteredData = self.data - self.mean;
-        self.covMatrix = np.dot(meanCenteredData.T,meanCenteredData);
-        w, v = LA.eig(self.covMatrix);  
+        w, v = LA.eig(covMatrix);  
         # Sorting the eigenvalues in descending order.
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
@@ -33,8 +53,11 @@ class PCAImpl(object):
         #print sortedW;
         sortedV = v[:,idx];
         
-        self.eigValues = np.real(sortedW);
-        self.projMatrix = np.real(sortedV);
+        eigValues = np.real(sortedW);
+        #print eigValues[:20];
+        eigVectors = np.real(sortedV);
+        #print eigVectors[:20,1];
+        return eigValues,eigVectors;
     
     def __getApproxEigval(self,covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
@@ -43,19 +66,22 @@ class PCAImpl(object):
         eigVal = np.divide(v1,v2);
         return eigVal;
 
-    def genEigenvectors_power(self,covMatrix):
+    def genEigenvectors_power(self,covMatrix,topK):
         '''
         Compute the eigenvector with power iteration method, multiplying covariance with random vector, 
         converge threshold is setted through epsilon.
         '''
     #    r0 = np.random.rand(covMatrix.shape[0],1);
         epsilon = 0.01;
-        eigVectors = [];
+        eigValues = np.zeros(topK);
+        eigVectors = None;
         k=0;
-        while k<covMatrix.shape[0]:
-            r0 = np.random.rand(covMatrix.shape[0],1);
+        vecLength = covMatrix.shape[0];
+        bound = max(10,vecLength*2);
+        while k<topK:
+            r0 = np.random.rand(vecLength,1);
             count=0;
-            while True:
+            while count<bound:
                 r1 = np.dot(covMatrix, r0);
                 # Get the second norm of r1;
                 scale = LA.norm(r1,2);
@@ -68,26 +94,32 @@ class PCAImpl(object):
                 
                 if dist < epsilon:
                     #print count;
-                    #print eigVal;
+                    #print "No.%d eigenvalue: %f" % (k,eigVal);
                     break;
                 else:    
                     r0 = r1;
-                    count = count + 1;
-            #print (r1.dot(r1.T)); 
-            eigVectors.append(r1);
-            covMatrix = covMatrix - covMatrix.dot(r1.dot(r1.T));
-            k = k+1;            
-        return np.asarray(eigVectors).T;
+                    count += 1;
+            if eigVectors is None:
+                eigVectors = r1;
+            else:
+                eigVectors = np.append(eigVectors,r1,axis=1);
+            np.put(eigValues,k,eigVal);
+            covMatrix -= eigVal*np.outer(r1,r1);
+            k += 1;            
+        return eigValues,eigVectors;
     
     def getEigValueEnergies(self):
         '''
         Once eigenvalues are computed, computing the percentage of each eigenvalue over the sum of eigenvalues. 
         '''
+        if self.eigValues is None:
+            sigValues = LA.svd(self.centeredData,compute_uv=False);
+            self.eigValues = np.square(sigValues);
         absEigValues = np.absolute(self.eigValues);
         totalEnergy = np.sum(absEigValues);
         return [elem/totalEnergy for elem in absEigValues];
     
-    def getNumOfPCwithKPercentVariance(self,k):
+    def getNumOfPCwithKPercentVariance(self,varianceRatio):
         '''
         Once eigenvalues are computed, computing the num of principal components which explains k percent of whole variance,0<k<=1. 
         '''
@@ -97,7 +129,7 @@ class PCAImpl(object):
         for energy in pcaEnergies:
             tmpSumEnergy = tmpSumEnergy + energy;
             numOfDimension = numOfDimension + 1;
-            if tmpSumEnergy > k:
+            if tmpSumEnergy > varianceRatio:
                 break;
         return numOfDimension;
     
