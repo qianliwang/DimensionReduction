@@ -146,7 +146,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
-    numOfRounds = 4;
+    numOfRounds = 10;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
     numOfDimensions = 30;

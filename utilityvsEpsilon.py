@@ -172,7 +172,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     return avgResult;    
 if __name__ == "__main__":
     
-    numOfRounds = 4;
+    numOfRounds = 10;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";

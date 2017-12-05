@@ -327,7 +327,7 @@ def normByRow(data):
     return data;
 if __name__ == "__main__":
     
-    numOfRounds = 4;
+    numOfRounds = 10;
     epsilon = 0.3;
     varianceRatio = 0.9
     numOfSamples = 2;
