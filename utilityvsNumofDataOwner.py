@@ -331,7 +331,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['Australian','Amazon_3','face2','madelon','CNAE_2',];
+        datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2',];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

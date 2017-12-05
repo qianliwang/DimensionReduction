@@ -127,8 +127,8 @@ class PCAImpl(object):
         pcaEnergies = self.getEigValueEnergies();
         tmpSumEnergy = 0;
         for energy in pcaEnergies:
-            tmpSumEnergy = tmpSumEnergy + energy;
-            numOfDimension = numOfDimension + 1;
+            tmpSumEnergy += energy;
+            numOfDimension += 1;
             if tmpSumEnergy > varianceRatio:
                 break;
         return numOfDimension;
@@ -141,7 +141,7 @@ class PCAImpl(object):
         if(numOfComponents>len(self.eigValues)):
             print "This PCA could only project data up to %d dimension." % len(self.eigValues);
         tmpNumOfComponents = len(self.eigValues) if numOfComponents>len(self.eigValues) else numOfComponents;
-        tmpProjMatrix = self.projMatrix[:,0:tmpNumOfComponents];
+        tmpProjMatrix = self.projMatrix[:,:tmpNumOfComponents];
         centeredScaledData = scaledData - self.mean;
         return np.dot(centeredScaledData,tmpProjMatrix);
     
@@ -150,6 +150,6 @@ class PCAImpl(object):
         Reconstruct the data using the transpose of the projection matrix.
         '''
         reducedDim = reducedData.shape[1];
-        reconData = reducedData.dot(self.projMatrix[:,0:reducedDim].T) + self.mean;
+        reconData = reducedData.dot(self.projMatrix[:,:reducedDim].T) + self.mean;
         #reconData = reducedData.dot(self.projMatrix[:,0:reducedDim].T);
         return reconData; 

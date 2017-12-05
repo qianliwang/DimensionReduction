@@ -58,7 +58,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
         numOfFeature = trainingData.shape[1]-1;
         
         pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-        pcaImpl.getPCs(numOfFeature);
+        pcaImpl.getPCs(matrixRank);
         
         dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
         dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['diabetes','Amazon_3','face2','madelon','CNAE_2'];
-        for dataset in datasets:    
+        for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds);
