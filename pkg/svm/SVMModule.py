@@ -36,9 +36,9 @@ class SVMClf(object):
         skfCV = StratifiedKFold(n_splits=10,shuffle=True);
         
         # 2). Grid search, with the C and gamma parameters.
-        C_range = np.logspace(-3, 4, 8,base = 10.0);
+        C_range = np.logspace(-3, 10, 14,base = 2.0);
         #print C_range;
-        gamma_range = np.logspace(-12, 2, 15, base=10.0);
+        gamma_range = np.logspace(-12, 2, 15, base=2.0);
         #print gamma_range;
         param_grid = dict(gamma=gamma_range, C=C_range);
         # Notice here that the svm.SVC is just for searching for the parameter, we didn't really train the model yet.  

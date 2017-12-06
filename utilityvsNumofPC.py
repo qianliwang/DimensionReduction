@@ -37,7 +37,7 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
+def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM):
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
     
@@ -47,7 +47,7 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     cprResult = np.zeros((len(xDimensions),4));
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     
-    pcaImpl.getPCs(topK);
+    pcaImpl.getPCs(largestReducedFeature);
     numOfTrainingSamples = trainingData.shape[0];
     
     delta = np.divide(1.0,numOfTrainingSamples);
@@ -56,12 +56,12 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     isGaussianDist = True;
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
-    dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,topK);
+    dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
     
     isGaussianDist = False;
     dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
-    dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,topK);
+    dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
     
     for k, targetDimension in np.ndenumerate(xDimensions):    
         #print pcaImpl.projMatrix[:,0];
@@ -115,14 +115,12 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
-    topK=0;
     xDimensions = None;
     if numOfDimensions > numOfFeature:
         xDimensions = np.arange(1,numOfFeature);
-        topK=numOfFeature;
+        largestReducedFeature=numOfFeature;
     else:
         xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
-        topK = largestReducedFeature;
     
     cprResult = np.zeros((len(xDimensions),4));
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
@@ -133,7 +131,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
         trainingData = data[train_index];
         testingData = data[test_index];
         
-        tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
+        tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM));
         cprResult += tmpResult.get();
 
     avgCprResult = cprResult/numOfRounds;
@@ -146,7 +144,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
-    numOfRounds = 10;
+    numOfRounds = 4;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
     numOfDimensions = 30;

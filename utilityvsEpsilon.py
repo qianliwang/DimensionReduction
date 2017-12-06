@@ -176,7 +176,7 @@ if __name__ == "__main__":
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
-    isLinearSVM = True;
+    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
