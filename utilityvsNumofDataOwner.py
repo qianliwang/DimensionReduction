@@ -31,7 +31,7 @@ def genEigenvectors_power(covMatrix,topK):
     eigVectors = None;
     k=0;
     vecLength = covMatrix.shape[0];
-    bound = max(1000,vecLength*2);
+    bound = min(1000,vecLength);
     while k<topK:
         r0 = np.random.rand(vecLength,1);
         count=0;
@@ -92,14 +92,13 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"twoSamplesatDataOwner_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-def simulatePrivateLocalPCA(data,maxDim,epsilon):
+def simulatePrivateLocalPCA(data,maxDim,WishartNoiseMatrix):
     k = np.minimum(maxDim,LA.matrix_rank(data));
     #print "In each data owner, the k is: %d" % k;
     
-    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
     C = np.dot(data.T,data);
     noisyC = C + WishartNoiseMatrix;
-    noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k);
+    noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k=k);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
     return P;
@@ -108,13 +107,14 @@ def simulatePrivateGlobalPCA(data,numOfSamples,maxDim,epsilon):
     numOfCopies = data.shape[0]/numOfSamples;
     dataOwnerGroups = np.array_split(data, numOfCopies);
     P = None;
-    for singleDataOwnerCopy in dataOwnerGroups:
-        
-        PPrime = simulatePrivateLocalPCA(singleDataOwnerCopy,maxDim,epsilon);
+    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
+    
+    for singleDataOwnerCopy in dataOwnerGroups:    
+        PPrime = simulatePrivateLocalPCA(singleDataOwnerCopy,maxDim,WishartNoiseMatrix);
         if P is not None:
             k_prime = np.maximum(np.minimum(LA.matrix_rank(singleDataOwnerCopy),maxDim),LA.matrix_rank(P));
             tmpSummary = np.concatenate((PPrime, P), axis=0);
-            P = simulatePrivateLocalPCA(tmpSummary,k_prime,epsilon);
+            P = simulatePrivateLocalPCA(tmpSummary,k_prime,WishartNoiseMatrix);
         P = PPrime;
     return P;
 def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
@@ -143,6 +143,7 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     #idx = np.absolute(w).argsort()[::-1];
     #noisyProjMatrix = np.real(v[:,idx]);
     noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK);
+    print topK;
     #print projTrainingData.shape;
     #for k in range(1,numOfDimensions):
     for k, targetDimension in np.ndenumerate(xDimensions):
@@ -229,7 +230,7 @@ def normByRow(data):
     return data;
 if __name__ == "__main__":
     
-    numOfRounds = 10;
+    numOfRounds = 4;
     epsilon = 0.3;
     varianceRatio = 0.9
     numOfSamples = 2;
@@ -243,7 +244,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['Australian','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
