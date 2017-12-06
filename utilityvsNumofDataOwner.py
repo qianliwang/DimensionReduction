@@ -96,7 +96,7 @@ def simulatePrivateLocalPCA(data,maxDim,epsilon):
     k = np.minimum(maxDim,LA.matrix_rank(data));
     #print "In each data owner, the k is: %d" % k;
     
-    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape);
+    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
     C = np.dot(data.T,data);
     noisyC = C + WishartNoiseMatrix;
     noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
@@ -230,7 +230,7 @@ def normByRow(data):
     return data;
 if __name__ == "__main__":
     
-    numOfRounds = 4;
+    numOfRounds = 10;
     epsilon = 0.3;
     varianceRatio = 0.9
     numOfSamples = 2;
