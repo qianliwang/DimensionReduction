@@ -31,7 +31,7 @@ def genEigenvectors_power(covMatrix,topK):
     eigVectors = None;
     k=0;
     vecLength = covMatrix.shape[0];
-    bound = min(1000,vecLength);
+    bound = min(1000,max(100,vecLength));
     while k<topK:
         r0 = np.random.rand(vecLength,1);
         count=0;
@@ -92,13 +92,14 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"twoSamplesatDataOwner_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-def simulatePrivateLocalPCA(data,maxDim,WishartNoiseMatrix):
+def simulatePrivateLocalPCA(data,maxDim,epsilon):
     k = np.minimum(maxDim,LA.matrix_rank(data));
     #print "In each data owner, the k is: %d" % k;
     
+    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape);
     C = np.dot(data.T,data);
     noisyC = C + WishartNoiseMatrix;
-    noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k=k);
+    noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
     return P;
@@ -107,14 +108,13 @@ def simulatePrivateGlobalPCA(data,numOfSamples,maxDim,epsilon):
     numOfCopies = data.shape[0]/numOfSamples;
     dataOwnerGroups = np.array_split(data, numOfCopies);
     P = None;
-    WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
-    
-    for singleDataOwnerCopy in dataOwnerGroups:    
-        PPrime = simulatePrivateLocalPCA(singleDataOwnerCopy,maxDim,WishartNoiseMatrix);
+    for singleDataOwnerCopy in dataOwnerGroups:
+        
+        PPrime = simulatePrivateLocalPCA(singleDataOwnerCopy,maxDim,epsilon);
         if P is not None:
             k_prime = np.maximum(np.minimum(LA.matrix_rank(singleDataOwnerCopy),maxDim),LA.matrix_rank(P));
             tmpSummary = np.concatenate((PPrime, P), axis=0);
-            P = simulatePrivateLocalPCA(tmpSummary,k_prime,WishartNoiseMatrix);
+            P = simulatePrivateLocalPCA(tmpSummary,k_prime,epsilon);
         P = PPrime;
     return P;
 def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
