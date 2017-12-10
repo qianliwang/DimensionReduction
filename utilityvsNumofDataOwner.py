@@ -97,9 +97,18 @@ def simulatePrivateLocalPCA(data,maxDim,epsilon):
     #print "In each data owner, the k is: %d" % k;
     
     WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
-    C = np.dot(data.T,data);
+    C = np.cov(data,rowvar=False);
     noisyC = C + WishartNoiseMatrix;
-    noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
+    if data.shape[1]<100:
+        noisyEigenvalues,noisyEigenvectors = LA.eig(noisyC);
+        idx = np.absolute(noisyEigenvalues).argsort()[::-1];
+        # print idx;
+        noisyEigenvalues = np.real(noisyEigenvalues[idx]);
+        # print sortedW;
+        noisyEigenvectors = np.real(noisyEigenvectors[:, idx]);
+    else:
+        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k);
+    #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
     return P;
@@ -197,27 +206,32 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     else:
         xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
         topK=largestReducedFeature;
-    cprResult = np.zeros((len(xDimensions),4));
-    
+    #cprResult = np.zeros((len(xDimensions),4));
+    cprResult = None;
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
     
-    p = Pool(numOfRounds);
+    #p = Pool(numOfRounds);
     
     for train_index, test_index in rs.split(data):
         
         trainingData = data[train_index];
         testingData = data[test_index];
-        tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
-        cprResult += tmpResult.get();
-        
+        #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
+        #cprResult += tmpResult.get();
+        tmpResult = singleExp(xDimensions, trainingData, testingData, topK, isLinearSVM);
+        if cprResult is None:
+            cprResult = tmpResult;
+        else:
+            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
         """
         for i in range(0,len(cprResult)):
             print ','.join(['%.3f' % num for num in cprResult[i]]);
         """
-    avgResult = cprResult/numOfRounds;
-    p.close();
-    p.join();
+    #avgResult = cprResult/numOfRounds;
+    avgResult = cprResult;
+    #p.close();
+    #p.join();
     for result in avgResult:
         print ','.join(['%.3f' % num for num in result]);
 
@@ -244,7 +258,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
