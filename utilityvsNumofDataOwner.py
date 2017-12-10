@@ -130,16 +130,16 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
-    normalizedTrainingData = normByRow(pureTrainingData);
+    #normalizedTrainingData = normByRow(pureTrainingData);
     
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
-    normalizedTestingData = normByRow(pureTestingData);
+    #normalizedTestingData = normByRow(pureTestingData);
     
     numOfFeature = trainingData.shape[1]-1;
     cprResult = np.zeros((len(xDimensions),4));
     
-    pcaImpl = PCAModule.PCAImpl(normalizedTrainingData);
+    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     pcaImpl.getPCs(topK);
     
     '''
@@ -158,8 +158,8 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     for k, targetDimension in np.ndenumerate(xDimensions):
         #print pcaImpl.projMatrix[:,0];
         cprResult[k][0] += targetDimension;
-        projTrainingData1 = pcaImpl.transform(normalizedTrainingData,targetDimension);
-        projTestingData1 = pcaImpl.transform(normalizedTestingData,targetDimension);
+        projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
+        projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
         print "Non-noise PCA %d" % targetDimension;
         if isLinearSVM:
             result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
@@ -168,8 +168,8 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
         
         cprResult[k][1] += result[2];
         
-        projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:targetDimension]);
-        projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:targetDimension]);
+        projTrainingData2 = np.dot(pureTrainingData,noisyProjMatrix[:,:targetDimension]);
+        projTestingData2 = np.dot(pureTestingData,noisyProjMatrix[:,:targetDimension]);
         
         print "DPDPCA %d" % targetDimension;
         if isLinearSVM:
@@ -179,9 +179,9 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
         
         cprResult[k][2] += result[2];
         
-        pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,targetDimension,epsilon);
-        projTrainingData3 = np.dot(normalizedTrainingData,pgProjMatrix);
-        projTestingData3 = np.dot(normalizedTestingData,pgProjMatrix);
+        pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,targetDimension,epsilon);
+        projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix);
+        projTestingData3 = np.dot(pureTestingData,pgProjMatrix);
         
         print "PrivateLocalPCA %d" % targetDimension;
         if isLinearSVM:
@@ -212,11 +212,13 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     rs.get_n_splits(data);
     
     #p = Pool(numOfRounds);
-    
+    normalizedData = normByRow(data[:,1:]);
+
+    normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
     for train_index, test_index in rs.split(data):
         
-        trainingData = data[train_index];
-        testingData = data[test_index];
+        trainingData = normalizedData[train_index];
+        testingData = normalizedData[test_index];
         #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
         #cprResult += tmpResult.get();
         tmpResult = singleExp(xDimensions, trainingData, testingData, topK, isLinearSVM);
