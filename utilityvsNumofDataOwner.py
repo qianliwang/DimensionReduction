@@ -153,6 +153,7 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     #noisyProjMatrix = np.real(v[:,idx]);
     noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK);
     print topK;
+    pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
     #print projTrainingData.shape;
     #for k in range(1,numOfDimensions):
     for k, targetDimension in np.ndenumerate(xDimensions):
@@ -178,10 +179,13 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
             result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         
         cprResult[k][2] += result[2];
-        
-        pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,targetDimension,epsilon);
-        projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix);
-        projTestingData3 = np.dot(pureTestingData,pgProjMatrix);
+
+
+        projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix[:,:targetDimension]);
+        projTestingData3 = np.dot(pureTestingData,pgProjMatrix[:,:targetDimension]);
+        #pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,targetDimension,epsilon);
+        #projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix);
+        #projTestingData3 = np.dot(pureTestingData,pgProjMatrix);
         
         print "PrivateLocalPCA %d" % targetDimension;
         if isLinearSVM:
