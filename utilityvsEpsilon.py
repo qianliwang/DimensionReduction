@@ -154,18 +154,25 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     
     xEpsilons = np.arange(0.1,1.0,0.1);
-    cprResult = np.zeros((len(xEpsilons),10)); 
-    p = Pool(numOfRounds);
+    cprResult = None;
+    #cprResult = np.zeros((len(xEpsilons),10));
+    #p = Pool(numOfRounds);
     
     for train_index, test_index in rs.split(data):
         trainingData = data[train_index];
         testingData = data[test_index];
-        tmpResult = p.apply_async(singleExp, (xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM));
-        cprResult += tmpResult.get();
-        
-    avgResult = cprResult/numOfRounds;
-    p.close();
-    p.join();
+        #tmpResult = p.apply_async(singleExp, (xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM));
+        #cprResult += tmpResult.get();
+        tmpResult = singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM);
+        if cprResult is None:
+            cprResult = tmpResult;
+        else:
+            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
+    # To record the mean and standard deviation.
+    avgResult = cprResult;
+    #avgResult = cprResult/numOfRounds;
+    #p.close();
+    #p.join();
     for result in avgResult:
         print ','.join(['%.3f' % num for num in result]);
     
@@ -176,14 +183,14 @@ if __name__ == "__main__":
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
-    isLinearSVM = False;
+    isLinearSVM = True ;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['ionosphere','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

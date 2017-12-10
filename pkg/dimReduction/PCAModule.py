@@ -13,7 +13,8 @@ class PCAImpl(object):
     def __init__(self,rawData):
         self.mean = np.mean(rawData,axis=0);
         self.centeredData = rawData-self.mean; 
-        self.covMatrix = np.dot(self.centeredData.T,self.centeredData);
+        #self.covMatrix = np.dot(self.centeredData.T,self.centeredData);
+        self.covMatrix = np.cov(self.centeredData, rowvar=False);
         self.eigValues = None;
         self.projMatrix = None;
         

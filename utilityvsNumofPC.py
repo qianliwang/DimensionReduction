@@ -122,24 +122,30 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     else:
         xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
     
-    cprResult = np.zeros((len(xDimensions),4));
+    #cprResult = np.zeros((len(xDimensions),4));
+    cprResult = None;
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
-    p = Pool(numOfRounds);
+    #p = Pool(numOfRounds);
     
     for train_index, test_index in rs.split(data):    
         trainingData = data[train_index];
         testingData = data[test_index];
         
-        tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM));
-        cprResult += tmpResult.get();
+        #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM));
 
-    avgCprResult = cprResult/numOfRounds;
-    
+        #cprResult += tmpResult.get();
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
+        if cprResult is None:
+            cprResult = tmpResult;
+        else:
+            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
+    #avgCprResult = cprResult/numOfRounds;
+    avgCprResult = cprResult;
     for result in avgCprResult:
         print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
-    p.close();
-    p.join();
+    #p.close();
+    #p.join();
     return avgCprResult;
 
 if __name__ == "__main__":
