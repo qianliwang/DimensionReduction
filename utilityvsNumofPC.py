@@ -3,7 +3,7 @@ from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
+#import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
@@ -150,24 +150,24 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
-    numOfRounds = 4;
+    numOfRounds = 10;
     figSavedPath = "./log/";
-    resultSavedPath = "./log/";
+    resultSavedPath = "/work/s/senwang/DimensionReduction/log/";
     numOfDimensions = 30;
-    epsilon = 0.3;
+    epsilon = 0.5;
     varianceRatio = 0.9;
-    isLinearSVM = True;
+    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Face_15','Amazon_3'];
         #datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "./input/"+dataset+"_prePCA";
+            datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    

@@ -3,7 +3,7 @@ from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
+#import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
@@ -182,18 +182,18 @@ if __name__ == "__main__":
     numOfRounds = 10;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
-    resultSavedPath = "./log/";
-    isLinearSVM = True ;
+    resultSavedPath = "/work/s/senwang/DimensionReduction/log/";
+    isLinearSVM = False ;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Face_15','Amazon_3'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "./input/"+dataset+"_prePCA";
+            datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);
