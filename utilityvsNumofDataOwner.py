@@ -7,7 +7,7 @@ from pkg.diffPrivDimReduction import invwishart;
 from numpy.linalg import norm;
 from sklearn.model_selection import ShuffleSplit;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
-import matplotlib.pyplot as plt;
+#import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
@@ -97,9 +97,18 @@ def simulatePrivateLocalPCA(data,maxDim,epsilon):
     #print "In each data owner, the k is: %d" % k;
     
     WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
-    C = np.dot(data.T,data);
+    C = np.cov(data,rowvar=False);
     noisyC = C + WishartNoiseMatrix;
-    noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
+    if data.shape[1]<100:
+        noisyEigenvalues,noisyEigenvectors = LA.eig(noisyC);
+        idx = np.absolute(noisyEigenvalues).argsort()[::-1];
+        # print idx;
+        noisyEigenvalues = np.real(noisyEigenvalues[idx]);
+        # print sortedW;
+        noisyEigenvectors = np.real(noisyEigenvectors[:, idx]);
+    else:
+        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k);
+    #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
     return P;
@@ -121,16 +130,16 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
-    normalizedTrainingData = normByRow(pureTrainingData);
+    #normalizedTrainingData = normByRow(pureTrainingData);
     
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
-    normalizedTestingData = normByRow(pureTestingData);
+    #normalizedTestingData = normByRow(pureTestingData);
     
     numOfFeature = trainingData.shape[1]-1;
     cprResult = np.zeros((len(xDimensions),4));
     
-    pcaImpl = PCAModule.PCAImpl(normalizedTrainingData);
+    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     pcaImpl.getPCs(topK);
     
     '''
@@ -143,14 +152,15 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     #idx = np.absolute(w).argsort()[::-1];
     #noisyProjMatrix = np.real(v[:,idx]);
     noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK);
-    print topK;
+    #print topK;
+    pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
     #print projTrainingData.shape;
     #for k in range(1,numOfDimensions):
     for k, targetDimension in np.ndenumerate(xDimensions):
         #print pcaImpl.projMatrix[:,0];
         cprResult[k][0] += targetDimension;
-        projTrainingData1 = pcaImpl.transform(normalizedTrainingData,targetDimension);
-        projTestingData1 = pcaImpl.transform(normalizedTestingData,targetDimension);
+        projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
+        projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
         print "Non-noise PCA %d" % targetDimension;
         if isLinearSVM:
             result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
@@ -159,8 +169,8 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
         
         cprResult[k][1] += result[2];
         
-        projTrainingData2 = np.dot(normalizedTrainingData,noisyProjMatrix[:,:targetDimension]);
-        projTestingData2 = np.dot(normalizedTestingData,noisyProjMatrix[:,:targetDimension]);
+        projTrainingData2 = np.dot(pureTrainingData,noisyProjMatrix[:,:targetDimension]);
+        projTestingData2 = np.dot(pureTestingData,noisyProjMatrix[:,:targetDimension]);
         
         print "DPDPCA %d" % targetDimension;
         if isLinearSVM:
@@ -169,10 +179,13 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
             result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         
         cprResult[k][2] += result[2];
-        
-        pgProjMatrix = simulatePrivateGlobalPCA(normalizedTrainingData,numOfSamples,targetDimension,epsilon);
-        projTrainingData3 = np.dot(normalizedTrainingData,pgProjMatrix);
-        projTestingData3 = np.dot(normalizedTestingData,pgProjMatrix);
+
+
+        projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix[:,:targetDimension]);
+        projTestingData3 = np.dot(pureTestingData,pgProjMatrix[:,:targetDimension]);
+        #pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,targetDimension,epsilon);
+        #projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix);
+        #projTestingData3 = np.dot(pureTestingData,pgProjMatrix);
         
         print "PrivateLocalPCA %d" % targetDimension;
         if isLinearSVM:
@@ -197,27 +210,34 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     else:
         xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
         topK=largestReducedFeature;
-    cprResult = np.zeros((len(xDimensions),4));
-    
+    #cprResult = np.zeros((len(xDimensions),4));
+    cprResult = None;
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
     
-    p = Pool(numOfRounds);
-    
+    #p = Pool(numOfRounds);
+    normalizedData = normByRow(data[:,1:]);
+
+    normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
     for train_index, test_index in rs.split(data):
         
-        trainingData = data[train_index];
-        testingData = data[test_index];
-        tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
-        cprResult += tmpResult.get();
-        
+        trainingData = normalizedData[train_index];
+        testingData = normalizedData[test_index];
+        #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
+        #cprResult += tmpResult.get();
+        tmpResult = singleExp(xDimensions, trainingData, testingData, topK, isLinearSVM);
+        if cprResult is None:
+            cprResult = tmpResult;
+        else:
+            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
         """
         for i in range(0,len(cprResult)):
             print ','.join(['%.3f' % num for num in cprResult[i]]);
         """
-    avgResult = cprResult/numOfRounds;
-    p.close();
-    p.join();
+    #avgResult = cprResult/numOfRounds;
+    avgResult = cprResult;
+    #p.close();
+    #p.join();
     for result in avgResult:
         print ','.join(['%.3f' % num for num in result]);
 
@@ -231,12 +251,12 @@ def normByRow(data):
 if __name__ == "__main__":
     
     numOfRounds = 10;
-    epsilon = 0.3;
+    epsilon = 0.5;
     varianceRatio = 0.9
     numOfSamples = 2;
     numOfDimensions = 30;
     figSavedPath = "./log/";
-    resultSavedPath = "./log/";
+    resultSavedPath = "/work/s/senwang/DimensionReduction/log/";
     isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
@@ -244,10 +264,10 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Face_15','Amazon_3'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "./input/"+dataset+"_prePCA";
+            datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawF1Score(dataset,result,figSavedPath=figSavedPath);
