@@ -244,9 +244,10 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     return avgResult;
 
 def normByRow(data):
-    for i in range(0,data.shape[0]):
+    for i in range(data.shape[0]):
         rowNorm = norm(data[i,:], ord=2);
-        data[i,:] = data[i,:]/rowNorm;
+        if rowNorm is not 0:
+            data[i,:] = data[i,:]/rowNorm;
     return data;
 if __name__ == "__main__":
     
