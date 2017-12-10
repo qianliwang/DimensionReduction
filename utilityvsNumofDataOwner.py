@@ -152,7 +152,7 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     #idx = np.absolute(w).argsort()[::-1];
     #noisyProjMatrix = np.real(v[:,idx]);
     noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK);
-    print topK;
+    #print topK;
     pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
     #print projTrainingData.shape;
     #for k in range(1,numOfDimensions):
