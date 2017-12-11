@@ -116,16 +116,19 @@ def simulatePrivateLocalPCA(data,maxDim,epsilon):
 
 def simulatePrivateGlobalPCA(data,numOfSamples,maxDim,epsilon):
     numOfCopies = data.shape[0]/numOfSamples;
-    dataOwnerGroups = np.array_split(data, numOfCopies);
+    #dataOwnerGroups = np.array_split(data, numOfCopies);
     P = None;
-    for singleDataOwnerCopy in dataOwnerGroups:
+    i=0;
+    while (i+numOfSamples)<data.shape[0]:
+    #for singleDataOwnerCopy in dataOwnerGroups:
         
-        PPrime = simulatePrivateLocalPCA(singleDataOwnerCopy,maxDim,epsilon);
+        PPrime = simulatePrivateLocalPCA(data[i:i+numOfSamples],maxDim,epsilon);
         if P is not None:
-            k_prime = np.maximum(np.minimum(LA.matrix_rank(singleDataOwnerCopy),maxDim),LA.matrix_rank(P));
+            k_prime = np.maximum(np.minimum(numOfSamples,maxDim),LA.matrix_rank(P));
             tmpSummary = np.concatenate((PPrime, P), axis=0);
             P = simulatePrivateLocalPCA(tmpSummary,k_prime,epsilon);
         P = PPrime;
+        i += numOfSamples;
     return P;
 def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     
