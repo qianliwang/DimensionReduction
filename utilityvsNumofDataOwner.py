@@ -7,7 +7,7 @@ from pkg.diffPrivDimReduction import invwishart;
 from numpy.linalg import norm;
 from sklearn.model_selection import ShuffleSplit;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
-import matplotlib.pyplot as plt;
+#import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
