@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
+from sklearn.preprocessing import StandardScaler;
+
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
@@ -43,7 +45,17 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinea
     
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
-    
+
+    scaler = StandardScaler(copy=False);
+    #print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
+    #print pureTrainingData[0];
+
+    #print pureTestingData[0];
+    scaler.transform(pureTestingData);
+    #print pureTestingData[0];
+
     cprResult = np.zeros((len(xDimensions),4));
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     
