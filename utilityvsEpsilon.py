@@ -190,7 +190,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','Face_15','Amazon_3'];
+        datasets = ['B11','CNAE_2','Amazon_3'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";

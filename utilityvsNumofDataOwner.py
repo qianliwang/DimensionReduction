@@ -7,7 +7,7 @@ from pkg.diffPrivDimReduction import invwishart;
 from numpy.linalg import norm;
 from sklearn.model_selection import ShuffleSplit;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
-#import matplotlib.pyplot as plt;
+import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
@@ -107,7 +107,7 @@ def simulatePrivateLocalPCA(data,maxDim,epsilon):
         # print sortedW;
         noisyEigenvectors = np.real(noisyEigenvectors[:, idx]);
     else:
-        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k);
+        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k,tol=0.001);
     #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
@@ -151,7 +151,7 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     # Sorting the eigenvalues in descending order.
     #idx = np.absolute(w).argsort()[::-1];
     #noisyProjMatrix = np.real(v[:,idx]);
-    noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK);
+    noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK, tol=0.001);
     #print topK;
     pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
     #print projTrainingData.shape;
@@ -244,10 +244,9 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     return avgResult;
 
 def normByRow(data):
-    for i in range(data.shape[0]):
+    for i in range(0,data.shape[0]):
         rowNorm = norm(data[i,:], ord=2);
-        if rowNorm is not 0:
-            data[i,:] = data[i,:]/rowNorm;
+        data[i,:] = data[i,:]/rowNorm;
     return data;
 if __name__ == "__main__":
     
@@ -265,7 +264,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','Face_15','Amazon_3'];
+        datasets = ['B11','CNAE_2','Amazon_3'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";
