@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
+from sklearn.preprocessing import StandardScaler;
 
 def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     
@@ -80,6 +81,16 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
+    
+    scaler = StandardScaler(copy=False);
+    #print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
+    #print pureTrainingData[0];
+    
+    #print pureTestingData[0];
+    scaler.transform(pureTestingData);
+    #print pureTestingData[0];
     
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     pcaImpl.getPCs(largestReducedFeature);
@@ -159,12 +170,12 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     #cprResult = np.zeros((len(xEpsilons),10));
     #p = Pool(numOfRounds);
     
-    normalizedData = normByRow(data[:,1:]);
-    normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
+    #normalizedData = normByRow(data[:,1:]);
+    #normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
 
     for train_index, test_index in rs.split(data):
-        trainingData = normalizedData[train_index];
-        testingData = normalizedData[test_index];
+        trainingData = data[train_index];
+        testingData = data[test_index];
         #tmpResult = p.apply_async(singleExp, (xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM));
         #cprResult += tmpResult.get();
         tmpResult = singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM);

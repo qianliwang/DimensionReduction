@@ -45,7 +45,7 @@ class SVMClf(object):
         grid = GridSearchCV(svm.SVC(kernel='rbf',class_weight="balanced"), param_grid=param_grid, scoring="f1", n_jobs = 10, cv=skfCV);
         #grid.fit(ldaProjTrainingData, trainingLabel);
         grid.fit(trainingData, trainingLabel);
-        print grid.get_params();
+        #print grid.get_params();
         #print "Grid search support vectors:";
         #print grid.best_estimator_.support_;
         
