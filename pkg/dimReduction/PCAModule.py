@@ -58,13 +58,13 @@ class PCAImpl(object):
         return sortedW,sortedV;
     
     def scipyEvdSolver(self,covMatrix,topK):
-        w,v = sparse.linalg.eigs(covMatrix, k=topK);
+        w,v = sparse.linalg.eigs(covMatrix, k=topK, tol=0.001);
         idx = np.absolute(w).argsort()[::-1];
         #print idx;
         sortedW = w[idx];
         #print sortedW;
         sortedV = v[:,idx];
-        return sortedW,sortedV;
+        return np.real(sortedW),np.real(sortedV);
     
     def __getApproxEigval(self,covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);

@@ -107,7 +107,7 @@ def simulatePrivateLocalPCA(data,maxDim,epsilon):
         # print sortedW;
         noisyEigenvectors = np.real(noisyEigenvectors[:, idx]);
     else:
-        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k);
+        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k,tol=0.001);
     #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
@@ -151,8 +151,8 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     # Sorting the eigenvalues in descending order.
     #idx = np.absolute(w).argsort()[::-1];
     #noisyProjMatrix = np.real(v[:,idx]);
-    noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK);
-    print topK;
+    noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK, tol=0.001);
+    #print topK;
     pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
     #print projTrainingData.shape;
     #for k in range(1,numOfDimensions):
