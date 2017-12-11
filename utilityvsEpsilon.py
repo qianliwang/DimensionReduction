@@ -179,18 +179,18 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     return avgResult;    
 if __name__ == "__main__":
     
-    numOfRounds = 10;
+    numOfRounds = 2;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
-    isLinearSVM = True ;
+    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['Face_15','CNAE_2','Amazon_5','diabetes','ionosphere'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
