@@ -12,6 +12,7 @@ import sys;
 import os;
 from multiprocessing import Pool;
 import scipy.sparse as sparse;
+from sklearn.preprocessing import StandardScaler;
 
 def getApproxEigval(covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
@@ -135,7 +136,16 @@ def singleExp(xDimensions,trainingData,testingData,topK,isLinearSVM):
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
     #normalizedTestingData = normByRow(pureTestingData);
-    
+    scaler = StandardScaler(copy=False);
+    #print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
+    #print pureTrainingData[0];
+
+    #print pureTestingData[0];
+    scaler.transform(pureTestingData);
+    #print pureTestingData[0];
+
     numOfFeature = trainingData.shape[1]-1;
     cprResult = np.zeros((len(xDimensions),4));
     
@@ -246,10 +256,15 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     return avgResult;
 
 def normByRow(data):
+
+    rowsNorm = LA.norm(data, axis=1);
+    maxL2Norm = np.amax(rowsNorm);
+    """
     for i in range(data.shape[0]):
         rowNorm = norm(data[i,:], ord=2);
         data[i,:] = data[i,:]/rowNorm;
-    return data;
+    """
+    return data/maxL2Norm;
 if __name__ == "__main__":
     
     numOfRounds = 10;
@@ -266,7 +281,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

@@ -103,7 +103,14 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     projTestingData1 = pcaImpl.transform(pureTestingData,largestReducedFeature);
     #print projTrainingData.shape;
     cprResult = np.zeros((len(xEpsilons),10)); 
-    
+    print "non noise PCA SVM training";
+    if isLinearSVM:
+        result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+    else:
+        result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+    cprResult[0][1] += result[0];
+    cprResult[0][2] += result[1];
+    cprResult[0][3] += result[2];
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
         #print pcaImpl.projMatrix[:,0];    
         print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
@@ -118,17 +125,13 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
         '''
         We don't need to project the data multiple times.
         '''
-        print "non noise PCA SVM training";
-        if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-        else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-        
+
         cprResult[k][0] += targetEpsilon;
-        cprResult[k][1] += result[0];
-        cprResult[k][2] += result[1];
-        cprResult[k][3] += result[2];
-        
+        if k>0:
+            cprResult[k][1] += cprResult[0][1];
+            cprResult[k][2] += cprResult[0][2];
+            cprResult[k][3] += cprResult[0][3];
+
         projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
         projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
         print "Gaussian-DPDPCA SVM training";
