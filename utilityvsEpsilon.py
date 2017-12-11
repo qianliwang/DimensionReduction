@@ -2,6 +2,7 @@ from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
+from numpy import linalg as LA;
 from sklearn.model_selection import ShuffleSplit;
 import matplotlib.pyplot as plt;
 import sys;
@@ -158,9 +159,12 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     #cprResult = np.zeros((len(xEpsilons),10));
     #p = Pool(numOfRounds);
     
+    normalizedData = normByRow(data[:,1:]);
+    normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
+
     for train_index, test_index in rs.split(data):
-        trainingData = data[train_index];
-        testingData = data[test_index];
+        trainingData = normalizedData[train_index];
+        testingData = normalizedData[test_index];
         #tmpResult = p.apply_async(singleExp, (xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM));
         #cprResult += tmpResult.get();
         tmpResult = singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM);
@@ -176,21 +180,28 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     for result in avgResult:
         print ','.join(['%.3f' % num for num in result]);
     
-    return avgResult;    
+    return avgResult;
+
+def normByRow(data):
+    for i in range(data.shape[0]):
+        rowNorm = LA.norm(data[i,:], ord=2);
+        data[i,:] = data[i,:]/rowNorm;
+    return data;
+  
 if __name__ == "__main__":
     
-    numOfRounds = 10;
+    numOfRounds = 2;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
-    isLinearSVM = True ;
+    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['B11','Face_15','CNAE_2','Amazon_5','diabetes','ionosphere'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
