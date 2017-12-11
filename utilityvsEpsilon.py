@@ -2,11 +2,13 @@ from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
+from numpy import linalg as LA;
 from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
+#import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
+from sklearn.preprocessing import StandardScaler;
 
 def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     
@@ -80,6 +82,16 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
     
+    scaler = StandardScaler(copy=False);
+    #print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
+    #print pureTrainingData[0];
+    
+    #print pureTestingData[0];
+    scaler.transform(pureTestingData);
+    #print pureTestingData[0];
+    
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     pcaImpl.getPCs(largestReducedFeature);
     
@@ -91,7 +103,14 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     projTestingData1 = pcaImpl.transform(pureTestingData,largestReducedFeature);
     #print projTrainingData.shape;
     cprResult = np.zeros((len(xEpsilons),10)); 
-    
+    print "non noise PCA SVM training";
+    if isLinearSVM:
+        result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+    else:
+        result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+    cprResult[0][1] += result[0];
+    cprResult[0][2] += result[1];
+    cprResult[0][3] += result[2];
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
         #print pcaImpl.projMatrix[:,0];    
         print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
@@ -106,17 +125,13 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
         '''
         We don't need to project the data multiple times.
         '''
-        print "non noise PCA SVM training";
-        if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-        else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-        
+
         cprResult[k][0] += targetEpsilon;
-        cprResult[k][1] += result[0];
-        cprResult[k][2] += result[1];
-        cprResult[k][3] += result[2];
-        
+        if k>0:
+            cprResult[k][1] += cprResult[0][1];
+            cprResult[k][2] += cprResult[0][2];
+            cprResult[k][3] += cprResult[0][3];
+
         projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
         projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
         print "Gaussian-DPDPCA SVM training";
@@ -158,6 +173,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     #cprResult = np.zeros((len(xEpsilons),10));
     #p = Pool(numOfRounds);
     
+
     for train_index, test_index in rs.split(data):
         trainingData = data[train_index];
         testingData = data[test_index];
@@ -182,18 +198,18 @@ if __name__ == "__main__":
     numOfRounds = 10;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
-    resultSavedPath = "./log/";
-    isLinearSVM = True ;
+    resultSavedPath = "/work/s/senwang/DimensionReduction/log/";
+    isLinearSVM = False ;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['B11_10','CNAE_2','Amazon_3'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "./input/"+dataset+"_prePCA";
+            datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);

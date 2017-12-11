@@ -3,10 +3,12 @@ from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
+#import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
+from sklearn.preprocessing import StandardScaler;
+
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
@@ -43,7 +45,17 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinea
     
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
-    
+
+    scaler = StandardScaler(copy=False);
+    #print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
+    #print pureTrainingData[0];
+
+    #print pureTestingData[0];
+    scaler.transform(pureTestingData);
+    #print pureTestingData[0];
+
     cprResult = np.zeros((len(xDimensions),4));
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     
@@ -150,24 +162,24 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
-    numOfRounds = 4;
+    numOfRounds = 10;
     figSavedPath = "./log/";
-    resultSavedPath = "./log/";
+    resultSavedPath = "/work/s/senwang/DimensionReduction/log/";
     numOfDimensions = 30;
-    epsilon = 0.3;
+    epsilon = 0.5;
     varianceRatio = 0.9;
-    isLinearSVM = True;
+    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['B11_10','CNAE_2','Amazon_3'];
         #datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
-            datasetPath = "./input/"+dataset+"_prePCA";
+            datasetPath = "/work/s/senwang/DimensionReduction/input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    

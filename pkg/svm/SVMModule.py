@@ -42,7 +42,7 @@ class SVMClf(object):
         #print gamma_range;
         param_grid = dict(gamma=gamma_range, C=C_range);
         # Notice here that the svm.SVC is just for searching for the parameter, we didn't really train the model yet.  
-        grid = GridSearchCV(svm.SVC(kernel='rbf',class_weight="balanced"), param_grid=param_grid, scoring="f1", n_jobs = 5, cv=skfCV);
+        grid = GridSearchCV(svm.SVC(kernel='rbf',class_weight="balanced"), param_grid=param_grid, scoring="f1", n_jobs = 10, cv=skfCV);
         #grid.fit(ldaProjTrainingData, trainingLabel);
         grid.fit(trainingData, trainingLabel);
         
