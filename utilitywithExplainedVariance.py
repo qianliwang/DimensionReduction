@@ -12,10 +12,10 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
+
+    '''
     x = data[:,0];
-    '''
     gaussianPercent,wishartPercent is the percentage over the non-noise PCA.
-    '''
     gaussianPercent = data[:,2]/data[:,1];
     wishartPercent = data[:,3]/data[:,1];
     
@@ -24,8 +24,44 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
         plt.legend([y1Line,y2Line], ['Gaussian Noise','Wishart Noise'],loc=2);
     else:
         plt.legend([y1Line,y2Line], ['Gaussian Noise','Wishart Noise'],loc=4);
-    
-    plt.axis([0,1,0,1.1]);
+    '''
+    #x = range(1, data.shape[1]+1);
+    x = np.arange(1,data.shape[1]+1,data.shape[1]/20);
+    pcaIndices = np.arange(0,190,19);
+    pcaVal = data[pcaIndices];
+    pcaValMean = np.mean(pcaVal,axis=0);
+    pcaValStd = np.std(pcaVal,axis=0);
+
+    gepsiIndices = np.arange(1,190,19);
+    gepsiVal = data[gepsiIndices];
+    gepsiValMean = np.mean(gepsiVal,axis=0);
+    gepsiValStd = np.std(gepsiVal,axis=0);
+    #y1Line,y2Line = plt.plot(x, pcaValMean, 'bo-', x, pcaValStd, 'r^-');
+    pcaLine = plt.errorbar(x,pcaValMean[x-1],yerr=pcaValStd[x-1],ecolor='green',elinewidth=4,linestyle=':');
+    gepsi1Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],ecolor='green',elinewidth=4,linestyle='-');
+    gepsiIndices = np.arange(5,190,19);
+    gepsiVal = data[gepsiIndices];
+    gepsiValMean = np.mean(gepsiVal,axis=0);
+    gepsiValStd = np.std(gepsiVal,axis=0);
+    gepsi5Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],ecolor='green',elinewidth=4,linestyle='--');
+    gepsiIndices = np.arange(9,190,19);
+    gepsiVal = data[gepsiIndices];
+    gepsiValMean = np.mean(gepsiVal,axis=0);
+    gepsiValStd = np.std(gepsiVal,axis=0);
+    gepsi9Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],ecolor='green',elinewidth=4,linestyle='-.');
+
+    wepsiIndices = np.arange(10,190,19);
+    wepsiVal = data[wepsiIndices];
+    wepsiValMean = np.mean(wepsiVal,axis=0);
+    wepsiValStd = np.std(wepsiVal,axis=0);
+    wepsi1Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],ecolor='red',elinewidth=4,linestyle='solid');
+    wepsiIndices = np.arange(18,190,19);
+    wepsiVal = data[wepsiIndices];
+    wepsiValMean = np.mean(wepsiVal,axis=0);
+    wepsiValStd = np.std(wepsiVal,axis=0);
+    wepsi9Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],ecolor='yellow',elinewidth=4,linestyle=':');
+
+    plt.axis([0,data.shape[1]+1,0,1.1]);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('Captured Energy',fontsize=18);
@@ -140,10 +176,10 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','Face_15','Amazon_3'];
+        datasets = ['CNAE_3'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,varianceRatio,numOfRounds);
             np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawExplainedVariance(dataset,data=result,figSavedPath=figSavedPath);
+            #drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
