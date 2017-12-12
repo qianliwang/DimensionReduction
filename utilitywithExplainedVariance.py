@@ -35,39 +35,51 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
         plt.show();
     else:
         plt.savefig(figSavedPath+"explainedVariance_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
-
+def calcEigRatios(eigValues):
+    eigSum = np.sum(eigValues);
+    tmpSum = 0;
+    res = [];
+    for eigVal in eigValues:
+        tmpSum += eigVal;
+        res.append(tmpSum/eigSum);
+    return res;
 def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     
-    cprResult = np.zeros((len(xEpsilons),4));
+    #cprResult = np.zeros((len(xEpsilons),4));
     numOfTrainingSamples = pureTrainingData.shape[0];
     #numOfFeature = trainingData.shape[1]-1;
     matrixRank = LA.matrix_rank(pureTrainingData);
+
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-    pcaImpl.getPCs(matrixRank);
-    
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     
     pcaEnergies = pcaImpl.getEigValueEnergies();
-    
+    cprResult = [];
+    cprResult.append(calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
     delta = np.divide(1.0,numOfTrainingSamples);
-    
+    gaussianResult = [];
+    wishartResult = [];
+    #print cprResult;
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
-        #print pcaImpl.projMatrix[:,0];
-        #print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);           
+        #print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
         isGaussianDist = True;
         dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank);
-        
+        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank,onlyEigvalues=True);
+        #print dpGaussianPCAImpl.eigValues;
+        GaussianEigRatio = calcEigRatios(dpGaussianPCAImpl.eigValues);
+        gaussianResult.append(GaussianEigRatio[:largestReducedFeature]);
+        #print GaussianEigRatio;
         isGaussianDist = False;
         dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank);
-        
-        cprResult[k][0] = cprResult[k][0]+targetEpsilon;
-        cprResult[k][1] = cprResult[k][1]+np.sum(pcaEnergies[:largestReducedFeature]);
-        cprResult[k][2] = cprResult[k][2]+np.sum(dpGaussianPCAImpl.getEigValueEnergies()[:largestReducedFeature]);
-        cprResult[k][3] = cprResult[k][3]+np.sum(dpWishartPCAImpl.getEigValueEnergies()[:largestReducedFeature]);
-    return cprResult;
+        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank,onlyEigvalues=True);
+        WishartEigRatio = calcEigRatios(dpWishartPCAImpl.eigValues);
+        wishartResult.append(WishartEigRatio[:largestReducedFeature]);
+        #print WishartEigRatio;
+    cprResult.extend(gaussianResult);
+    cprResult.extend(wishartResult);
+    #print cprResult;
+    return np.asarray(cprResult);
 
 def doExp(datasetPath,varianceRatio,numOfRounds):
     data = np.loadtxt(datasetPath,delimiter=",");
@@ -84,26 +96,37 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     xEpsilons = np.arange(0.1,1.0,0.1);
     cprResult = np.zeros((len(xEpsilons),4));
     #print xDimensions;
-    p = Pool(numOfRounds);
+    #p = Pool(numOfRounds);
     #allResults = [];
+    cprResult = [];
+    m =0;
     for train_index, test_index in rs.split(data):
+        print "Trail %d" % m;
         trainingData = data[train_index];
         pureTrainingData = trainingData[:,1:];
-        tmpResult = p.apply_async(singleExp, (xEpsilons,pureTrainingData,largestReducedFeature));
-        cprResult += tmpResult.get();
+        tmpResult = singleExp(xEpsilons,pureTrainingData,largestReducedFeature);
+        cprResult.extend(tmpResult);
+        m += 1;
+        #print tmpResult.shape;
+        #print tmpResult;
+        #tmpResult = p.apply_async(singleExp, (xEpsilons,pureTrainingData,largestReducedFeature));
+        #cprResult += tmpResult.get();
     """
         for i in range(0,len(cprResult)):
             print "%.4f,%.4f,%.4f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
         print "******************************";
     """
     # Compute the average value after numOfRounds experiments.
-    avgCprResult = cprResult/numOfRounds;
-    p.close();
-    p.join();
-    for result in avgCprResult:
+    #avgCprResult = cprResult/numOfRounds;
+    #p.close();
+    #p.join();
+    """
+    for result in cprResult:
         print "%.2f,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);  
     
-    return avgCprResult;
+    """
+
+    return np.asarray(cprResult,dtype=float);
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german', 'ionosphere'];
@@ -117,7 +140,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['ionosphere','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Face_15','Amazon_3'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
