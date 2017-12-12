@@ -23,7 +23,7 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         self.epsilon = epsilon;
         self.delta = delta; 
         
-    def getDiffPrivPCs(self,isGaussianNoise,topK=None):
+    def getDiffPrivPCs(self,isGaussianNoise,topK=None,onlyEigvalues = False):
         
         if isGaussianNoise:
             noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,self.covMatrix.shape[0],self.L2Sensitivity);
@@ -32,13 +32,17 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
             
         #print wishart;
         noisyCovMatrix = self.covMatrix+noiseMatrix;
-        if self.centeredData.shape[1]<500:
-            #print "Eigenvalue decomposition";
-            self.eigValues,self.projMatrix = self.evdSolver(noisyCovMatrix);
+        if onlyEigvalues:
+            sigValues = LA.svd(noisyCovMatrix,compute_uv=False);
+            self.eigValues = np.square(sigValues);
         else:
-            self.eigValues,self.projMatrix = PCAModule.PCAImpl.scipyEvdSolver(self,noisyCovMatrix,topK);
-            #print "Power Iteration to find top %d principal components." % topK;
-            #self.eigValues,self.projMatrix = PCAModule.PCAImpl.genEigenvectors_power(self,noisyCovMatrix,topK); 
+            if self.centeredData.shape[1]<500:
+                #print "Eigenvalue decomposition";
+                self.eigValues,self.projMatrix = self.evdSolver(noisyCovMatrix);
+            else:
+                self.eigValues,self.projMatrix = PCAModule.PCAImpl.scipyEvdSolver(self,noisyCovMatrix,topK);
+                #print "Power Iteration to find top %d principal components." % topK;
+                #self.eigValues,self.projMatrix = PCAModule.PCAImpl.genEigenvectors_power(self,noisyCovMatrix,topK);
          
         #print self.projMatrix[:20,1];
         
