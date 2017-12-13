@@ -8,7 +8,7 @@ Wishart distribution, from two different papers respectively, mentioned in READM
 '''
 class DiffPrivImpl(object):
     @classmethod
-    def SymmGaussian(cls,epsilon,delta,dimension,deltaF=1):
+    def SymmGaussian(cls,epsilon,delta,dimension,deltaF):
         standardDeviation = np.sqrt(2*np.log(1.25/delta))*deltaF/epsilon;
         #print "Gaussian Standard deviation is %f." % standardDeviation;
         noiseMatrix = np.random.normal(0, standardDeviation, (dimension,dimension));

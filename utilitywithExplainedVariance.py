@@ -8,14 +8,19 @@ import sys;
 import os;
 from multiprocessing import Pool;
 
+def calcMeanandStd(data):
+    tmpMean = np.mean(data,axis=0);
+    tmpStd = np.std(data,axis=0);
+    return tmpMean,tmpStd;
+
 def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
+
+    '''
     x = data[:,0];
-    '''
     gaussianPercent,wishartPercent is the percentage over the non-noise PCA.
-    '''
     gaussianPercent = data[:,2]/data[:,1];
     wishartPercent = data[:,3]/data[:,1];
     
@@ -24,8 +29,43 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
         plt.legend([y1Line,y2Line], ['Gaussian Noise','Wishart Noise'],loc=2);
     else:
         plt.legend([y1Line,y2Line], ['Gaussian Noise','Wishart Noise'],loc=4);
-    
-    plt.axis([0,1,0,1.1]);
+    '''
+    #x = range(1, data.shape[1]+1);
+    if data.shape[1]<20:
+        x = np.arange(1,data.shape[1]+1);
+    else:
+        x = np.arange(1,data.shape[1]+1,data.shape[1]/20);
+    pcaIndices = np.arange(0,190,19);
+    pcaVal = data[pcaIndices];
+    pcaValMean,pcaValStd = calcMeanandStd(pcaVal);
+
+    gepsiIndices = np.arange(1,190,19);
+    gepsiVal = data[gepsiIndices];
+    gepsiValMean,gepsiValStd = calcMeanandStd(gepsiVal);
+    #y1Line,y2Line = plt.plot(x, pcaValMean, 'bo-', x, pcaValStd, 'r^-');
+    pcaLine = plt.errorbar(x,pcaValMean[x-1],yerr=pcaValStd[x-1],fmt='b-',elinewidth=4);
+    gepsi1Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='g-',elinewidth=4);
+    gepsiIndices = np.arange(5,190,19);
+    gepsiVal = data[gepsiIndices];
+    gepsiValMean,gepsiValStd = calcMeanandStd(gepsiVal);
+    gepsi5Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='r-',elinewidth=4);
+
+    gepsiIndices = np.arange(9,190,19);
+    gepsiVal = data[gepsiIndices];
+    ggepsiValMean,gepsiValStd = calcMeanandStd(gepsiVal);
+    gepsi9Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='k-.',elinewidth=4);
+
+    wepsiIndices = np.arange(10,190,19);
+    wepsiVal = data[wepsiIndices];
+    wepsiValMean,wepsiValStd = calcMeanandStd(wepsiVal);
+    print wepsiValStd;
+    wepsi1Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y-',elinewidth=4);
+    wepsiIndices = np.arange(18,190,19);
+    wepsiVal = data[wepsiIndices];
+    wepsiValMean,wepsiValStd = calcMeanandStd(wepsiVal);
+    wepsi9Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y--',elinewidth=4);
+
+    plt.axis([0,data.shape[1]+1,0,1.1]);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('Captured Energy',fontsize=18);
@@ -53,8 +93,12 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-    
-    pcaEnergies = pcaImpl.getEigValueEnergies();
+    print dpGaussianPCAImpl.L2Sensitivity;
+    #dpGaussianPCAImpl.L2Sensitivity = 1;
+    #dpWishartPCAImpl.L2Sensitivity = 1;
+    print dpGaussianPCAImpl.L2Sensitivity;
+
+    pcaImpl.getEigValueEnergies();
     cprResult = [];
     cprResult.append(calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
     delta = np.divide(1.0,numOfTrainingSamples);
@@ -89,8 +133,14 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     numOfFeature = data.shape[1]-1;
     matrixRank = LA.matrix_rank(data[:,1:]);
 
+    rowsNorm = LA.norm(data[:,1:], axis=1);
+    maxL2Norm = np.amax(rowsNorm);
+
     print "Matrix rank of the data is %d." % matrixRank;
-    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
+    if data.shape[1]<20:
+        largestReducedFeature = data.shape[1];
+    else:
+        largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     
     xEpsilons = np.arange(0.1,1.0,0.1);
@@ -103,7 +153,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     for train_index, test_index in rs.split(data):
         print "Trail %d" % m;
         trainingData = data[train_index];
-        pureTrainingData = trainingData[:,1:];
+        pureTrainingData = trainingData[:,1:]/maxL2Norm;
         tmpResult = singleExp(xEpsilons,pureTrainingData,largestReducedFeature);
         cprResult.extend(tmpResult);
         m += 1;
@@ -130,7 +180,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german', 'ionosphere'];
-    numOfRounds = 1;
+    numOfRounds = 10;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
@@ -140,10 +190,10 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_4','diabetes','CNAE_3','Face_15','CNAE_2','ionosphere','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,varianceRatio,numOfRounds);
-            np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawExplainedVariance(dataset,data=result,figSavedPath=figSavedPath);
+            #result = doExp(datasetPath,varianceRatio,numOfRounds);
+            #np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
