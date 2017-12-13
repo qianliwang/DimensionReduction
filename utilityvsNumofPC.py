@@ -8,15 +8,16 @@ import sys;
 import os;
 from multiprocessing import Pool;
 from sklearn.preprocessing import StandardScaler;
-
+from pkg.global_functions import globalFunction as gf;
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
-    xBound = len(data)+1;
-    x = data[:,0];
-    
+    numOfDim = data.shape[0]/10;
+    x = data[:numOfDim,0];
+    xBound = len(x) + 1;
+    """
     minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
     maxVector = np.amax(data[:,1:],axis=0);
@@ -28,7 +29,25 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
     
     plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=4);
-    plt.axis([0,xBound,yMin,yMax]);
+    """
+    pcaF1 = [];
+    gF1 = [];
+    wF1 = [];
+    for i in range(0, numOfDim):
+        pcaIndices = np.arange(i, data.shape[0], numOfDim);
+        pcaF1.append(data[pcaIndices, 1]);
+        gF1.append(data[pcaIndices, 2]);
+        wF1.append(data[pcaIndices, 3]);
+    # print np.asarray(gF1);
+    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
+    pcaF1Line = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b-', elinewidth=2);
+    
+    gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
+    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-', elinewidth=2);
+    
+    wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
+    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-', elinewidth=2);
+    plt.axis([0,xBound,0,1]);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
@@ -175,11 +194,11 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        #datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
+        #datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
-            np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    
+            #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+            #np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",figSavedPath=None);

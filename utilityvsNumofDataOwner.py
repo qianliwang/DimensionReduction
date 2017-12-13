@@ -13,6 +13,7 @@ import os;
 from multiprocessing import Pool;
 import scipy.sparse as sparse;
 from sklearn.preprocessing import StandardScaler;
+from pkg.global_functions import globalFunction as gf;
 
 def getApproxEigval(covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
@@ -67,8 +68,10 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
+    numOfDim = data.shape[0] / 10;
+    x = data[:numOfDim, 0];
     xBound = len(data)+1;
-    x = data[:,0];
+    """
     minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
     maxVector = np.amax(data[:,1:],axis=0);
@@ -82,7 +85,26 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
         plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=4);
     else:
         plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=2);
-    plt.axis([0,xBound,yMin,yMax]);
+    """
+    pcaF1 = [];
+    gF1 = [];
+    wF1 = [];
+    for i in range(0, numOfDim):
+        pcaIndices = np.arange(i, data.shape[0], numOfDim);
+        pcaF1.append(data[pcaIndices, 1]);
+        gF1.append(data[pcaIndices, 2]);
+        wF1.append(data[pcaIndices, 3]);
+    # print np.asarray(gF1);
+    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
+    pcaF1Line = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b-', elinewidth=2);
+
+    gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
+    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-', elinewidth=2);
+
+    wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
+    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-', elinewidth=2);
+
+    plt.axis([0,xBound,0,1]);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
@@ -228,7 +250,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     rs.get_n_splits(data);
     
     #p = Pool(numOfRounds);
-    normalizedData = normByRow(data[:,1:]);
+    normalizedData = gf.normByRow(data[:,1:]);
 
     normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
     for train_index, test_index in rs.split(data):
@@ -255,16 +277,6 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
 
     return avgResult;
 
-def normByRow(data):
-
-    rowsNorm = LA.norm(data, axis=1);
-    maxL2Norm = np.amax(rowsNorm);
-    """
-    for i in range(data.shape[0]):
-        rowNorm = norm(data[i,:], ord=2);
-        data[i,:] = data[i,:]/rowNorm;
-    """
-    return data/maxL2Norm;
 if __name__ == "__main__":
     
     numOfRounds = 10;
@@ -285,6 +297,6 @@ if __name__ == "__main__":
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
-            np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,result,figSavedPath=figSavedPath);
+            #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
+            #np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            drawF1Score(dataset,data=None,path = resultSavedPath+"dataOwner_"+dataset+".output",figSavedPath=None);
