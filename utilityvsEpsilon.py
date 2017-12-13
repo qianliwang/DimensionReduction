@@ -157,7 +157,50 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
         cprResult[k][9] += result[2];
         
     return cprResult;
-    
+
+
+def doExp_unbalanced(datasetPath, varianceRatio, numOfRounds, isLinearSVM=True):
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+
+    globalPCA = PCAModule.PCAImpl(data[:, 1:]);
+
+    numOfFeature = data.shape[1] - 1;
+    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature, numOfFeature, varianceRatio);
+    xEpsilons = np.arange(0.1, 1.0, 0.1);
+    cprResult = None;
+
+    posiData = data[np.where(data[:, 0] == 1)];
+    negData = data[np.where(data[:, 0] == -1)];
+    splitRatio = 0.8;
+    numPosSamples = int(posiData.shape[0] * splitRatio);
+    numNegSamples = int(negData.shape[0] * splitRatio);
+    cprResult = None;
+    # print posiData.shape;
+    # print negData.shape;
+    for i in range(numOfRounds):
+        np.random.shuffle(posiData);
+        np.random.shuffle(negData);
+        trainingData = np.concatenate((posiData[:numPosSamples], negData[:numNegSamples]), axis=0);
+        testingData = np.concatenate((posiData[numPosSamples:], negData[numNegSamples:]), axis=0);
+        # print trainingData.shape;
+        # print testingData.shape;
+        tmpResult = singleExp(xEpsilons, trainingData, testingData, largestReducedFeature, isLinearSVM);
+        if cprResult is None:
+            cprResult = tmpResult;
+        else:
+            cprResult = np.concatenate((cprResult, tmpResult), axis=0);
+    # avgCprResult = cprResult/numOfRounds;
+    avgCprResult = cprResult;
+    for result in avgCprResult:
+        print "%d,%.3f,%.3f,%.3f" % (result[0], result[1], result[2], result[3]);
+    # p.close();
+    # p.join();
+    return avgCprResult;
+
 def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     
     data = np.loadtxt(datasetPath,delimiter=",");
@@ -167,7 +210,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
-    
+
     xEpsilons = np.arange(0.1,1.0,0.1);
     cprResult = None;
     #cprResult = np.zeros((len(xEpsilons),10));
@@ -211,8 +254,9 @@ if __name__ == "__main__":
     isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
+        varianceRatio = 0.8;
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
+        result = doExp_unbalanced(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['B11','Face_15','CNAE_2','Amazon_5','diabetes','ionosphere'];
