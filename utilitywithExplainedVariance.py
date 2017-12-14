@@ -118,7 +118,12 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     return np.asarray(cprResult);
 
 def doExp(datasetPath,varianceRatio,numOfRounds):
-    data = np.loadtxt(datasetPath,delimiter=",");
+
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
     globalPCA = PCAModule.PCAImpl(data[:,1:]);
