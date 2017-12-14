@@ -218,10 +218,10 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
     
     if numOfDimensions > numOfFeature:
         xDimensions = np.arange(1,numOfFeature);
-        topK=numOfFeature;
+
     else:
         xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
-        topK=largestReducedFeature;
+
     #cprResult = np.zeros((len(xDimensions),4));
     cprResult = None;
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
@@ -237,7 +237,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
         testingData = normalizedData[test_index];
         #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
         #cprResult += tmpResult.get();
-        tmpResult = singleExp(xDimensions, trainingData, testingData, topK, isLinearSVM);
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
         if cprResult is None:
             cprResult = tmpResult;
         else:
@@ -254,6 +254,53 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSam
         print ','.join(['%.3f' % num for num in result]);
 
     return avgResult;
+def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=True):
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+
+    globalPCA = PCAModule.PCAImpl(data[:, 1:]);
+
+    numOfFeature = data.shape[1] - 1;
+    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature, numOfFeature, varianceRatio);
+    xDimensions = None;
+    if numOfDimensions > numOfFeature:
+        xDimensions = np.arange(1, numOfFeature);
+        largestReducedFeature = numOfFeature;
+    else:
+        xDimensions = np.arange(1, largestReducedFeature, max(largestReducedFeature / numOfDimensions, 1));
+
+    normalizedData = normByRow(data[:, 1:]);
+    normalizedData = np.concatenate((data[:, [0, ]], normalizedData), axis=1);
+    posiData = data[np.where(normalizedData[:,0]==1)];
+    negData = data[np.where(normalizedData[:,0]==-1)];
+    splitRatio = 0.8;
+    numPosSamples = int(posiData.shape[0]*splitRatio);
+    numNegSamples = int(negData.shape[0]*splitRatio);
+    cprResult = None;
+    #print posiData.shape;
+    #print negData.shape;
+    for i in range(numOfRounds):
+        np.random.shuffle(posiData);
+        np.random.shuffle(negData);
+        trainingData = np.concatenate((posiData[:numPosSamples],negData[:numNegSamples]),axis=0);
+        testingData = np.concatenate((posiData[numPosSamples:],negData[numNegSamples:]),axis=0);
+        #print trainingData.shape;
+        #print testingData.shape;
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
+        if cprResult is None:
+            cprResult = tmpResult;
+        else:
+            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
+    #avgCprResult = cprResult/numOfRounds;
+    avgCprResult = cprResult;
+    for result in avgCprResult:
+        print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
+    #p.close();
+    #p.join();
+    return avgCprResult;
 
 def normByRow(data):
 
@@ -278,7 +325,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
+        result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
