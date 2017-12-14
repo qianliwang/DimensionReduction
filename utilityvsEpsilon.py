@@ -20,7 +20,7 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     pcaF1 = data[np.arange(0,90,9),3];
     pcaF1Mean = np.full((9,),np.mean(pcaF1));
     pcaF1Std = np.full((9,),0);
-    pcaF1Line = plt.errorbar(x, pcaF1Mean/2, yerr=pcaF1Std, fmt='b-', elinewidth=2);
+    pcaF1Line = plt.errorbar(x, pcaF1Mean/2, yerr=pcaF1Std, fmt='b-',capsize=4);
     gF1 = [];
     wF1=[];
     for i in range(0,9):
@@ -29,10 +29,10 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
        wF1.append(data[gIndices,9]);
     #print np.asarray(gF1);
     gF1Mean,gF1Std = gf.calcMeanandStd(np.asarray(gF1).T)
-    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-', elinewidth=2);
+    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-',capsize=4);
      
     wF1Mean,wF1Std = gf.calcMeanandStd(np.asarray(wF1).T)
-    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-', elinewidth=2);
+    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-',capsize=4);
 
     """
     data = data[:,[3,6,9]];
@@ -67,7 +67,7 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     pcaPrecision = data[np.arange(0, 90, 9), 1];
     pcaPrecMean = np.full((9,), np.mean(pcaPrecision));
     pcaPrecStd = np.full((9,), 0);
-    pcaPrecLine = plt.errorbar(x, pcaPrecMean / 2, yerr=pcaPrecStd, fmt='b-', elinewidth=2);
+    pcaPrecLine = plt.errorbar(x, pcaPrecMean / 2, yerr=pcaPrecStd, fmt='b-',capsize=4);
     gPrec = [];
     wPrec = [];
     for i in range(0, 9):
@@ -76,16 +76,16 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
         wPrec.append(data[gIndices, 7]);
     # print np.asarray(gF1);
     gPrecMean, gPrecStd = gf.calcMeanandStd(np.asarray(gPrec).T)
-    gPrecLine = plt.errorbar(x, gPrecMean, yerr=gPrecStd, fmt='g-', elinewidth=2);
+    gPrecLine = plt.errorbar(x, gPrecMean, yerr=gPrecStd, fmt='g-',capsize=4);
         
     wPrecMean, wPrecStd = gf.calcMeanandStd(np.asarray(wPrec).T)
-    wPrecLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='r-', elinewidth=2);
+    wPrecLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='r-',capsize=4);
 
 
     pcaRecall = data[np.arange(0, 90, 9), 2];
     pcaRecMean = np.full((9,), np.mean(pcaRecall));
     pcaRecStd = np.full((9,), 0);
-    pcaRecLine = plt.errorbar(x, pcaRecMean / 2, yerr=pcaRecStd, fmt='b--', elinewidth=2);
+    pcaRecLine = plt.errorbar(x, pcaRecMean / 2, yerr=pcaRecStd, fmt='b--',capsize=4);
     gRec = [];
     wRec = [];
     for i in range(0, 9):
@@ -94,10 +94,10 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
         wRec.append(data[gIndices, 8]);
     # print np.asarray(gF1);
     gRecMean, gRecStd = gf.calcMeanandStd(np.asarray(gRec).T)
-    gRecLine = plt.errorbar(x, gRecMean, yerr=gRecStd, fmt='g--', elinewidth=2);
+    gRecLine = plt.errorbar(x, gRecMean, yerr=gRecStd, fmt='g--',capsize=4);
        
     wRecMean, wRecStd = gf.calcMeanandStd(np.asarray(wRec).T)
-    wRecLine = plt.errorbar(x, wRecMean, yerr=wRecStd, fmt='r--', elinewidth=2);
+    wRecLine = plt.errorbar(x, wRecMean, yerr=wRecStd, fmt='r--',capsize=4);
     """
     x = data[:,0];
     data = data[:,[1,2,5,6,7,8]];
@@ -265,11 +265,11 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','B11_10','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=None);
-            drawPrecisionRecall(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=None);
+            drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=None);
+            #drawPrecisionRecall(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=None);

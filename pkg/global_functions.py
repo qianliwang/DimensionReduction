@@ -98,3 +98,13 @@ class globalFunction(object):
         tmpMean = np.mean(data, axis=0);
         tmpStd = np.std(data, axis=0);
         return tmpMean, tmpStd;
+
+    @classmethod
+    def calcEigRatios(cls,eigValues):
+        eigSum = np.sum(eigValues);
+        tmpSum = 0;
+        res = [];
+        for eigVal in eigValues:
+            tmpSum += eigVal;
+            res.append(tmpSum/eigSum);
+        return res;

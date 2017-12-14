@@ -96,13 +96,13 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
         wF1.append(data[pcaIndices, 3]);
     # print np.asarray(gF1);
     pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
-    pcaF1Line = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b-', elinewidth=2);
+    pcaF1Line = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b-',capsize=4);
 
     gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
-    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-', elinewidth=2);
+    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-',capsize=4);
 
     wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
-    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-', elinewidth=2);
+    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-',capsize=4);
 
     plt.axis([0,xBound,0,1]);
     #plt.axis([0,10,0.4,1.0]);

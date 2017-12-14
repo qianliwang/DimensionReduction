@@ -46,27 +46,27 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     gepsiVal = data[gepsiIndices];
     gepsiValMean,gepsiValStd = gf.calcMeanandStd(gepsiVal);
     #y1Line,y2Line = plt.plot(x, pcaValMean, 'bo-', x, pcaValStd, 'r^-');
-    pcaLine = plt.errorbar(x,pcaValMean[x-1],yerr=pcaValStd[x-1],fmt='b-',elinewidth=4);
-    gepsi1Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='g-',elinewidth=4);
+    pcaLine = plt.errorbar(x,pcaValMean[x-1],yerr=pcaValStd[x-1],fmt='b-',capsize=4);
+    gepsi1Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='g-',capsize=4);
     gepsiIndices = np.arange(5,190,19);
     gepsiVal = data[gepsiIndices];
     gepsiValMean,gepsiValStd = gf.calcMeanandStd(gepsiVal);
-    gepsi5Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='r-',elinewidth=4);
+    gepsi5Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='r-',capsize=4);
 
     gepsiIndices = np.arange(9,190,19);
     gepsiVal = data[gepsiIndices];
     ggepsiValMean,gepsiValStd = gf.calcMeanandStd(gepsiVal);
-    gepsi9Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='k-.',elinewidth=4);
+    gepsi9Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='k-.',capsize=4);
 
     wepsiIndices = np.arange(10,190,19);
     wepsiVal = data[wepsiIndices];
     wepsiValMean,wepsiValStd = gf.calcMeanandStd(wepsiVal);
     print wepsiValStd;
-    wepsi1Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y-',elinewidth=4);
+    wepsi1Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y-',capsize=4);
     wepsiIndices = np.arange(18,190,19);
     wepsiVal = data[wepsiIndices];
     wepsiValMean,wepsiValStd = gf.calcMeanandStd(wepsiVal);
-    wepsi9Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y--',elinewidth=4);
+    wepsi9Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y--',capsize=4);
 
     plt.axis([0,data.shape[1]+1,0,1.1]);
     #plt.axis([0,10,0.4,1.0]);
@@ -193,7 +193,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_4','diabetes','CNAE_3','Face_15','CNAE_2','ionosphere','CNAE_5','CNAE_7','Amazon_3','madelon'];
+        datasets = ['CNAE_4','Amazon_10','ionosphere','diabetes','CNAE_3','Face_15','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
