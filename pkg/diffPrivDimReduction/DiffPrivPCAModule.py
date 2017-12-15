@@ -17,6 +17,7 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
         self.epsilon = 0;
         self.delta = 0;
         self.L2Sensitivity = self.__calcL2Sensitivity(self.centeredData);
+        self.frobeniusSensitivity = self.L2Sensitivity*self.L2Sensitivity;
         #self.frobeniusSensitivity = self.__calcFrobeniusSensitivity(self.centeredData);
         
     def setEpsilonAndGamma(self,epsilon,delta):
@@ -26,7 +27,7 @@ class DiffPrivPCAImpl(PCAModule.PCAImpl):
     def getDiffPrivPCs(self,isGaussianNoise,topK=None,onlyEigvalues = False):
         
         if isGaussianNoise:
-            noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,self.covMatrix.shape[0],self.L2Sensitivity);
+            noiseMatrix = DiffPrivImpl.SymmGaussian(self.epsilon,self.delta,self.covMatrix.shape[0],self.frobeniusSensitivity);
         else:
             noiseMatrix = DiffPrivImpl.SymmWishart_withDelta(self.epsilon,self.delta,self.covMatrix.shape[0],self.L2Sensitivity);
             
