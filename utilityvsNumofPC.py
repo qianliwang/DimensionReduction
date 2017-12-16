@@ -3,41 +3,9 @@ from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
 import sys;
 import os;
-from multiprocessing import Pool;
 from sklearn.preprocessing import StandardScaler;
-
-
-def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
-    plt.clf();
-    if path is not None:
-        data = np.loadtxt(path,delimiter=",");
-    xBound = len(data)+1;
-    x = data[:,0];
-    
-    minVector = np.amin(data[:,1:],axis=0);
-    yMin = min(minVector);
-    maxVector = np.amax(data[:,1:],axis=0);
-    yMax = max(maxVector);
-    
-    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
-    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
-    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
-    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
-    
-    plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=4);
-    plt.axis([0,xBound,yMin,yMax]);
-    #plt.axis([0,10,0.4,1.0]);
-    plt.xlabel('Number of Principal Components',fontsize=18);
-    plt.ylabel('F1-Score',fontsize=18);
-    plt.title(datasetTitle+' Dataset', fontsize=18);
-    plt.xticks(x);
-    if figSavedPath is None:
-        plt.show();
-    else:
-        plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM):
     pureTrainingData = trainingData[:,1:];
@@ -119,6 +87,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinea
             print "%f,%f,%f" % (result[0],result[1],result[2]);
         """
     return cprResult;
+
 def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
@@ -160,8 +129,6 @@ def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensio
     avgCprResult = cprResult;
     for result in avgCprResult:
         print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
-    #p.close();
-    #p.join();
     return avgCprResult;
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
@@ -182,15 +149,11 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     cprResult = None;
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
-    #p = Pool(numOfRounds);
-    
+
     for train_index, test_index in rs.split(data):    
         trainingData = data[train_index];
         testingData = data[test_index];
         
-        #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM));
-
-        #cprResult += tmpResult.get();
         tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
         if cprResult is None:
             cprResult = tmpResult;
@@ -200,8 +163,6 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     avgCprResult = cprResult;
     for result in avgCprResult:
         print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
-    #p.close();
-    #p.join();
     return avgCprResult;
 
 if __name__ == "__main__":
@@ -226,4 +187,3 @@ if __name__ == "__main__":
             datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,data=result,figSavedPath=figSavedPath);    

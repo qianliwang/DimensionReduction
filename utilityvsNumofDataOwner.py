@@ -7,7 +7,6 @@ from pkg.diffPrivDimReduction import invwishart;
 from numpy.linalg import norm;
 from sklearn.model_selection import ShuffleSplit;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
-import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
@@ -63,35 +62,6 @@ def genEigenvectors_power(covMatrix,topK):
         k += 1;            
     return eigValues,eigVectors;
 
-def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
-    plt.clf();
-    if path is not None:
-        data = np.loadtxt(path,delimiter=",");
-    xBound = len(data)+1;
-    x = data[:,0];
-    minVector = np.amin(data[:,1:],axis=0);
-    yMin = min(minVector);
-    maxVector = np.amax(data[:,1:],axis=0);
-    yMax = max(maxVector);
-    
-    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
-    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
-    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
-    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
-    if datasetTitle is 'Ionosphere':
-        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=4);
-    else:
-        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=2);
-    plt.axis([0,xBound,yMin,yMax]);
-    #plt.axis([0,10,0.4,1.0]);
-    plt.xlabel('Number of Principal Components',fontsize=18);
-    plt.ylabel('F1-Score',fontsize=18);
-    plt.title(datasetTitle+' Dataset', fontsize=18);
-    plt.xticks(x);
-    if figSavedPath is None:
-        plt.show();
-    else:
-        plt.savefig(figSavedPath+"twoSamplesatDataOwner_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
 def simulatePrivateLocalPCA(data,maxDim,epsilon):
     k = np.minimum(maxDim,LA.matrix_rank(data));
@@ -334,4 +304,3 @@ if __name__ == "__main__":
             datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
             np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,result,figSavedPath=figSavedPath);
