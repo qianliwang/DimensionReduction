@@ -38,35 +38,37 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
         x = np.arange(1,data.shape[1]+1);
     else:
         x = np.arange(1,data.shape[1]+1,data.shape[1]/20);
-    pcaIndices = np.arange(0,190,19);
+    pcaIndices = np.arange(0,210,21);
+    print pcaIndices;
     pcaVal = data[pcaIndices];
     pcaValMean,pcaValStd = gf.calcMeanandStd(pcaVal);
+    pcaLine = plt.errorbar(x, pcaValMean[x - 1], yerr=pcaValStd[x - 1], fmt='b-', capsize=4);
 
-    gepsiIndices = np.arange(1,190,19);
+
+    gepsiIndices = np.arange(1,210,21);
     gepsiVal = data[gepsiIndices];
     gepsiValMean,gepsiValStd = gf.calcMeanandStd(gepsiVal);
     #y1Line,y2Line = plt.plot(x, pcaValMean, 'bo-', x, pcaValStd, 'r^-');
-    pcaLine = plt.errorbar(x,pcaValMean[x-1],yerr=pcaValStd[x-1],fmt='b-',capsize=4);
-    gepsi1Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='g-',capsize=4);
-    gepsiIndices = np.arange(5,190,19);
+    #gepsi1Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='g-',capsize=4);
+    gepsiIndices = np.arange(5,210,21);
     gepsiVal = data[gepsiIndices];
     gepsiValMean,gepsiValStd = gf.calcMeanandStd(gepsiVal);
     gepsi5Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='r-',capsize=4);
 
-    gepsiIndices = np.arange(9,190,19);
+    gepsiIndices = np.arange(9,210,21);
     gepsiVal = data[gepsiIndices];
     ggepsiValMean,gepsiValStd = gf.calcMeanandStd(gepsiVal);
-    gepsi9Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='k-.',capsize=4);
+    gepsi9Line = plt.errorbar(x,gepsiValMean[x-1],yerr=gepsiValStd[x-1],fmt='ro-.',capsize=4);
 
-    wepsiIndices = np.arange(10,190,19);
+    wepsiIndices = np.arange(15,210,21);
     wepsiVal = data[wepsiIndices];
     wepsiValMean,wepsiValStd = gf.calcMeanandStd(wepsiVal);
-    print wepsiValStd;
-    wepsi1Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y-',capsize=4);
-    wepsiIndices = np.arange(18,190,19);
+    #print wepsiValStd;
+    wepsi5Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y-',capsize=4);
+    wepsiIndices = np.arange(19,210,21);
     wepsiVal = data[wepsiIndices];
     wepsiValMean,wepsiValStd = gf.calcMeanandStd(wepsiVal);
-    wepsi9Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='y--',capsize=4);
+    wepsi9Line = plt.errorbar(x,wepsiValMean[x-1],yerr=wepsiValStd[x-1],fmt='yo-',capsize=4);
 
     plt.axis([0,data.shape[1]+1,0,1.1]);
     #plt.axis([0,10,0.4,1.0]);
@@ -193,7 +195,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_4','Amazon_10','ionosphere','diabetes','CNAE_3','Face_15','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Face_15','Amazon_10','ionosphere','diabetes','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

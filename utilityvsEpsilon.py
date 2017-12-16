@@ -47,7 +47,7 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     y1Line,y2Line,y3Line = plt.plot(x, data[:,0], 'bo-', x, data[:,1], 'r^-',x, data[:,2], 'gs-');
     plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=1);
     """
-    plt.axis([0.05,0.95,0,1]);
+    plt.axis([0.05,0.95,0,1.1]);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
@@ -119,7 +119,7 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     else:
         plt.axis([0.05,0.95,0,1]);
     """
-    plt.axis([0,1,0,1.0]);
+    plt.axis([0,1,0,1.1]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('Precision & Recall',fontsize=18);
     plt.title(datasetTitle+' Dataset', fontsize=18);
@@ -265,7 +265,7 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['CNAE_2','B11_10','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['p53_3000','CNAE_2','B11_10','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
