@@ -286,9 +286,9 @@ if __name__ == "__main__":
     
     numOfRounds = 10;
     epsilon = 0.3;
-    varianceRatio = 0.9
+    varianceRatio = 0.8
     numOfSamples = 2;
-    numOfDimensions = 30;
+    numOfDimensions = 20;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
     isLinearSVM = False;
