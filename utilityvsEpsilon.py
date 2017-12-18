@@ -49,29 +49,37 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     y1Line,y2Line,y3Line = plt.plot(x, data[:,0], 'bo-', x, data[:,1], 'r^-',x, data[:,2], 'gs-');
     plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=1);
     """
-    plt.axis([0.05,1.05,0.4,1.05]);
+    minVector = np.amin(data[:,4:], axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data[:,4:], axis=0);
+    yMax = max(maxVector);
+
+    yMin = (yMin - 0.1) if (yMin - 0.1) > 0 else 0;
+    yMax = (yMax + 0.1) if (yMax + 0.1) < 1 else 1;
+    print yMin,yMax;
+    plt.axis([0.05,1.05,yMin,yMax]);
     plt.legend([pcaF1Line,gF1Line,wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
-    plt.title(datasetTitle+' Dataset', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
     if figSavedPath is None:
         plt.show();
     else:
         plt.savefig(figSavedPath+"epsilon_f1_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
-    
-def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
-    
+
+
+def drawPrecision(datasetTitle, data=None, path=None, figSavedPath=None):
     plt.clf();
     if path is not None:
-        data = np.loadtxt(path,delimiter=",");
+        data = np.loadtxt(path, delimiter=",");
     x = data[:10, 0];
     pcaPrecision = data[np.arange(0, 100, 10), 1];
     pcaPrecMean = np.full((10,), np.mean(pcaPrecision));
     pcaPrecStd = np.full((10,), 0);
-    #pcaPrecLine = plt.errorbar(x, pcaPrecMean / 2, yerr=pcaPrecStd, fmt='bs-',capsize=4);
-
+    pcaPrecErrorLine = plt.errorbar(x, pcaPrecMean / 2, yerr=pcaPrecStd, fmt='b',capsize=4);
+    pcaPrecLine, = plt.plot(x, pcaPrecMean / 2, 'bo-')
     gPrec = [];
     wPrec = [];
     for i in range(10):
@@ -80,12 +88,27 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
         wPrec.append(data[gIndices, 7]);
     # print np.asarray(gF1);
     gPrecMean, gPrecStd = gf.calcMeanandStd(np.asarray(gPrec).T)
-    #gPrecLine = plt.errorbar(x, gPrecMean, yerr=gPrecStd, fmt='rs-',capsize=4);
-        
+    gPrecErrorLine = plt.errorbar(x, gPrecMean, yerr=gPrecStd, fmt='r',capsize=4);
+    gPrecLine, = plt.plot(x, gPrecMean, 'ro-')
     wPrecMean, wPrecStd = gf.calcMeanandStd(np.asarray(wPrec).T)
-    #wPrecLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='gs-',capsize=4);
+    wPrecErrorLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='g',capsize=4);
+    wPrecLine, = plt.plot(x, wPrecMean, 'go-')
+    plt.axis([0.05, 1.05, 0.4, 1.05]);
+    plt.legend([pcaPrecLine, gPrecLine, wPrecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    plt.xlabel('Epsilon', fontsize=18);
+    plt.ylabel('Precision', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
+    plt.xticks(x);
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath + "epsilon_prec_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
 
-
+def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path, delimiter=",");
+    x = data[:10, 0];
     pcaRecall = data[np.arange(0, 100, 10), 2];
     pcaRecMean = np.full((10,), np.mean(pcaRecall));
     pcaRecStd = np.full((10,), 0);
@@ -128,13 +151,13 @@ def drawPrecisionRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     plt.axis([0.05,1.05,0.4,1.05]);
     plt.legend([pcaRecLine, gRecLine, wRecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
     plt.xlabel('Epsilon',fontsize=18);
-    plt.ylabel('Precision & Recall',fontsize=18);
-    plt.title(datasetTitle+' Dataset', fontsize=18);
+    plt.ylabel('Recall',fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
     if figSavedPath is None:
         plt.show();
     else:
-        plt.savefig(figSavedPath+"epsilon_pr_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
+        plt.savefig(figSavedPath+"epsilon_rec_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
 def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM):
     pureTrainingData = trainingData[:,1:];
@@ -262,7 +285,7 @@ if __name__ == "__main__":
     
     numOfRounds = 10;
     varianceRatio = 0.9;
-    figSavedPath = "./log/";
+    figSavedPath = "./fig/";
     resultSavedPath = "./log/";
     isLinearSVM = True ;
     if len(sys.argv) > 1:
@@ -272,11 +295,12 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['p53_3000','CNAE_2','B11_10','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['p53 Mutant','CNAE','YaleB','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=None);
-            drawPrecisionRecall(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=None);
+            drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=figSavedPath);
+            drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=figSavedPath);
+            drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);

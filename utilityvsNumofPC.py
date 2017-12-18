@@ -18,8 +18,6 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     numOfDim = data.shape[0]/10;
     x = data[:numOfDim, 0];
     print "Number of points on x-axis: %d" % numOfDim;
-    largestXVal = x[numOfDim-1];
-    xBound = len(x) + 1;
     """
     minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
@@ -33,6 +31,13 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     
     plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=4);
     """
+    minVector = np.amin(data[:, 1:], axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data[:, 1:], axis=0);
+    yMax = max(maxVector);
+
+    yMin = (yMin - 0.05) if (yMin - 0.05) > 0 else 0;
+    yMax = (yMax + 0.05) if (yMax + 0.05) < 1 else 1.05;
     pcaF1 = [];
     gF1 = [];
     wF1 = [];
@@ -42,25 +47,34 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
         gF1.append(data[pcaIndices, 2]);
         wF1.append(data[pcaIndices, 3]);
     # print np.asarray(gF1);
+    displayDim = 24;
+    x = x[:displayDim];
+    largestXVal = x[-1];
     pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
+    pcaF1Mean = pcaF1Mean[:displayDim];
+    pcaF1Std = pcaF1Std[:displayDim];
     pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b',capsize=4);
     pcaF1Line, = plt.plot(x, pcaF1Mean, 'b-')
     gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
+    gF1Mean = gF1Mean[:displayDim];
+    gF1Std = gF1Std[:displayDim];
     gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='r',capsize=4);
     gF1Line, = plt.plot(x, gF1Mean, 'r-')
     wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
+    wF1Mean = wF1Mean[:displayDim];
+    wF1Std = wF1Std[:displayDim];
     wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
     wF1Line, = plt.plot(x, wF1Mean , 'g-')
-    plt.axis([0,xBound,0,1.1]);
+    plt.axis([0,x[-1]+1,yMin,yMax]);
     #plt.axis([0,10,0.4,1.0]);
     plt.legend([pcaF1Line, gF1Line, wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
-    plt.title(datasetTitle+' Dataset', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
     ax = plt.gca();
     if largestXVal>50:
-        majorLocator = MultipleLocator(4);
+        majorLocator = MultipleLocator(8);
     else:
         majorLocator = MultipleLocator(2);
     ax.xaxis.set_major_locator(majorLocator);
@@ -193,7 +207,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
     numOfRounds = 4;
-    figSavedPath = "./log/";
+    figSavedPath = "./fig/";
     resultSavedPath = "./log/";
     numOfDimensions = 30;
     epsilon = 0.3;
@@ -206,10 +220,10 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['CNAE_2','B11_10','p53_3000','Amazon_2','Australian','german','ionosphere'];
+        datasets = ['CNAE','YaleB','p53 Mutant','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",figSavedPath=None);
+            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",figSavedPath=figSavedPath);
