@@ -9,13 +9,16 @@ import os;
 from multiprocessing import Pool;
 from sklearn.preprocessing import StandardScaler;
 from pkg.global_functions import globalFunction as gf;
+from matplotlib.ticker import MultipleLocator;
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
     numOfDim = data.shape[0]/10;
-    x = data[:numOfDim,0];
+    x = data[:numOfDim, 0];
+    print "Number of points on x-axis: %d" % numOfDim;
+    largestXVal = x[numOfDim-1];
     xBound = len(x) + 1;
     """
     minVector = np.amin(data[:,1:],axis=0);
@@ -40,19 +43,27 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
         wF1.append(data[pcaIndices, 3]);
     # print np.asarray(gF1);
     pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
-    pcaF1Line = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b-',capsize=4);
-    
+    pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b',capsize=4);
+    pcaF1Line, = plt.plot(x, pcaF1Mean, 'b-')
     gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
-    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-',capsize=4);
-    
+    gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='r',capsize=4);
+    gF1Line, = plt.plot(x, gF1Mean, 'r-')
     wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
-    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-',capsize=4);
-    plt.axis([0,xBound,0,1]);
+    wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
+    wF1Line, = plt.plot(x, wF1Mean , 'g-')
+    plt.axis([0,xBound,0,1.1]);
     #plt.axis([0,10,0.4,1.0]);
+    plt.legend([pcaF1Line, gF1Line, wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
     plt.title(datasetTitle+' Dataset', fontsize=18);
     plt.xticks(x);
+    ax = plt.gca();
+    if largestXVal>50:
+        majorLocator = MultipleLocator(4);
+    else:
+        majorLocator = MultipleLocator(2);
+    ax.xaxis.set_major_locator(majorLocator);
     if figSavedPath is None:
         plt.show();
     else:
@@ -195,7 +206,7 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['CNAE_2','B11_10','Amazon_2','Australian','german','ionosphere'];
+        datasets = ['CNAE_2','B11_10','p53_3000','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

@@ -8,18 +8,49 @@ import sys;
 import os;
 from multiprocessing import Pool;
 from pkg.global_functions import globalFunction as gf;
-"""
-def calcMeanandStd(data):
-    tmpMean = np.mean(data,axis=0);
-    tmpStd = np.std(data,axis=0);
-    return tmpMean,tmpStd;
-"""
 
+def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path, delimiter=",");
+    x = np.arange(0.1, 1.1, 0.1);
+    tmpDim = data.shape[1] - 1;
+    pcaRes = [];
+    gRes = [];
+    wRes = [];
+    pcaVal = data[np.arrange(0,190,21),tmpDim];
+    for i in np.arange(0,190,21):
+        tmpRange = np.arange(i+1,i+11);
+        print tmpRange;
+        gRes.append(data[tmpRange,tmpDim]);
+    for i in np.arange(11,200,21):
+        tmpRange = np.arange(i,i+10);
+        wRes.append(data[tmpRange,tmpDim]);
+
+    gMean, gStd = gf.calcMeanandStd(np.asarray(gRes));
+    gErrorLine = plt.errorbar(x, gMean, yerr=gStd, fmt='r', capsize=4);
+    gLine, = plt.plot(x,gMean,'r-');
+    wMean,wStd = gf.calcMeanandStd(np.asarray(wRes));
+    wErrorLine = plt.errorbar(x, wMean, yerr=wStd, fmt='g', capsize=4);
+    wLine, = plt.plot(x,wMean,'g-');
+
+    plt.axis([0.05, 1.05, 0, 0.2]);
+    plt.legend([gLine, wLine], ['Gaussian Noise', 'Wishart Noise'], loc=1);
+    # plt.axis([0,10,0.4,1.0]);
+    plt.xlabel('Epsilon', fontsize=18);
+    plt.ylabel('Captured Energy', fontsize=18);
+    plt.title(datasetTitle + 'Dataset', fontsize=18);
+    plt.xticks(x);
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath + "explainedVariance_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
 
 def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
+
 
     '''
     x = data[:,0];
@@ -151,7 +182,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     xEpsilons = np.arange(0.1,1.0,0.1);
     cprResult = np.zeros((len(xEpsilons),4));
     #print xDimensions;
-    p = Pool(numOfRounds);
+    #p = Pool(numOfRounds);
     #allResults = [];
     cprResult = [];
     m =0;
@@ -173,19 +204,19 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     """
     # Compute the average value after numOfRounds experiments.
     #avgCprResult = cprResult/numOfRounds;
-    p.close();
-    p.join();
+    #p.close();
+    #p.join();
     """
     for result in cprResult:
         print "%.2f,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);  
     
     """
 
-    return np.asarray(cprResult,dtype=float);
+    return cprResult;
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german', 'ionosphere'];
-    numOfRounds = 10;
+    numOfRounds = 2;
     varianceRatio = 0.9;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
@@ -195,10 +226,11 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','Face_15','Amazon_10','ionosphere','diabetes','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
+        datasets = ['CNAE_2','Face_15','Amazon','p53','diabetes','ionosphere','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,varianceRatio,numOfRounds);
             #np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
+            #drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
+            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);

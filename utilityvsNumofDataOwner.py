@@ -15,6 +15,62 @@ import scipy.sparse as sparse;
 from sklearn.preprocessing import StandardScaler;
 from pkg.global_functions import globalFunction as gf;
 
+
+def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path, delimiter=",");
+    if datasetTitle is 'CNAE_2':
+        numOfDim = data.shape[0] / 10;
+    else:
+        numOfDim = data.shape[0] / 6;
+    x = data[:numOfDim, 0];
+    xBound = x[-1] + 2;
+    """
+    minVector = np.amin(data[:,1:],axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data[:,1:],axis=0);
+    yMax = max(maxVector);
+
+    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
+    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
+    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
+    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
+    if datasetTitle is 'Ionosphere':
+        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=4);
+    else:
+        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=2);
+    """
+    pcaF1 = [];
+    dpdpcaF1 = [];
+    privateF1 = [];
+    for i in range(0, numOfDim):
+        pcaIndices = np.arange(i, data.shape[0], numOfDim);
+        pcaF1.append(data[pcaIndices, 1]);
+        dpdpcaF1.append(data[pcaIndices, 2]);
+        privateF1.append(data[pcaIndices, 3]);
+    # print np.asarray(gF1);
+    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
+    pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b', capsize=4);
+    pcaF1Line, = plt.plot(x,pcaF1Mean,'b-');
+    dpdpcaF1Mean, dpdpcaF1Std = gf.calcMeanandStd(np.asarray(dpdpcaF1).T);
+    dpdpcaF1ErrorLine = plt.errorbar(x, dpdpcaF1Mean, yerr=dpdpcaF1Std, fmt='m', capsize=4);
+    dpdpcaF1Line, = plt.plot(x,dpdpcaF1Mean,'m-');
+    privateF1Mean, privateF1Std = gf.calcMeanandStd(np.asarray(privateF1).T);
+    privateF1ErrorLine = plt.errorbar(x, privateF1Mean, yerr=privateF1Std, fmt='c', capsize=4);
+    privateF1Line, = plt.plot(x,privateF1Mean,'c-');
+    plt.axis([0, xBound, -0.05, 1.05]);
+    plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
+    # plt.axis([0,10,0.4,1.0]);
+    plt.xlabel('Number of Principal Components', fontsize=18);
+    plt.ylabel('F1-Score', fontsize=18);
+    plt.title(datasetTitle + ' Dataset', fontsize=18);
+    plt.xticks(x);
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath + "twoSamplesatDataOwner_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
+
 def getApproxEigval(covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
         v1 = np.dot(r1.T,temp1);
@@ -64,56 +120,6 @@ def genEigenvectors_power(covMatrix,topK):
         k += 1;            
     return eigValues,eigVectors;
 
-def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
-    plt.clf();
-    if path is not None:
-        data = np.loadtxt(path,delimiter=",");
-    numOfDim = data.shape[0] / 10;
-    x = data[:numOfDim, 0];
-    xBound = len(data)+1;
-    """
-    minVector = np.amin(data[:,1:],axis=0);
-    yMin = min(minVector);
-    maxVector = np.amax(data[:,1:],axis=0);
-    yMax = max(maxVector);
-    
-    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
-    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
-    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
-    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
-    if datasetTitle is 'Ionosphere':
-        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=4);
-    else:
-        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=2);
-    """
-    pcaF1 = [];
-    gF1 = [];
-    wF1 = [];
-    for i in range(0, numOfDim):
-        pcaIndices = np.arange(i, data.shape[0], numOfDim);
-        pcaF1.append(data[pcaIndices, 1]);
-        gF1.append(data[pcaIndices, 2]);
-        wF1.append(data[pcaIndices, 3]);
-    # print np.asarray(gF1);
-    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
-    pcaF1Line = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b-',capsize=4);
-
-    gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
-    gF1Line = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g-',capsize=4);
-
-    wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
-    wF1Line = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r-',capsize=4);
-
-    plt.axis([0,xBound,0,1]);
-    #plt.axis([0,10,0.4,1.0]);
-    plt.xlabel('Number of Principal Components',fontsize=18);
-    plt.ylabel('F1-Score',fontsize=18);
-    plt.title(datasetTitle+' Dataset', fontsize=18);
-    plt.xticks(x);
-    if figSavedPath is None:
-        plt.show();
-    else:
-        plt.savefig(figSavedPath+"twoSamplesatDataOwner_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
 def simulatePrivateLocalPCA(data,maxDim,epsilon):
     k = np.minimum(maxDim,LA.matrix_rank(data));
@@ -293,7 +299,7 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2','B11_10','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
