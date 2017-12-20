@@ -73,13 +73,12 @@ class PCAImpl(object):
         eigVal = np.divide(v1,v2);
         return eigVal;
 
-    def genEigenvectors_power(self,covMatrix,topK):
+    def genEigenvectors_power(self,covMatrix,topK,epsilon=0.01):
         '''
         Compute the eigenvector with power iteration method, multiplying covariance with random vector, 
         converge threshold is setted through epsilon.
         '''
     #    r0 = np.random.rand(covMatrix.shape[0],1);
-        epsilon = 0.01;
         eigValues = np.zeros(topK);
         eigVectors = None;
         convergeRounds = [];

@@ -8,14 +8,15 @@ import sys;
 import os;
 from multiprocessing import Pool;
 from pkg.global_functions import globalFunction as gf;
+from sklearn.preprocessing import StandardScaler;
 
 def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path, delimiter=",");
     x = np.arange(0.1, 1.1, 0.1);
-    tmpDim = data.shape[1] - 1;
-    #tmpDim = 0;
+    #tmpDim = data.shape[1] - 1;
+    tmpDim = 0;
     pcaRes = [];
     gRes = [];
     wRes = [];
@@ -24,12 +25,12 @@ def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
     for i in np.arange(0,190,21):
         tmpRange = np.arange(i+1,i+11);
         #print len(tmpRange);
-        gRes.append(np.divide(data[tmpRange,tmpDim],pcaVal));
+        gRes.append(data[tmpRange,tmpDim]);
     print gRes;
     for i in np.arange(11,200,21):
         tmpRange = np.arange(i,i+10);
         #print len(tmpRange);
-        wRes.append(np.divide(data[tmpRange,tmpDim],pcaVal));
+        wRes.append(data[tmpRange,tmpDim]);
 
     gMean, gStd = gf.calcMeanandStd(np.asarray(gRes));
     gErrorLine = plt.errorbar(x, gMean, yerr=gStd, fmt='r', capsize=4);
@@ -129,18 +130,19 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     
     #cprResult = np.zeros((len(xEpsilons),4));
     numOfTrainingSamples = pureTrainingData.shape[0];
-    #numOfFeature = trainingData.shape[1]-1;
+    #scaler = StandardScaler(copy=False);
+    #scaler.fit(pureTrainingData);
+    #scaler.transform(pureTrainingData);
+
+    pureTrainingData = gf.normByRow(pureTrainingData);
+
     matrixRank = LA.matrix_rank(pureTrainingData);
 
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-    print dpGaussianPCAImpl.L2Sensitivity;
-    #dpGaussianPCAImpl.L2Sensitivity = 1;
-    #dpWishartPCAImpl.L2Sensitivity = 1;
-    print dpGaussianPCAImpl.L2Sensitivity;
-
-    pcaImpl.getEigValueEnergies();
+    
+    pcaEnergies = pcaImpl.getEigValueEnergies();
     cprResult = [];
     cprResult.append(calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
     delta = np.divide(1.0,numOfTrainingSamples);
@@ -168,24 +170,23 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     return np.asarray(cprResult);
 
 def doExp(datasetPath,varianceRatio,numOfRounds):
-    data = np.loadtxt(datasetPath,delimiter=",");
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+
+    rs = ShuffleSplit(n_splits=numOfRounds, test_size=1, random_state=0);
     rs.get_n_splits(data);
     globalPCA = PCAModule.PCAImpl(data[:,1:]);
     numOfFeature = data.shape[1]-1;
     matrixRank = LA.matrix_rank(data[:,1:]);
 
-    rowsNorm = LA.norm(data[:,1:], axis=1);
-    maxL2Norm = np.amax(rowsNorm);
-
     print "Matrix rank of the data is %d." % matrixRank;
-    if data.shape[1]<20:
-        largestReducedFeature = data.shape[1];
-    else:
-        largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
+    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     
-    xEpsilons = np.arange(0.1,1.0,0.1);
+    xEpsilons = np.arange(0.1,1.1,0.1);
     cprResult = np.zeros((len(xEpsilons),4));
     #print xDimensions;
     #p = Pool(numOfRounds);
@@ -194,8 +195,10 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     m =0;
     for train_index, test_index in rs.split(data):
         print "Trail %d" % m;
+        #print len(train_index);
+        #print len(test_index);
         trainingData = data[train_index];
-        pureTrainingData = trainingData[:,1:]/maxL2Norm;
+        pureTrainingData = trainingData[:,1:];
         tmpResult = singleExp(xEpsilons,pureTrainingData,largestReducedFeature);
         cprResult.extend(tmpResult);
         m += 1;
@@ -222,8 +225,8 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german', 'ionosphere'];
-    numOfRounds = 2;
-    varianceRatio = 0.9;
+    numOfRounds = 10;
+    varianceRatio = 1;
     figSavedPath = "./fig/";
     resultSavedPath = "./log/";
     if len(sys.argv) >1:
@@ -232,11 +235,11 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE','YaleB','diabetes','german','Amazon','p53 Mutant','diabetes','MovieLens','ionosphere','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
+        datasets = ['diabetes','german','CNAE_11','YaleB','diabetes','Amazon','p53 Mutant','diabetes','MovieLens','ionosphere','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            #result = doExp(datasetPath,varianceRatio,numOfRounds);
-            #np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            result = doExp(datasetPath,varianceRatio,numOfRounds);
+            np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
-            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=figSavedPath);
+            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
