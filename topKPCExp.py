@@ -11,7 +11,7 @@ from pkg.global_functions import globalFunction as gf;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
 import scipy.sparse as sparse;
 
-def singleExp(pureTrainingData):
+def singleExp(pureTrainingData,targetEpsilon):
 
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
 
@@ -27,7 +27,6 @@ def singleExp(pureTrainingData):
     cprResult = [];
     gaussianResult = [];
     wishartResult = [];
-    targetEpsilon = 0.5;
     delta = np.divide(1.0,pureTrainingData.shape[0]);
     # print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
 
@@ -48,8 +47,11 @@ def singleExp(pureTrainingData):
 
 
 def doExp(datasetPath, varianceRatio, numOfRounds):
-    data = np.loadtxt(datasetPath, delimiter=",");
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.01, random_state=0);
     rs.get_n_splits(data);
 
 
@@ -58,10 +60,11 @@ def doExp(datasetPath, varianceRatio, numOfRounds):
     # allResults = [];
     cprResult = [];
     m = 0;
+    targetEpsilon = 0.9;
     for train_index, test_index in rs.split(data):
         print "Trail %d" % m;
         trainingData = data[train_index];
-        tmpResult = singleExp(trainingData);
+        tmpResult = singleExp(trainingData,targetEpsilon);
         cprResult.extend(tmpResult);
         m += 1;
         # print tmpResult.shape;
