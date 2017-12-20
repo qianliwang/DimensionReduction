@@ -6,6 +6,7 @@ from sklearn.model_selection import ShuffleSplit;
 import sys;
 import os;
 from multiprocessing import Pool;
+from sklearn.preprocessing import StandardScaler;
 
 def calcEigRatios(eigValues):
     eigSum = np.sum(eigValues);
@@ -19,6 +20,10 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     
     #cprResult = np.zeros((len(xEpsilons),4));
     numOfTrainingSamples = pureTrainingData.shape[0];
+    scaler = StandardScaler(copy=False);
+    # print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
     #numOfFeature = trainingData.shape[1]-1;
     matrixRank = LA.matrix_rank(pureTrainingData);
 

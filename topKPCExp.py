@@ -10,8 +10,14 @@ from multiprocessing import Pool;
 from pkg.global_functions import globalFunction as gf;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
 import scipy.sparse as sparse;
+from sklearn.preprocessing import StandardScaler;
 
 def singleExp(pureTrainingData,targetEpsilon):
+
+    scaler = StandardScaler(copy=False);
+    # print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
 
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
 
