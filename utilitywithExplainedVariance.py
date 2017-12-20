@@ -70,7 +70,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     
-    xEpsilons = np.arange(0.1,1.0,0.1);
+    xEpsilons = np.arange(0.1,1.1,0.1);
     cprResult = np.zeros((len(xEpsilons),4));
     #print xDimensions;
     #p = Pool(numOfRounds);
