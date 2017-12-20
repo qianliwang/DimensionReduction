@@ -14,13 +14,14 @@ from multiprocessing import Pool;
 import scipy.sparse as sparse;
 from sklearn.preprocessing import StandardScaler;
 from pkg.global_functions import globalFunction as gf;
-
+from matplotlib.ticker import MultipleLocator;
+from time import time;
 
 def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path, delimiter=",");
-    if datasetTitle is 'CNAE_2':
+    if datasetTitle is 'CNAE':
         numOfDim = data.shape[0] / 10;
     else:
         numOfDim = data.shape[0] / 6;
@@ -64,12 +65,18 @@ def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
     # plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Number of Principal Components', fontsize=18);
     plt.ylabel('F1-Score', fontsize=18);
-    plt.title(datasetTitle + ' Dataset', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
+    ax = plt.gca();
+    if x[-1] > 100:
+        majorLocator = MultipleLocator(12);
+    else:
+        majorLocator = MultipleLocator(4);
+    ax.xaxis.set_major_locator(majorLocator);
     if figSavedPath is None:
         plt.show();
     else:
-        plt.savefig(figSavedPath + "twoSamplesatDataOwner_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
+        plt.savefig(figSavedPath + "dataOwner_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
 
 def getApproxEigval(covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
@@ -290,7 +297,7 @@ if __name__ == "__main__":
     varianceRatio = 0.9
     numOfSamples = 2;
     numOfDimensions = 30;
-    figSavedPath = "./log/";
+    figSavedPath = "./fig/";
     resultSavedPath = "./log/";
     isLinearSVM = False;
     if len(sys.argv) > 1:
@@ -299,10 +306,12 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','B11_10','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE','YaleB','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
+            timeStr = str(time());
+            print timeStr+".output";
             #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"dataOwner_"+dataset+".output",figSavedPath=None);
+            #drawF1Score(dataset,data=None,path = resultSavedPath+"dataOwner_"+dataset+".output",figSavedPath=figSavedPath);

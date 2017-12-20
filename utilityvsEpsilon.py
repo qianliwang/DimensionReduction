@@ -57,7 +57,7 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     yMin = (yMin - 0.1) if (yMin - 0.1) > 0 else 0;
     yMax = (yMax + 0.1) if (yMax + 0.1) < 1 else 1;
     print yMin,yMax;
-    plt.axis([0.05,1.05,yMin,yMax]);
+    plt.axis([0.05,1.05,0.4,1.05]);
     plt.legend([pcaF1Line,gF1Line,wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
@@ -302,5 +302,5 @@ if __name__ == "__main__":
             #result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=figSavedPath);
-            drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=figSavedPath);
-            drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);
+            #drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=figSavedPath);
+            #drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);
