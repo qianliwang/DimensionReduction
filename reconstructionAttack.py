@@ -191,9 +191,13 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
                 if minWeightedDistance > weightedDistance:
                     minWeightedDistance = weightedDistance;
                     minPCAImpl = tmpPCAImpl;
+                    minClusterIndex = i;
+
                 print "Weighted Cosine Distance is: %f" % (weightedDistance);
                 print "Optimization target: %f" %(weightedDistance + (tmpTotalEnergy/totalEnergy));
                 print "\n";
+
+        print "Minimum cluster index is %d" % minClusterIndex;
 
         for i in range(numOfCluster):
             singleClusterData = pureTrainingData[kmeans.labels_ == i];
