@@ -237,7 +237,9 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
             res = singleExp(pureTrainingData,j,numOfPCs,projMatrix,energies,totalEnergy);
             wholeRes.append(res);
         wholeArray = np.asarray(wholeRes);
-        print wholeArray;
+        for res in wholeArray:
+            print "%d,%f,%f,%f" % (res[0],res[1],res[2],res[3]);
+        #print wholeArray;
 
 def testKMeans_GroundTruth():
     
