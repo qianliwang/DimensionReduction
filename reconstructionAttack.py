@@ -168,11 +168,12 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
                 minClusterIndex = i;
                 minRawSimDist = rawSimDist;
                 minOptimizationTarget = optimizationTarget;
+                minClusterSampleRatio = singleClusterData.shape[0]/trainingData.shape[0];
             # print "\n";
 
     print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (
     minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget);
-    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget];
+    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minClusterSampleRatio];
     '''
     for i in range(numOfCluster):
         singleClusterData = pureTrainingData[kmeans.labels_ == i];
@@ -224,8 +225,8 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
         totalEnergy = np.sum(pcaImpl.eigValues);
         print "The total eigenvalue energies is %f, to achieve %f percentage, it needs %d principal components." % (totalEnergy,varianceRatio,numOfPCs);
 
-        numOfCluster = pureTrainingData.shape[0]/pureTrainingData.shape[1];
-        print "Maximum number of clusters; %d"% numOfCluster;
+        numOfCluster = pureTrainingData.shape[0]/numOfPCs;
+        print "Maximum number of clusters; %d" % numOfCluster;
 
         '''
         for i in range(len(composeData)):
