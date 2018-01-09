@@ -331,6 +331,7 @@ if __name__ == "__main__":
     varianceRatio = 0.9;
     numOfRounds = 1;
     subject = "diabetes";
+    path = "./input/"+subject+"_prePCA";
     if len(sys.argv) > 1:
         subject = sys.argv[1];
         path = "./input/"+subject+"_prePCA";
