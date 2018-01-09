@@ -16,18 +16,18 @@ def drawResult(datasetTitle, data=None, path=None, figSavedPath=None):
     x = data[:, 0];
     print "Number of points on x-axis: %d" % len(x);
 
-    rawDistLine, = plt.plot(x, data[:,1], 'g-');
+    #rawDistLine, = plt.plot(x, data[:,1], 'g-');
 
     weightedDistLine, = plt.plot(x, data[:,2], 'r-');
     optimizationTargetLine, = plt.plot(x, data[:,3], 'b-');
 
-    maxVector = np.amax(data[:,1:],axis=0);
+    maxVector = np.amax(data[:,2:],axis=0);
     yMax = max(maxVector);
 
 
     plt.axis([0, x[-1] + 1, 0, yMax+1]);
     # plt.axis([0,10,0.4,1.0]);
-    plt.legend([rawDistLine, weightedDistLine, optimizationTargetLine], ['raw', 'weighted', 'opTarget'], loc=4);
+    #plt.legend([rawDistLine, weightedDistLine, optimizationTargetLine], ['raw', 'weighted', 'opTarget'], loc=1);
     plt.xlabel('Number of Clusters', fontsize=18);
     plt.ylabel('dist', fontsize=18);
     plt.title(datasetTitle, fontsize=18);
@@ -205,11 +205,12 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
                 minClusterIndex = i;
                 minRawSimDist = rawSimDist;
                 minOptimizationTarget = optimizationTarget;
+                minClusterSampleRatio = singleClusterData.shape[0]/trainingData.shape[0];
             # print "\n";
 
     print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (
     minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget);
-    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget];
+    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minClusterSampleRatio];
     '''
     for i in range(numOfCluster):
         singleClusterData = pureTrainingData[kmeans.labels_ == i];
@@ -233,6 +234,7 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
     SVMModule.SVMClf.rbfSVM(approPCAReducedData,data[:,0],testApproPCAReducedData,testData[:,0]);
     '''
 def testKMeans(path,numOfRounds,varianceRatio,subject):
+    print "*************** %s ****************" % path;
     data = np.loadtxt(path,delimiter=",");
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.1, random_state=0);
     rs.get_n_splits(data);
@@ -260,8 +262,8 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
         totalEnergy = np.sum(pcaImpl.eigValues);
         print "The total eigenvalue energies is %f, to achieve %f percentage, it needs %d principal components." % (totalEnergy,varianceRatio,numOfPCs);
 
-        numOfCluster = pureTrainingData.shape[0]/pureTrainingData.shape[1];
-        print "Maximum number of clusters; %d"% numOfCluster;
+        numOfCluster = pureTrainingData.shape[0]/numOfPCs;
+        print "Maximum number of clusters; %d" % numOfCluster;
 
         '''
         for i in range(len(composeData)):
@@ -388,8 +390,8 @@ if __name__ == "__main__":
     varianceRatio = 0.9;
     numOfRounds = 1;
 
-    subject = "diabetes";
+    subject = "german";
     path = "./input/"+subject+"_prePCA";
-
-    testKMeans(path,numOfRounds,varianceRatio,subject);
-    
+    resPath = "./log/privateSubspace/"+subject+".output";
+    #testKMeans(path,numOfRounds,varianceRatio,subject);
+    drawResult(subject,None,resPath,None);
