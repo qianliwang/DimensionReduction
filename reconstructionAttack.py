@@ -241,7 +241,7 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
             wholeRes.append(res);
         wholeArray = np.asarray(wholeRes);
         for res in wholeArray:
-            print "%d,%f,%f,%f" % (res[0],res[1],res[2],res[3]);
+            print "%d,%f,%f,%f,%f" % (res[0],res[1],res[2],res[3],res[4]);
         #print wholeArray;
 
 def testKMeans_GroundTruth():
