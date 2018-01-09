@@ -168,7 +168,7 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
                 minClusterIndex = i;
                 minRawSimDist = rawSimDist;
                 minOptimizationTarget = optimizationTarget;
-                minClusterSampleRatio = singleClusterData.shape[0]/trainingData.shape[0];
+                minClusterSampleRatio = 1.0*singleClusterData.shape[0]/trainingData.shape[0];
             # print "\n";
 
     print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (
