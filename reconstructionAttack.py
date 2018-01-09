@@ -152,7 +152,7 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
             minWeightedDistance = 10000;
             for i in range(j):
                 singleClusterData = pureTrainingData[kmeans.labels_ == i];
-                print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
+                #print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
                 '''
                 clusterIndices = np.asarray(np.where(kmeans.labels_ == i));
                 #Positive indices intersection and union
