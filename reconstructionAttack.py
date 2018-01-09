@@ -6,6 +6,7 @@ from sklearn.cluster import KMeans;
 from pkg.svm import SVMModule;
 from sklearn.model_selection import ShuffleSplit;
 from sklearn.preprocessing import StandardScaler;
+import sys;
 
 def displayImg(vector):
     tmp = np.reshape(vector,(30,30));
@@ -195,6 +196,7 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
     SVMModule.SVMClf.rbfSVM(approPCAReducedData,data[:,0],testApproPCAReducedData,testData[:,0]);
     '''
 def testKMeans(path,numOfRounds,varianceRatio,subject):
+    print "*************** %s ****************" % path;
     data = np.loadtxt(path,delimiter=",");
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.1, random_state=0);
     rs.get_n_splits(data);
@@ -325,32 +327,11 @@ def testWithSyntheticData():
 if __name__ == "__main__":
     #testWithSyntheticData();
     #testKMeans_GroundTruth();
-    '''
-    posiPath = "../faceDetection_Android/P/trainingFile";
-    posiData = np.genfromtxt(posiPath,delimiter="\t")[:,:-1];
-    negPath = "../faceDetection_Android/N/trainingFileNeg";
-    negData = np.genfromtxt(negPath,delimiter="\t")[:,:-1];
-    
-    colPOnes = np.ones((len(posiData),1));
-    colNOnes = np.ones((len(negData),1));
-    colNOnes = -1*colNOnes;
-    posiData = np.append(colPOnes,posiData,axis=1);
-    negData = np.append(colNOnes,negData,axis=1);
-    
-    trainingData = posiData[:150,:];
-    trainingData = np.append(trainingData,negData[:200,:],axis=0);
-    testingData = posiData[150:,:];
-    testingData = np.append(testingData,negData[200:,:],axis=0);
-    print trainingData.shape;
-    
-    np.savetxt("./face_prePCA_training",trainingData,delimiter=",",fmt='%d');
-    np.savetxt("./face_prePCA_testing",testingData,delimiter=",",fmt='%d');
-    '''
     varianceRatio = 0.9;
     numOfRounds = 1;
-
     subject = "diabetes";
-    path = "./input/"+subject+"_prePCA";
-
+    if len(sys.argv) > 1:
+        subject = sys.argv[1];
+        path = "./input/"+subject+"_prePCA";
     testKMeans(path,numOfRounds,varianceRatio,subject);
     
