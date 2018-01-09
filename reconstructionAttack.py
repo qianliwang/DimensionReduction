@@ -107,6 +107,93 @@ def testWithImg():
         #displayImg(negReconstData);
         print "+++++++++++++++++++++++++++++++++++++++++";
     '''
+
+def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, totalEnergy):
+
+    kmeans = KMeans(n_clusters=targetClusters, random_state=0, n_jobs=5).fit(trainingData);
+    minPCAImpl = None;
+    minWeightedDistance = 10000;
+    for i in range(targetClusters):
+        singleClusterData = trainingData[kmeans.labels_ == i];
+        # print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
+        '''
+        clusterIndices = np.asarray(np.where(kmeans.labels_ == i));
+        #Positive indices intersection and union
+        intersectionIndices = np.intersect1d(clusterIndices[0],posiIndices[0],True);
+        unionIndices = np.union1d(clusterIndices[0],posiIndices[0]);
+        print "Jaccard similarity of positive indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
+
+        #Negative indices intersection and union
+        intersectionIndices = np.intersect1d(clusterIndices[0],negIndices[0],True);
+        unionIndices = np.union1d(clusterIndices[0],negIndices[0]);
+        print "Jaccard similarity of negative indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
+        '''
+        if singleClusterData.shape[0] >= numOfPCs:
+            tmpPCAImpl = PCAModule.PCAImpl(singleClusterData);
+            tmpPCAImpl.getPCs();
+            # print "Approximate PC's mean vector:";
+            # print tmpPCAImpl.mean;
+            # print "Eigenvalue energies:";
+            # print tmpPCAImpl.getEigValueEnergies();
+            tmpTotalEnergy = np.sum(tmpPCAImpl.eigValues);
+            # print "Total energy of cluster %d data is %f, it takes over %f of the whole data energy." % (i,tmpTotalEnergy,(tmpTotalEnergy/totalEnergy));
+            """
+            Since the PCs contain possible positive and negative values,
+            so the cosine similarity is between -1 and 1,
+            then the cosine distance is 1 - cosine similarity, then it ranges
+            between 0 and 2.
+            """
+            simDist = scipy.spatial.distance.cdist(projMatrix.T[:numOfPCs], tmpPCAImpl.projMatrix.T[:numOfPCs],
+                                                   'cosine');
+            # print simDist.diagonal();
+            rawSimDist = np.sum(simDist.diagonal());
+            # print "Cluster %d Cosine Distance in total: %f" % (i, rawSimDist);
+            '''
+            approSim = 1 - simDist.diagonal();
+            print "Approximate Similarity:"
+            print approSim;
+            '''
+            weightedDistance = 0;
+            for j in range(numOfPCs):
+                weightedDistance = weightedDistance + simDist.diagonal()[j] * energies[j];
+
+            # print "Weighted Cosine Distance is: %f" % (weightedDistance);
+            optimizationTarget = weightedDistance + (tmpTotalEnergy / totalEnergy);
+            # print "Optimization target: %f" % optimizationTarget;
+
+            if minWeightedDistance > weightedDistance:
+                minWeightedDistance = weightedDistance;
+                minPCAImpl = tmpPCAImpl;
+                minClusterIndex = i;
+                minRawSimDist = rawSimDist;
+                minOptimizationTarget = optimizationTarget;
+            # print "\n";
+
+    print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (
+    minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget);
+    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget];
+    '''
+    for i in range(numOfCluster):
+        singleClusterData = pureTrainingData[kmeans.labels_ == i];
+        reducedAData = minPCAImpl.transform(singleClusterData, numOfPCs);
+        # np.savetxt(aPCAPath+str(i),reducedAData,delimiter=",",fmt='%1.2f');
+
+        reducedGData = pcaImpl.transform(singleClusterData, numOfPCs);
+        # np.savetxt(gPCAPath+str(i),reducedGData,delimiter=",",fmt='%1.2f');
+        # print pcaImpl.transform(singleClusterData,numOfPCs);
+
+    oriPCAReducedData = pcaImpl.transform(pureTrainingData, numOfPCs);
+    approPCAReducedData = tmpPCAImpl.transform(pureTrainingData, numOfPCs);
+    # print composeData.shape;
+
+    testOriPCAReducedData = pcaImpl.transform(pureTestingData, numOfPCs);
+    testApproPCAReducedData = tmpPCAImpl.transform(pureTestingData, numOfPCs);
+    # print testData[:,1:].shape;
+    
+    SVMModule.SVMClf.rbfSVM(oriPCAReducedData,data[:,0],testOriPCAReducedData,testData[:,0]);
+    print("=====================================");
+    SVMModule.SVMClf.rbfSVM(approPCAReducedData,data[:,0],testApproPCAReducedData,testData[:,0]);
+    '''
 def testKMeans(path,numOfRounds,varianceRatio,subject):
     data = np.loadtxt(path,delimiter=",");
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.1, random_state=0);
@@ -138,97 +225,20 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
         numOfCluster = pureTrainingData.shape[0]/pureTrainingData.shape[1];
         print "Maximum number of clusters; %d"% numOfCluster;
 
-        kmeans = KMeans(n_clusters=numOfCluster, random_state=0, n_jobs=5).fit(pureTrainingData);
         '''
         for i in range(len(composeData)):
             print "%d , %d" % (i,kmeans.labels_[i]);
         '''
         gPCAPath = "./"+subject+"_c";
         aPCAPath = "./"+subject+"_appro_c";
+        wholeRes = [];
         for j in range(2,numOfCluster+1):
             print "%d-means" % j;
-            kmeans = KMeans(n_clusters=j, random_state=0, n_jobs=5).fit(pureTrainingData);
-            minPCAImpl = None;
-            minWeightedDistance = 10000;
-            for i in range(j):
-                singleClusterData = pureTrainingData[kmeans.labels_ == i];
-                #print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
-                '''
-                clusterIndices = np.asarray(np.where(kmeans.labels_ == i));
-                #Positive indices intersection and union
-                intersectionIndices = np.intersect1d(clusterIndices[0],posiIndices[0],True);
-                unionIndices = np.union1d(clusterIndices[0],posiIndices[0]);
-                print "Jaccard similarity of positive indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
-           
-                #Negative indices intersection and union
-                intersectionIndices = np.intersect1d(clusterIndices[0],negIndices[0],True);
-                unionIndices = np.union1d(clusterIndices[0],negIndices[0]);
-                print "Jaccard similarity of negative indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
-                '''
-                if singleClusterData.shape[0] >= numOfPCs:
-                    tmpPCAImpl = PCAModule.PCAImpl(singleClusterData);
-                    tmpPCAImpl.getPCs();
-                    #print "Approximate PC's mean vector:";
-                    #print tmpPCAImpl.mean;
-                    #print "Eigenvalue energies:";
-                    #print tmpPCAImpl.getEigValueEnergies();
-                    tmpTotalEnergy = np.sum(tmpPCAImpl.eigValues);
-                    #print "Total energy of cluster %d data is %f, it takes over %f of the whole data energy." % (i,tmpTotalEnergy,(tmpTotalEnergy/totalEnergy));
-                    """
-                    Since the PCs contain possible positive and negative values,
-                    so the cosine similarity is between -1 and 1,
-                    then the cosine distance is 1 - cosine similarity, then it ranges
-                    between 0 and 2.
-                    """
-                    simDist = scipy.spatial.distance.cdist(projMatrix.T[:numOfPCs],tmpPCAImpl.projMatrix.T[:numOfPCs],'cosine');
-                    #print simDist.diagonal();
-                    rawSimDist = np.sum(simDist.diagonal());
-                    #print "Cluster %d Cosine Distance in total: %f" % (i, rawSimDist);
-                    '''
-                    approSim = 1 - simDist.diagonal();
-                    print "Approximate Similarity:"
-                    print approSim;
-                    '''
-                    weightedDistance = 0;
-                    for j in range(numOfPCs):
-                        weightedDistance = weightedDistance + simDist.diagonal()[j]*energies[j];
+            res = singleExp(pureTrainingData,j,numOfPCs,projMatrix,energies,totalEnergy);
+            wholeRes.append(res);
+        wholeArray = np.asarray(wholeRes);
+        print wholeArray;
 
-                    #print "Weighted Cosine Distance is: %f" % (weightedDistance);
-                    optimizationTarget = weightedDistance + (tmpTotalEnergy/totalEnergy);
-                    #print "Optimization target: %f" % optimizationTarget;
-
-                    if minWeightedDistance > weightedDistance:
-                        minWeightedDistance = weightedDistance;
-                        minPCAImpl = tmpPCAImpl;
-                        minClusterIndex = i;
-                        minRawSimDist = rawSimDist;
-                        minOptimizationTarget = optimizationTarget;
-                    print "\n";
-
-            print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (minClusterIndex,minRawSimDist,minWeightedDistance,minOptimizationTarget);
-
-            for i in range(numOfCluster):
-                singleClusterData = pureTrainingData[kmeans.labels_ == i];
-                reducedAData = minPCAImpl.transform(singleClusterData,numOfPCs);
-                #np.savetxt(aPCAPath+str(i),reducedAData,delimiter=",",fmt='%1.2f');
-
-                reducedGData = pcaImpl.transform(singleClusterData,numOfPCs);
-                #np.savetxt(gPCAPath+str(i),reducedGData,delimiter=",",fmt='%1.2f');
-                #print pcaImpl.transform(singleClusterData,numOfPCs);
-
-
-            oriPCAReducedData = pcaImpl.transform(pureTrainingData,numOfPCs);
-            approPCAReducedData = tmpPCAImpl.transform(pureTrainingData,numOfPCs);
-            #print composeData.shape;
-
-            testOriPCAReducedData = pcaImpl.transform(pureTestingData,numOfPCs);
-            testApproPCAReducedData = tmpPCAImpl.transform(pureTestingData,numOfPCs);
-            #print testData[:,1:].shape;
-            '''
-            SVMModule.SVMClf.rbfSVM(oriPCAReducedData,data[:,0],testOriPCAReducedData,testData[:,0]);
-            print("=====================================");
-            SVMModule.SVMClf.rbfSVM(approPCAReducedData,data[:,0],testApproPCAReducedData,testData[:,0]);
-            '''
 def testKMeans_GroundTruth():
     
     posiPath = "../faceDetection_Android/P/trainingFile";
