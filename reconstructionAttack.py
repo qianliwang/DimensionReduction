@@ -8,6 +8,9 @@ from sklearn.model_selection import ShuffleSplit;
 from sklearn.preprocessing import StandardScaler;
 import matplotlib.pyplot as plt;
 from matplotlib.ticker import MultipleLocator;
+from scipy.spatial.distance import squareform;
+from scipy.spatial.distance import pdist, jaccard, cdist;
+
 
 def drawResult(datasetTitle, data=None, path=None, figSavedPath=None):
     plt.clf();
@@ -20,7 +23,7 @@ def drawResult(datasetTitle, data=None, path=None, figSavedPath=None):
 
     weightedDistLine, = plt.plot(x, data[:,2], 'r-');
     optimizationTargetLine, = plt.plot(x, data[:,3], 'b-');
-
+    clusterSampleRatioLine = plt.plot(x, data[:,4], 'p-');
     maxVector = np.amax(data[:,2:],axis=0);
     yMax = max(maxVector);
 
@@ -70,13 +73,13 @@ def projAndReconstruct(testData,projMatrix,meanVector):
        
         avgReconstData = np.average(reconstData,axis=0);
         '''
-        reconDist = scipy.spatial.distance.cdist(avgTestData,reconstData,'euclidean');
+        reconDist = cdist(avgTestData,reconstData,'euclidean');
         diagDist = reconDist.diagonal();
         print np.average(diagDist);
         
         print "===============================";
         for i in range(0,len(avgTestData)):
-            print scipy.spatial.distance.cdist([avgTestData[i]],[reconstData[i]],'euclidean');
+            print cdist([avgTestData[i]],[reconstData[i]],'euclidean');
         '''
     else:
         avgReconstData = reconstData;
@@ -148,23 +151,21 @@ def testWithImg():
 
 def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, totalEnergy):
 
-    kmeans = KMeans(n_clusters=targetClusters, random_state=0, n_jobs=5).fit(trainingData);
+    kmeans = KMeans(n_clusters=targetClusters, random_state=0, n_jobs=10).fit(trainingData);
     minPCAImpl = None;
     minWeightedDistance = 10000;
     for i in range(targetClusters):
         singleClusterData = trainingData[kmeans.labels_ == i];
         # print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
+        sampleIndices = np.where(kmeans.labels_ == i);
+
         '''
         clusterIndices = np.asarray(np.where(kmeans.labels_ == i));
         #Positive indices intersection and union
-        intersectionIndices = np.intersect1d(clusterIndices[0],posiIndices[0],True);
-        unionIndices = np.union1d(clusterIndices[0],posiIndices[0]);
-        print "Jaccard similarity of positive indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
+        print "Jaccard similarity of positive indices: %f" % calcJaccardSimilarity(clusterIndices[0],posiIndices[0]);
 
         #Negative indices intersection and union
-        intersectionIndices = np.intersect1d(clusterIndices[0],negIndices[0],True);
-        unionIndices = np.union1d(clusterIndices[0],negIndices[0]);
-        print "Jaccard similarity of negative indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
+        print "Jaccard similarity of negative indices: %f" % calcJaccardSimilarity(clusterIndices[0],negIndices[0]);
         '''
         if singleClusterData.shape[0] >= numOfPCs:
             tmpPCAImpl = PCAModule.PCAImpl(singleClusterData);
@@ -205,13 +206,14 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
                 minClusterIndex = i;
                 minRawSimDist = rawSimDist;
                 minOptimizationTarget = optimizationTarget;
-                minClusterSampleRatio = singleClusterData.shape[0]/trainingData.shape[0];
+                minSampleRatio = 1.0*singleClusterData.shape[0]/trainingData.shape[0];
+                minSampleIndices = sampleIndices[0];
             # print "\n";
 
     print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (
     minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget);
-    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minClusterSampleRatio];
-    '''
+    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minSampleRatio], minSampleIndices;
+    """
     for i in range(numOfCluster):
         singleClusterData = pureTrainingData[kmeans.labels_ == i];
         reducedAData = minPCAImpl.transform(singleClusterData, numOfPCs);
@@ -232,7 +234,7 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
     SVMModule.SVMClf.rbfSVM(oriPCAReducedData,data[:,0],testOriPCAReducedData,testData[:,0]);
     print("=====================================");
     SVMModule.SVMClf.rbfSVM(approPCAReducedData,data[:,0],testApproPCAReducedData,testData[:,0]);
-    '''
+    """
 def testKMeans(path,numOfRounds,varianceRatio,subject):
     print "*************** %s ****************" % path;
     data = np.loadtxt(path,delimiter=",");
@@ -271,16 +273,33 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
         '''
         gPCAPath = "./"+subject+"_c";
         aPCAPath = "./"+subject+"_appro_c";
-        wholeRes = [];
-        numOfCluster = 5;
+        clusterRes = [];
+        clusterSampleIndices = [];
+        numOfCluster = 20;
         for j in range(2,numOfCluster+1):
             print "%d-means" % j;
-            res = singleExp(pureTrainingData,j,numOfPCs,projMatrix,energies,totalEnergy);
-            wholeRes.append(res);
-        wholeArray = np.asarray(wholeRes);
-        for res in wholeArray:
-            print "%d,%f,%f,%f" % (res[0],res[1],res[2],res[3]);
+            res,minSampleIndices = singleExp(pureTrainingData,j,numOfPCs,projMatrix,energies,totalEnergy);
+            clusterRes.append(res);
+            clusterSampleIndices.append(minSampleIndices);
+        clusterResArray = np.asarray(clusterRes);
+        sortedWeightedDistIndices = np.argsort(clusterResArray[:,2]);
+        print sortedWeightedDistIndices;
+        sortedResArray = clusterResArray[sortedWeightedDistIndices];
+        sampleIndicesArray = np.asarray(clusterSampleIndices);
+        sortedClusterSampleIndices = sampleIndicesArray[sortedWeightedDistIndices];
+        for res in sortedResArray:
+            print "%d,%f,%f,%f,%f" % (res[0],res[1],res[2],res[3],res[4]);
+        jacSimMat = np.zeros((sortedClusterSampleIndices.shape[0],sortedClusterSampleIndices.shape[0]));
+        for i in range(sortedClusterSampleIndices.shape[0]):
+            for j in range(i,sortedClusterSampleIndices.shape[0]):
+                jacSimMat[i,j] = calcJaccardSimilarity(sortedClusterSampleIndices[i],sortedClusterSampleIndices[j]);
+        print jacSimMat[:5,:5];
         #print wholeArray;
+
+def calcJaccardSimilarity(xa,xb):
+    intersectionIndices = np.intersect1d(xa, xb, True);
+    unionIndices = np.union1d(xa, xb);
+    return (1.0 * len(intersectionIndices) / len(unionIndices));
 
 def testKMeans_GroundTruth():
     
@@ -390,8 +409,8 @@ if __name__ == "__main__":
     varianceRatio = 0.9;
     numOfRounds = 1;
 
-    subject = "german";
+    subject = "diabetes";
     path = "./input/"+subject+"_prePCA";
     resPath = "./log/privateSubspace/"+subject+".output";
-    #testKMeans(path,numOfRounds,varianceRatio,subject);
-    drawResult(subject,None,resPath,None);
+    testKMeans(path,numOfRounds,varianceRatio,subject);
+    #drawResult(subject,None,resPath,None);
