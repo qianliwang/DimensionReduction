@@ -209,10 +209,13 @@ def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, tota
                 minSampleRatio = 1.0*singleClusterData.shape[0]/trainingData.shape[0];
                 minSampleIndices = sampleIndices[0];
             # print "\n";
-
-    print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f." % (
-    minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget);
-    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minSampleRatio], minSampleIndices;
+    projTrainingData = minPCAImpl.transform(trainingData,numOfPCs);
+    reconstTrainData = minPCAImpl.reconstruct(projTrainingData);
+    NMAE = calcNormalizedMeanAbsoluteError(trainingData,reconstTrainData);
+    clusterCenterDist = np.sum(np.abs(minPCAImpl.mean));
+    print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f, NMAE is %f." % (
+    minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget, NMAE);
+    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minSampleRatio,clusterCenterDist, NMAE], minSampleIndices;
     """
     for i in range(numOfCluster):
         singleClusterData = pureTrainingData[kmeans.labels_ == i];
@@ -283,12 +286,13 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
             clusterSampleIndices.append(minSampleIndices);
         clusterResArray = np.asarray(clusterRes);
         sortedWeightedDistIndices = np.argsort(clusterResArray[:,2]);
-        print sortedWeightedDistIndices;
+        #print sortedWeightedDistIndices;
         sortedResArray = clusterResArray[sortedWeightedDistIndices];
+        for res in sortedResArray:
+            print "%d,%f,%f,%f,%f,%f,%f" % (res[0],res[1],res[2],res[3],res[4],res[5],res[6]);
+
         sampleIndicesArray = np.asarray(clusterSampleIndices);
         sortedClusterSampleIndices = sampleIndicesArray[sortedWeightedDistIndices];
-        for res in sortedResArray:
-            print "%d,%f,%f,%f,%f" % (res[0],res[1],res[2],res[3],res[4]);
         jacSimMat = np.zeros((sortedClusterSampleIndices.shape[0],sortedClusterSampleIndices.shape[0]));
         for i in range(sortedClusterSampleIndices.shape[0]):
             for j in range(i,sortedClusterSampleIndices.shape[0]):
@@ -300,6 +304,13 @@ def calcJaccardSimilarity(xa,xb):
     intersectionIndices = np.intersect1d(xa, xb, True);
     unionIndices = np.union1d(xa, xb);
     return (1.0 * len(intersectionIndices) / len(unionIndices));
+
+def calcNormalizedMeanAbsoluteError(originalData,reconstructedData):
+    diffMat = reconstructedData - originalData;
+    resMat = np.abs(np.divide(diffMat,originalData));
+    colSum = np.sum(resMat,axis=0);
+    res = np.sum(colSum)/(originalData.shape[0]*originalData.shape[1]);
+    return res;
 
 def testKMeans_GroundTruth():
     
