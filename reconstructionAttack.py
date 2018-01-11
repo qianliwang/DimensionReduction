@@ -235,7 +235,6 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
         aPCAPath = "./"+subject+"_appro_c";
         clusterRes = [];
         clusterSampleIndices = [];
-        numOfCluster = 20;
         for j in range(2,numOfCluster+1):
             print "%d-means" % j;
             res,minSampleIndices = singleExp(pureTrainingData,j,numOfPCs,projMatrix,energies,totalEnergy);
@@ -243,7 +242,6 @@ def testKMeans(path,numOfRounds,varianceRatio,subject):
             clusterSampleIndices.append(minSampleIndices);
         clusterResArray = np.asarray(clusterRes);
         sortedWeightedDistIndices = np.argsort(clusterResArray[:,2]);
-        print sortedWeightedDistIndices;
         sortedResArray = clusterResArray[sortedWeightedDistIndices];
         sampleIndicesArray = np.asarray(clusterSampleIndices);
         sortedClusterSampleIndices = sampleIndicesArray[sortedWeightedDistIndices];
