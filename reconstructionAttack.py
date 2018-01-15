@@ -4,6 +4,49 @@ import scipy;
 from pkg.dimReduction import PCAModule;
 from sklearn.cluster import KMeans;
 from pkg.svm import SVMModule;
+from sklearn.model_selection import ShuffleSplit;
+from sklearn.preprocessing import StandardScaler;
+import matplotlib.pyplot as plt;
+from matplotlib.ticker import MultipleLocator;
+from scipy.spatial.distance import squareform;
+from scipy.spatial.distance import pdist, jaccard, cdist;
+
+
+def drawResult(datasetTitle, data=None, path=None, figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path, delimiter=",");
+    x = data[:, 0];
+    print "Number of points on x-axis: %d" % len(x);
+
+    #rawDistLine, = plt.plot(x, data[:,1], 'g-');
+
+    weightedDistLine, = plt.plot(x, data[:,2], 'r-');
+    optimizationTargetLine, = plt.plot(x, data[:,3], 'b-');
+    clusterSampleRatioLine = plt.plot(x, data[:,4], 'p-');
+    maxVector = np.amax(data[:,2:],axis=0);
+    yMax = max(maxVector);
+
+
+    plt.axis([0, x[-1] + 1, 0, yMax+1]);
+    # plt.axis([0,10,0.4,1.0]);
+    #plt.legend([rawDistLine, weightedDistLine, optimizationTargetLine], ['raw', 'weighted', 'opTarget'], loc=1);
+    plt.xlabel('Number of Clusters', fontsize=18);
+    plt.ylabel('dist', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
+    plt.xticks(x);
+    ax = plt.gca();
+    largestXVal = x[-1];
+    if largestXVal > 50:
+        majorLocator = MultipleLocator(8);
+    else:
+        majorLocator = MultipleLocator(2);
+    ax.xaxis.set_major_locator(majorLocator);
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath + "cluster_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
+
 
 def displayImg(vector):
     tmp = np.reshape(vector,(30,30));
@@ -30,13 +73,13 @@ def projAndReconstruct(testData,projMatrix,meanVector):
        
         avgReconstData = np.average(reconstData,axis=0);
         '''
-        reconDist = scipy.spatial.distance.cdist(avgTestData,reconstData,'euclidean');
+        reconDist = cdist(avgTestData,reconstData,'euclidean');
         diagDist = reconDist.diagonal();
         print np.average(diagDist);
         
         print "===============================";
         for i in range(0,len(avgTestData)):
-            print scipy.spatial.distance.cdist([avgTestData[i]],[reconstData[i]],'euclidean');
+            print cdist([avgTestData[i]],[reconstData[i]],'euclidean');
         '''
     else:
         avgReconstData = reconstData;
@@ -105,115 +148,171 @@ def testWithImg():
         #displayImg(negReconstData);
         print "+++++++++++++++++++++++++++++++++++++++++";
     '''
-def testKMeans(path,testPath,subject):
-    data = np.loadtxt(path,delimiter=",");
-    posiIndices = np.asarray(np.where(data[:,0]==1));
-    negIndices = np.asarray(np.where(data[:,0]==-1));
-    #print posiIndices;
-    
-    composeData = data[:,1:];
-    pcaImpl = PCAModule.PCAImpl(composeData);
-    pcaImpl.getPCs();
-    '''
-    print "Original PC's mean vector:";
-    print pcaImpl.mean;
-    '''
-    projMatrix = pcaImpl.projMatrix;
-    
-    energies = pcaImpl.getEigValueEnergies();
-    #print energies;
-    totalEnergy = np.sum(pcaImpl.eigValues);
-    cumEnergies = 0.90;
-    tmpSum = 0;
-    i=0;
-    while (tmpSum<cumEnergies):
-        tmpSum = tmpSum + energies[i];
-        i = i+1;
-    print i;
-    print "The total energy is %f, to achieve %f, it needs %d principal components." % (totalEnergy,cumEnergies,i);
-    print "\n*****************************************************\n";
-    numOfPCs = i;
-    numOfCluster = 3;
-    kmeans = KMeans(n_clusters=numOfCluster, random_state=0, n_jobs=5).fit(composeData);
-    '''
-    for i in range(len(composeData)):
-        print "%d , %d" % (i,kmeans.labels_[i]);
-    '''
-    gPCAPath = "./"+subject+"_c";
-    aPCAPath = "./"+subject+"_appro_c";
+
+def singleExp(trainingData, targetClusters, numOfPCs, projMatrix, energies, totalEnergy):
+
+    kmeans = KMeans(n_clusters=targetClusters, random_state=0, n_jobs=10).fit(trainingData);
     minPCAImpl = None;
     minWeightedDistance = 10000;
-    for i in range(numOfCluster):
-        singleClusterData = composeData[kmeans.labels_ == i];
-        print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
+    for i in range(targetClusters):
+        singleClusterData = trainingData[kmeans.labels_ == i];
+        # print "Cluster %d:%d" % (i,singleClusterData.shape[0]);
+        sampleIndices = np.where(kmeans.labels_ == i);
+
         '''
         clusterIndices = np.asarray(np.where(kmeans.labels_ == i));
         #Positive indices intersection and union
-        intersectionIndices = np.intersect1d(clusterIndices[0],posiIndices[0],True);
-        unionIndices = np.union1d(clusterIndices[0],posiIndices[0]);
-        print "Jaccard similarity of positive indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
-       
+        print "Jaccard similarity of positive indices: %f" % calcJaccardSimilarity(clusterIndices[0],posiIndices[0]);
+
         #Negative indices intersection and union
-        intersectionIndices = np.intersect1d(clusterIndices[0],negIndices[0],True);
-        unionIndices = np.union1d(clusterIndices[0],negIndices[0]);
-        print "Jaccard similarity of negative indices: %f" % (1.0*len(intersectionIndices)/len(unionIndices));
+        print "Jaccard similarity of negative indices: %f" % calcJaccardSimilarity(clusterIndices[0],negIndices[0]);
         '''
-        tmpPCAImpl = PCAModule.PCAImpl(singleClusterData);
-        tmpPCAImpl.getPCs();
-        #print "Approximate PC's mean vector:";
-        #print tmpPCAImpl.mean;
-        #print "Eigenvalue energies:";
-        #print tmpPCAImpl.getEigValueEnergies();
-        tmpTotalEnergy = np.sum(tmpPCAImpl.eigValues);
-        print "Total energy of cluster %d data is %f, it takes over %f of the whole data energy." % (i,tmpTotalEnergy,(tmpTotalEnergy/totalEnergy));
-        """
-        Since the PCs contain possible positive and negative values,
-        so the cosine similarity is between -1 and 1,
-        then the cosine distance is 1 - cosine similarity, then it ranges
-        between 0 and 2.
-        """
-        simDist = scipy.spatial.distance.cdist(projMatrix.T[:numOfPCs],tmpPCAImpl.projMatrix.T[:numOfPCs],'cosine');
-        print simDist.diagonal();
-        print "Cluster %d Cosine Distance in total: %f" % (i, np.sum(simDist.diagonal()));
-        '''
-        approSim = 1 - simDist.diagonal();
-        print "Approximate Similarity:"
-        print approSim;
-        '''
-        weightedDistance = 0;
-        for j in range(numOfPCs):
-            weightedDistance = weightedDistance + simDist.diagonal()[j]*energies[j];
-        if minWeightedDistance > weightedDistance:
-            minWeightedDistance = weightedDistance;
-            minPCAImpl = tmpPCAImpl;
-        print "Weighted Cosine Distance is: %f" % (weightedDistance);
-        print "Optimization target: %f" %(weightedDistance + (tmpTotalEnergy/totalEnergy));
-        print "\n";
-        
+        if singleClusterData.shape[0] >= numOfPCs:
+            tmpPCAImpl = PCAModule.PCAImpl(singleClusterData);
+            tmpPCAImpl.getPCs();
+            # print "Approximate PC's mean vector:";
+            # print tmpPCAImpl.mean;
+            # print "Eigenvalue energies:";
+            # print tmpPCAImpl.getEigValueEnergies();
+            tmpTotalEnergy = np.sum(tmpPCAImpl.eigValues);
+            # print "Total energy of cluster %d data is %f, it takes over %f of the whole data energy." % (i,tmpTotalEnergy,(tmpTotalEnergy/totalEnergy));
+            """
+            Since the PCs contain possible positive and negative values,
+            so the cosine similarity is between -1 and 1,
+            then the cosine distance is 1 - cosine similarity, then it ranges
+            between 0 and 2.
+            """
+            simDist = scipy.spatial.distance.cdist(projMatrix.T[:numOfPCs], tmpPCAImpl.projMatrix.T[:numOfPCs],
+                                                   'cosine');
+            # print simDist.diagonal();
+            rawSimDist = np.sum(simDist.diagonal());
+            # print "Cluster %d Cosine Distance in total: %f" % (i, rawSimDist);
+            '''
+            approSim = 1 - simDist.diagonal();
+            print "Approximate Similarity:"
+            print approSim;
+            '''
+            weightedDistance = 0;
+            for j in range(numOfPCs):
+                weightedDistance = weightedDistance + simDist.diagonal()[j] * energies[j];
+
+            # print "Weighted Cosine Distance is: %f" % (weightedDistance);
+            optimizationTarget = weightedDistance + (tmpTotalEnergy / totalEnergy);
+            # print "Optimization target: %f" % optimizationTarget;
+
+            if minWeightedDistance > weightedDistance:
+                minWeightedDistance = weightedDistance;
+                minPCAImpl = tmpPCAImpl;
+                minClusterIndex = i;
+                minRawSimDist = rawSimDist;
+                minOptimizationTarget = optimizationTarget;
+                minSampleRatio = 1.0*singleClusterData.shape[0]/trainingData.shape[0];
+                minSampleIndices = sampleIndices[0];
+            # print "\n";
+    projTrainingData = minPCAImpl.transform(trainingData,numOfPCs);
+    reconstTrainData = minPCAImpl.reconstruct(projTrainingData);
+    NMAE = calcNormalizedMeanAbsoluteError(trainingData,reconstTrainData);
+    clusterCenterDist = np.sum(np.abs(minPCAImpl.mean));
+    print "Minimum cluster index is %d, min raw cosine distance is %f, min weighted cosine distance is %f, min optimization target is %f, NMAE is %f." % (
+    minClusterIndex, minRawSimDist, minWeightedDistance, minOptimizationTarget, NMAE);
+    """
     for i in range(numOfCluster):
-        singleClusterData = composeData[kmeans.labels_ == i];
-        reducedAData = minPCAImpl.transform(singleClusterData,numOfPCs);
-        np.savetxt(aPCAPath+str(i),reducedAData,delimiter=",",fmt='%1.2f');
-        
-        reducedGData = pcaImpl.transform(singleClusterData,numOfPCs);
-        np.savetxt(gPCAPath+str(i),reducedGData,delimiter=",",fmt='%1.2f');
-        #print pcaImpl.transform(singleClusterData,numOfPCs);
-        
-        
-    oriPCAReducedData = pcaImpl.transform(composeData,numOfPCs);
-    approPCAReducedData = tmpPCAImpl.transform(composeData,numOfPCs);
-    #print composeData.shape;
-    #testPath = "../distr_dp_pca/experiment/input/diabetes_prePCA_testing";
-    testData = np.loadtxt(testPath,delimiter=",");
-    
-    testOriPCAReducedData = pcaImpl.transform(testData[:,1:],numOfPCs);
-    testApproPCAReducedData = tmpPCAImpl.transform(testData[:,1:],numOfPCs);
-    #print testData[:,1:].shape;
-    '''
-    SVMModule.SVMClf.rbfSVM(oriPCAReducedData,data[:,0],testOriPCAReducedData,testData[:,0]);
-    print("=====================================");
-    SVMModule.SVMClf.rbfSVM(approPCAReducedData,data[:,0],testApproPCAReducedData,testData[:,0]);
-    '''
+        singleClusterData = pureTrainingData[kmeans.labels_ == i];
+        reducedAData = minPCAImpl.transform(singleClusterData, numOfPCs);
+        # np.savetxt(aPCAPath+str(i),reducedAData,delimiter=",",fmt='%1.2f');
+
+        reducedGData = pcaImpl.transform(singleClusterData, numOfPCs);
+        # np.savetxt(gPCAPath+str(i),reducedGData,delimiter=",",fmt='%1.2f');
+        # print pcaImpl.transform(singleClusterData,numOfPCs);
+
+    """
+
+    return [targetClusters,minRawSimDist,minWeightedDistance,minOptimizationTarget,minSampleRatio,clusterCenterDist, NMAE], minSampleIndices;
+
+def testKMeans(path,numOfRounds,varianceRatio,subject):
+    print "*************** %s ****************" % path;
+    data = np.loadtxt(path,delimiter=",");
+    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.1, random_state=0);
+    rs.get_n_splits(data);
+    for train_index, test_index in rs.split(data):
+
+        posiIndices = np.asarray(np.where(data[:,0]==1));
+        negIndices = np.asarray(np.where(data[:,0]==-1));
+        #print posiIndices;
+
+        scaler = StandardScaler(copy=True);
+        scaler.fit(data[train_index,1:]);
+        pureTrainingData = scaler.transform(data[train_index,1:]);
+        pureTestingData = scaler.transform(data[test_index,1:]);
+        print "Training Samples: %d, dimension: %d" % (pureTrainingData.shape[0],pureTrainingData.shape[1]);
+        #composeData = data[:,1:];
+        pcaImpl = PCAModule.PCAImpl(pureTrainingData);
+        pcaImpl.getPCs();
+
+        energies = pcaImpl.getEigValueEnergies();
+        numOfPCs = pcaImpl.getNumOfPCwithKPercentVariance(varianceRatio);
+        projMatrix = pcaImpl.projMatrix;
+        totalEnergy = np.sum(pcaImpl.eigValues);
+        print "The total eigenvalue energies is %f, to achieve %f percentage, it needs %d principal components." % (totalEnergy,varianceRatio,numOfPCs);
+
+        numOfCluster = pureTrainingData.shape[0]/numOfPCs;
+        print "Maximum number of clusters; %d" % numOfCluster;
+        print "global PCA performance on classification"
+        oriPCAReducedData = pcaImpl.transform(pureTrainingData, numOfPCs);
+        testOriPCAReducedData = pcaImpl.transform(pureTestingData, numOfPCs);
+        SVMModule.SVMClf.rbfSVM(oriPCAReducedData, data[train_index, 0], testOriPCAReducedData, data[test_index, 0]);
+        '''
+        for i in range(len(composeData)):
+            print "%d , %d" % (i,kmeans.labels_[i]);
+        gPCAPath = "./"+subject+"_c";
+        aPCAPath = "./"+subject+"_appro_c";
+        '''
+        clusterRes = [];
+        clusterSampleIndices = [];
+        numOfCluster = 20;
+        for j in range(2,numOfCluster+1):
+            print "%d-means" % j;
+            res,minSampleIndices = singleExp(pureTrainingData,j,numOfPCs,projMatrix,energies,totalEnergy);
+            clusterRes.append(res);
+            clusterSampleIndices.append(minSampleIndices);
+
+            tmpMinPCAImpl = PCAModule.PCAImpl(pureTrainingData[minSampleIndices]);
+            tmpMinPCAImpl.getPCs();
+            approPCAReducedData = tmpMinPCAImpl.transform(pureTrainingData, numOfPCs);
+            # print composeData.shape;
+            testApproPCAReducedData = tmpMinPCAImpl.transform(pureTestingData, numOfPCs);
+            # print testData[:,1:].shape;
+            # print("=====================================");
+            SVMModule.SVMClf.rbfSVM(approPCAReducedData, data[train_index, 0], testApproPCAReducedData, data[test_index, 0]);
+
+        clusterResArray = np.asarray(clusterRes);
+        sortedWeightedDistIndices = np.argsort(clusterResArray[:,2]);
+        #print sortedWeightedDistIndices;
+        sortedResArray = clusterResArray[sortedWeightedDistIndices];
+        for res in sortedResArray:
+            print "%d,%f,%f,%f,%f,%f,%f" % (res[0],res[1],res[2],res[3],res[4],res[5],res[6]);
+
+        sampleIndicesArray = np.asarray(clusterSampleIndices);
+        sortedClusterSampleIndices = sampleIndicesArray[sortedWeightedDistIndices];
+        jacSimMat = np.zeros((sortedClusterSampleIndices.shape[0],sortedClusterSampleIndices.shape[0]));
+        for i in range(sortedClusterSampleIndices.shape[0]):
+            for j in range(i,sortedClusterSampleIndices.shape[0]):
+                jacSimMat[i,j] = calcJaccardSimilarity(sortedClusterSampleIndices[i],sortedClusterSampleIndices[j]);
+        print jacSimMat[:5,:5];
+        #print wholeArray;
+
+def calcJaccardSimilarity(xa,xb):
+    intersectionIndices = np.intersect1d(xa, xb, True);
+    unionIndices = np.union1d(xa, xb);
+    return (1.0 * len(intersectionIndices) / len(unionIndices));
+
+def calcNormalizedMeanAbsoluteError(originalData,reconstructedData):
+    diffMat = reconstructedData - originalData;
+    resMat = np.abs(np.divide(diffMat,originalData));
+    colSum = np.sum(resMat,axis=0);
+    res = np.sum(colSum)/(originalData.shape[0]*originalData.shape[1]);
+    return res;
+
 def testKMeans_GroundTruth():
     
     posiPath = "../faceDetection_Android/P/trainingFile";
@@ -319,13 +418,11 @@ if __name__ == "__main__":
     np.savetxt("./face_prePCA_training",trainingData,delimiter=",",fmt='%d');
     np.savetxt("./face_prePCA_testing",testingData,delimiter=",",fmt='%d');
     '''
-    subject = "ionosphere";
-    diabetesPath = "../distr_dp_pca/experiment/input/"+subject+"_prePCA_training";
-    diabetesTestPath = "../distr_dp_pca/experiment/input/"+subject+"_prePCA_testing";
-    facePath = "./face_prePCA_training";
-    
-    ionospherePath = "../distr_dp_pca/experiment/input/"+subject+"_prePCA_training";
-    ionosphereTestPath = "../distr_dp_pca/experiment/input/"+subject+"_prePCA_testing";
-    
-    testKMeans(ionospherePath,ionosphereTestPath,subject);
-    
+    varianceRatio = 0.9;
+    numOfRounds = 1;
+
+    subject = "diabetes";
+    path = "./input/"+subject+"_prePCA";
+    resPath = "./log/privateSubspace/"+subject+".output";
+    testKMeans(path,numOfRounds,varianceRatio,subject);
+    #drawResult(subject,None,resPath,None);
