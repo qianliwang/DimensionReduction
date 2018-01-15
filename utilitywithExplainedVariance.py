@@ -15,8 +15,13 @@ def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
     if path is not None:
         data = np.loadtxt(path, delimiter=",");
     x = np.arange(0.1, 1.1, 0.1);
-    #tmpDim = data.shape[1] - 1;
-    tmpDim = 0;
+    tmpDim = 1;
+    for i in range(data.shape[1]):
+        if data[0,i]>0.8:
+            tmpDim = i;
+            break;
+    print "print dimension: %d" % tmpDim;
+    #tmpDim = 1;
     pcaRes = [];
     gRes = [];
     wRes = [];
@@ -25,12 +30,14 @@ def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
     for i in np.arange(0,190,21):
         tmpRange = np.arange(i+1,i+11);
         #print len(tmpRange);
-        gRes.append(data[tmpRange,tmpDim]);
+        #gRes.append(data[tmpRange,tmpDim]/data[i,tmpDim]);
+        gRes.append(data[tmpRange, tmpDim]);
     print gRes;
     for i in np.arange(11,200,21):
         tmpRange = np.arange(i,i+10);
         #print len(tmpRange);
-        wRes.append(data[tmpRange,tmpDim]);
+        #wRes.append(data[tmpRange,tmpDim]/data[i-11,tmpDim]);
+        wRes.append(data[tmpRange, tmpDim]);
 
     gMean, gStd = gf.calcMeanandStd(np.asarray(gRes));
     gErrorLine = plt.errorbar(x, gMean, yerr=gStd, fmt='r', capsize=4);
@@ -41,13 +48,15 @@ def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
 
     yMin = min(np.amin(gMean),np.amin(wMean));
     yMax = max(np.amax(gMean),np.amax(wMean));
-    plt.axis([0.05, 1.05, 0, yMax+0.2]);
-    plt.legend([gLine, wLine], ['Gaussian Noise', 'Wishart Noise'], loc=1);
+    plt.axis([0.05, 1.05, 0, 1.1*yMax]);
+    plt.legend([gLine, wLine], ['Gaussian Noise', 'Wishart Noise'], loc=4);
     # plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon', fontsize=18);
     plt.ylabel('Captured Energy', fontsize=18);
     plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
+    #plt.tight_layout();
+    plt.gcf().subplots_adjust(left=0.15)
     if figSavedPath is None:
         plt.show();
     else:
@@ -112,28 +121,20 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('Captured Energy',fontsize=18);
-    plt.title(datasetTitle+'Dataset', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
+
     if figSavedPath is None:
         plt.show();
     else:
         plt.savefig(figSavedPath+"explainedVariance_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
-def calcEigRatios(eigValues):
-    eigSum = np.sum(eigValues);
-    tmpSum = 0;
-    res = [];
-    for eigVal in eigValues:
-        tmpSum += eigVal;
-        res.append(tmpSum/eigSum);
-    return res;
+
 def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     
-    #cprResult = np.zeros((len(xEpsilons),4));
     numOfTrainingSamples = pureTrainingData.shape[0];
     #scaler = StandardScaler(copy=False);
     #scaler.fit(pureTrainingData);
     #scaler.transform(pureTrainingData);
-
     pureTrainingData = gf.normByRow(pureTrainingData);
 
     matrixRank = LA.matrix_rank(pureTrainingData);
@@ -142,9 +143,9 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     
-    pcaEnergies = pcaImpl.getEigValueEnergies();
+    pcaImpl.getEigValueEnergies();
     cprResult = [];
-    cprResult.append(calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
+    cprResult.append(gf.calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
     delta = np.divide(1.0,numOfTrainingSamples);
     gaussianResult = [];
     wishartResult = [];
@@ -155,13 +156,13 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
         dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
         dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank,onlyEigvalues=True);
         #print dpGaussianPCAImpl.eigValues;
-        GaussianEigRatio = calcEigRatios(dpGaussianPCAImpl.eigValues);
+        GaussianEigRatio = gf.calcEigRatios(dpGaussianPCAImpl.eigValues);
         gaussianResult.append(GaussianEigRatio[:largestReducedFeature]);
         #print GaussianEigRatio;
         isGaussianDist = False;
         dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
         dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank,onlyEigvalues=True);
-        WishartEigRatio = calcEigRatios(dpWishartPCAImpl.eigValues);
+        WishartEigRatio = gf.calcEigRatios(dpWishartPCAImpl.eigValues);
         wishartResult.append(WishartEigRatio[:largestReducedFeature]);
         #print WishartEigRatio;
     cprResult.extend(gaussianResult);
@@ -179,54 +180,37 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=1, random_state=0);
     rs.get_n_splits(data);
     globalPCA = PCAModule.PCAImpl(data[:,1:]);
-    numOfFeature = data.shape[1]-1;
-    matrixRank = LA.matrix_rank(data[:,1:]);
 
-    print "Matrix rank of the data is %d." % matrixRank;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,data.shape[1]-1,varianceRatio);
     
     xEpsilons = np.arange(0.1,1.1,0.1);
-    cprResult = np.zeros((len(xEpsilons),4));
-    #print xDimensions;
+    #cprResult = np.zeros((len(xEpsilons),4));
     #p = Pool(numOfRounds);
-    #allResults = [];
     cprResult = [];
     m =0;
     for train_index, test_index in rs.split(data):
         print "Trail %d" % m;
-        #print len(train_index);
-        #print len(test_index);
         trainingData = data[train_index];
         pureTrainingData = trainingData[:,1:];
         tmpResult = singleExp(xEpsilons,pureTrainingData,largestReducedFeature);
         cprResult.extend(tmpResult);
         m += 1;
-        #print tmpResult.shape;
         #print tmpResult;
         #tmpResult = p.apply_async(singleExp, (xEpsilons,pureTrainingData,largestReducedFeature));
-        #cprResult += tmpResult.get();
-    """
-        for i in range(0,len(cprResult)):
-            print "%.4f,%.4f,%.4f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
-        print "******************************";
-    """
+        #cprResult.extend(tmpResult.get());
+
     # Compute the average value after numOfRounds experiments.
     #avgCprResult = cprResult/numOfRounds;
     #p.close();
     #p.join();
-    """
-    for result in cprResult:
-        print "%.2f,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);  
-    
-    """
 
-    return cprResult;
+    return np.asarray(cprResult);
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german', 'ionosphere'];
     numOfRounds = 10;
-    varianceRatio = 1;
+    varianceRatio = 0.9;
     figSavedPath = "./fig/";
     resultSavedPath = "./log/";
     if len(sys.argv) >1:
@@ -235,11 +219,11 @@ if __name__ == "__main__":
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','german','CNAE_11','YaleB','diabetes','Amazon','p53 Mutant','diabetes','MovieLens','ionosphere','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
+        datasets = ['YaleB','MovieLens','p53 Mutant','Million Song','Aloi','Facebook','letter_1','YaleB','diabetes','Amazon','p53 Mutant','diabetes','MovieLens','ionosphere','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,varianceRatio,numOfRounds);
-            np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            #result = doExp(datasetPath,varianceRatio,numOfRounds);
+            #np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
-            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
+            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=figSavedPath);

@@ -67,7 +67,7 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     wF1Line, = plt.plot(x, wF1Mean , 'g-')
     plt.axis([0,x[-1]+1,yMin,yMax]);
     #plt.axis([0,10,0.4,1.0]);
-    plt.legend([pcaF1Line, gF1Line, wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    plt.legend([gF1Line, wF1Line,pcaF1Line], ['Gaussian Noise', 'Wishart Noise', 'PCA'], loc=4);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
     plt.title(datasetTitle, fontsize=18);

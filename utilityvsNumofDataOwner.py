@@ -21,12 +21,9 @@ def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
     plt.clf();
     if path is not None:
         data = np.loadtxt(path, delimiter=",");
-    if datasetTitle is 'CNAE':
-        numOfDim = data.shape[0] / 10;
-    else:
-        numOfDim = data.shape[0] / 6;
+    numOfDim = data.shape[0] / 9;
     x = data[:numOfDim, 0];
-    xBound = x[-1] + 2;
+    xBound = x[-1] + 1;
     """
     minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
@@ -61,7 +58,10 @@ def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
     privateF1ErrorLine = plt.errorbar(x, privateF1Mean, yerr=privateF1Std, fmt='c', capsize=4);
     privateF1Line, = plt.plot(x,privateF1Mean,'c-');
     plt.axis([0, xBound, -0.05, 1.05]);
-    plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
+    if 'p53' in datasetTitle:
+        plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=2, fontsize='small');
+    else:
+        plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
     # plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Number of Principal Components', fontsize=18);
     plt.ylabel('F1-Score', fontsize=18);
@@ -69,9 +69,9 @@ def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
     plt.xticks(x);
     ax = plt.gca();
     if x[-1] > 100:
-        majorLocator = MultipleLocator(12);
+        majorLocator = MultipleLocator(8);
     else:
-        majorLocator = MultipleLocator(4);
+        majorLocator = MultipleLocator(2);
     ax.xaxis.set_major_locator(majorLocator);
     if figSavedPath is None:
         plt.show();
@@ -306,12 +306,11 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE','YaleB','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE','YaleB','p53 Mutant','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             timeStr = str(time());
-            print timeStr+".output";
             #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,numOfSamples,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,data=None,path = resultSavedPath+"dataOwner_"+dataset+".output",figSavedPath=figSavedPath);
+            drawF1Score(dataset,data=None,path = resultSavedPath+"dataOwner_"+dataset+".output",figSavedPath=figSavedPath);

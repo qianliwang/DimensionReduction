@@ -20,8 +20,11 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     pcaF1 = data[np.arange(0,100,10),3];
     pcaF1Mean = np.full((10,),np.mean(pcaF1));
     pcaF1Std = np.full((10,),0);
+    ax = plt.gca();
+    width = 0.03;
+
     #pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean/2, yerr=pcaF1Std, fmt='bs-',capsize=4);
-    pcaF1Line, = plt.plot(x,pcaF1Mean/2,'bs-')
+    #pcaF1Line, = plt.plot(x,pcaF1Mean/2,'bs-')
     gF1 = [];
     wF1=[];
     for i in range(10):
@@ -30,12 +33,25 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
        wF1.append(data[gIndices,9]);
     #print np.asarray(gF1);
     gF1Mean,gF1Std = gf.calcMeanandStd(np.asarray(gF1).T)
-    gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g',capsize=4);
-    gF1Line, = plt.plot(x, gF1Mean, 'gs-')
+    #gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='g',capsize=4);
+    #gF1Line, = plt.plot(x, gF1Mean, 'gs-')
 
     wF1Mean,wF1Std = gf.calcMeanandStd(np.asarray(wF1).T)
-    wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r',capsize=4);
-    wF1Line, = plt.plot(x, wF1Mean, 'rs-')
+    #wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='r',capsize=4);
+    #wF1Line, = plt.plot(x, wF1Mean, 'rs-')
+    theRange = np.arange(1,10,2);
+    x = x[theRange];
+    pcaF1Mean = pcaF1Mean[theRange];
+    pcaF1Std = pcaF1Std[theRange];
+    gF1Mean = gF1Mean[theRange];
+    gF1Std = gF1Std[theRange];
+    wF1Mean = wF1Mean[theRange];
+    wF1Std = wF1Std[theRange];
+
+    gBar = ax.bar(x-0.035, gF1Mean, width, color='r', yerr=gF1Std,capsize=2);
+    wBar = ax.bar(x, wF1Mean, width, color='g', yerr=wF1Std,capsize=2);
+    pcaBar = ax.bar(x+0.035, pcaF1Mean/2, width, color='b', yerr=pcaF1Std,capsize=2);
+
     """
     data = data[:,[3,6,9]];
     minVector = np.amin(data,axis=0);
@@ -57,8 +73,9 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     yMin = (yMin - 0.1) if (yMin - 0.1) > 0 else 0;
     yMax = (yMax + 0.1) if (yMax + 0.1) < 1 else 1;
     print yMin,yMax;
-    plt.axis([0.05,1.05,0.4,1.05]);
-    plt.legend([pcaF1Line,gF1Line,wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    plt.axis([0.12,1.08,0,1.15]);
+    #plt.legend([pcaF1Line,gF1Line,wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
@@ -78,8 +95,8 @@ def drawPrecision(datasetTitle, data=None, path=None, figSavedPath=None):
     pcaPrecision = data[np.arange(0, 100, 10), 1];
     pcaPrecMean = np.full((10,), np.mean(pcaPrecision));
     pcaPrecStd = np.full((10,), 0);
-    pcaPrecErrorLine = plt.errorbar(x, pcaPrecMean / 2, yerr=pcaPrecStd, fmt='b',capsize=4);
-    pcaPrecLine, = plt.plot(x, pcaPrecMean / 2, 'bo-')
+    #pcaPrecErrorLine = plt.errorbar(x, pcaPrecMean / 2, yerr=pcaPrecStd, fmt='b',capsize=4);
+    #pcaPrecLine, = plt.plot(x, pcaPrecMean / 2, 'bo-')
     gPrec = [];
     wPrec = [];
     for i in range(10):
@@ -88,13 +105,29 @@ def drawPrecision(datasetTitle, data=None, path=None, figSavedPath=None):
         wPrec.append(data[gIndices, 7]);
     # print np.asarray(gF1);
     gPrecMean, gPrecStd = gf.calcMeanandStd(np.asarray(gPrec).T)
-    gPrecErrorLine = plt.errorbar(x, gPrecMean, yerr=gPrecStd, fmt='r',capsize=4);
-    gPrecLine, = plt.plot(x, gPrecMean, 'ro-')
+    #gPrecErrorLine = plt.errorbar(x, gPrecMean, yerr=gPrecStd, fmt='r',capsize=4);
+    #gPrecLine, = plt.plot(x, gPrecMean, 'ro-')
     wPrecMean, wPrecStd = gf.calcMeanandStd(np.asarray(wPrec).T)
-    wPrecErrorLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='g',capsize=4);
-    wPrecLine, = plt.plot(x, wPrecMean, 'go-')
-    plt.axis([0.05, 1.05, 0.4, 1.05]);
-    plt.legend([pcaPrecLine, gPrecLine, wPrecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    #wPrecErrorLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='g',capsize=4);
+    #wPrecLine, = plt.plot(x, wPrecMean, 'go-')
+    ax = plt.gca();
+    width = 0.03;
+    theRange = np.arange(1,10,2);
+    x = x[theRange];
+    pcaPrecMean = pcaPrecMean[theRange];
+    pcaPrecStd = pcaPrecStd[theRange];
+    gPrecMean = gPrecMean[theRange];
+    gPrecStd = gPrecStd[theRange];
+    wPrecMean = wPrecMean[theRange];
+    wPrecStd = wPrecStd[theRange];
+
+    gBar = ax.bar(x - 0.035, gPrecMean, width, color='r', yerr=gPrecStd, capsize=2);
+    wBar = ax.bar(x, wPrecMean, width, color='g', yerr=wPrecStd,capsize=2);
+    pcaBar = ax.bar(x + 0.035, pcaPrecMean / 2, width, color='b', yerr=pcaPrecStd,capsize=2);
+
+    plt.axis([0.12, 1.08, 0, 1.15]);
+    #plt.legend([pcaPrecLine, gPrecLine, wPrecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
     plt.xlabel('Epsilon', fontsize=18);
     plt.ylabel('Precision', fontsize=18);
     plt.title(datasetTitle, fontsize=18);
@@ -112,8 +145,8 @@ def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     pcaRecall = data[np.arange(0, 100, 10), 2];
     pcaRecMean = np.full((10,), np.mean(pcaRecall));
     pcaRecStd = np.full((10,), 0);
-    pcaRecErrorLine = plt.errorbar(x, pcaRecMean / 2, yerr=pcaRecStd, fmt='b',capsize=4);
-    pcaRecLine, = plt.plot(x, pcaRecMean / 2, 'b^-')
+    #pcaRecErrorLine = plt.errorbar(x, pcaRecMean / 2, yerr=pcaRecStd, fmt='b',capsize=4);
+    #pcaRecLine, = plt.plot(x, pcaRecMean / 2, 'b^-')
     gRec = [];
     wRec = [];
     for i in range(10):
@@ -122,11 +155,11 @@ def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
         wRec.append(data[gIndices, 8]);
     # print np.asarray(gF1);
     gRecMean, gRecStd = gf.calcMeanandStd(np.asarray(gRec).T)
-    gRecErrorLine = plt.errorbar(x, gRecMean, yerr=gRecStd, fmt='r',capsize=4);
-    gRecLine, = plt.plot(x, gRecMean, 'r^-')
+    #gRecErrorLine = plt.errorbar(x, gRecMean, yerr=gRecStd, fmt='r',capsize=4);
+    #gRecLine, = plt.plot(x, gRecMean, 'r^-')
     wRecMean, wRecStd = gf.calcMeanandStd(np.asarray(wRec).T)
-    wRecErrorLine = plt.errorbar(x, wRecMean, yerr=wRecStd, fmt='g',capsize=4);
-    wRecLine, = plt.plot(x, wRecMean, 'g^-')
+    #wRecErrorLine = plt.errorbar(x, wRecMean, yerr=wRecStd, fmt='g',capsize=4);
+    #wRecLine, = plt.plot(x, wRecMean, 'g^-')
     """
     x = data[:,0];
     data = data[:,[1,2,5,6,7,8]];
@@ -148,8 +181,24 @@ def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     else:
         plt.axis([0.05,0.95,0,1]);
     """
-    plt.axis([0.05,1.05,0.4,1.05]);
-    plt.legend([pcaRecLine, gRecLine, wRecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    ax = plt.gca();
+    width = 0.03;
+    theRange = np.arange(1,10,2);
+    x = x[theRange];
+    pcaRecMean = pcaRecMean[theRange];
+    pcaRecStd = pcaRecStd[theRange];
+    gRecMean = gRecMean[theRange];
+    gRecStd = gRecStd[theRange];
+    wRecMean = wRecMean[theRange];
+    wRecStd = wRecStd[theRange];
+
+    gBar = ax.bar(x - 0.035, gRecMean, width, color='r', yerr=gRecStd, capsize=2);
+    wBar = ax.bar(x, wRecMean, width, color='g', yerr=wRecStd,capsize=2);
+    pcaBar = ax.bar(x + 0.035, pcaRecMean / 2, width, color='b', yerr=pcaRecStd,capsize=2);
+
+    plt.axis([0.12,1.08,0,1.15]);
+    #plt.legend([pcaRecLine, gRecLine, wRecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
+    ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('Recall',fontsize=18);
     plt.title(datasetTitle, fontsize=18);
@@ -302,5 +351,5 @@ if __name__ == "__main__":
             #result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=figSavedPath);
-            #drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=figSavedPath);
-            #drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);
+            drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=figSavedPath);
+            drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);

@@ -84,7 +84,7 @@ class PCAImpl(object):
         convergeRounds = [];
         k=0;
         vecLength = covMatrix.shape[0];
-        bound = min(1000,vecLength);
+        bound = max(1000,vecLength);
         while k<topK:
             r0 = np.random.rand(vecLength,1);
             count=0;
