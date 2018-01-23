@@ -138,6 +138,7 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
 
     noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK, tol=0.001);
     noisyProjMatrix = np.real(noisyProjMatrix);
+
     # Project the data using different projection matrix.
     projTrainingData1 = pcaImpl.transform(pureTrainingData, topK);
     projTestingData1 = pcaImpl.transform(pureTestingData, topK);
