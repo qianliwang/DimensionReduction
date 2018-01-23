@@ -75,12 +75,14 @@ def simulatePrivateLocalPCA(data,targetDimension,epsilon):
         noisyEigenvalues,noisyEigenvectors = LA.eig(noisyC);
         idx = np.absolute(noisyEigenvalues).argsort()[::-1];
         # print idx;
-        noisyEigenvalues = np.real(noisyEigenvalues[idx]);
+        noisyEigenvalues = noisyEigenvalues[idx];
         # print sortedW;
-        noisyEigenvectors = np.real(noisyEigenvectors[:, idx]);
+        noisyEigenvectors = noisyEigenvectors[:, idx];
     else:
-        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=k,tol=0.001);
+        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=max(k-1,1),tol=0.001);
     #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
+    noisyEigenvalues = np.real(noisyEigenvalues);
+    noisyEigenvectors = np.real(noisyEigenvectors);
     S = np.diagflat(np.sqrt(noisyEigenvalues));
     P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
     return P;
