@@ -99,7 +99,7 @@ def simulatePrivateGlobalPCA(data,numOfSamples,targetDimension,epsilon):
         P_prime = simulatePrivateLocalPCA(singleDataOwnerCopy, k_prime, epsilon);
         if P is not None:
             k_prime = max(k_prime, LA.matrix_rank(P));
-            tmpSummary = np.vstack((P_prime, P));
+            tmpSummary = np.hstack((P_prime, P));
             P = simulatePrivateLocalPCA(tmpSummary.T, k_prime, epsilon);
         else:
             P = P_prime;
