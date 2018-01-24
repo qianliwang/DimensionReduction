@@ -65,12 +65,13 @@ def genEigenvectors_power(covMatrix,topK):
 
 
 def simulatePrivateLocalPCA(data,targetDimension,epsilon):
-    k = np.minimum(targetDimension,LA.matrix_rank(data));
+    #k = np.minimum(targetDimension,LA.matrix_rank(data));
     #print "In each data owner, the k is: %d" % k;
-    
+
+    C = data.T.dot(data);
     WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
-    C = np.cov(data,rowvar=False);
     noisyC = C + WishartNoiseMatrix;
+    """
     if data.shape[1]<100:
         noisyEigenvalues,noisyEigenvectors = LA.eig(noisyC);
         idx = np.absolute(noisyEigenvalues).argsort()[::-1];
@@ -81,10 +82,12 @@ def simulatePrivateLocalPCA(data,targetDimension,epsilon):
     else:
         noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=max(k-1,1),tol=0.001);
     #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
-    noisyEigenvalues = np.real(noisyEigenvalues);
-    noisyEigenvectors = np.real(noisyEigenvectors);
-    S = np.diagflat(np.sqrt(noisyEigenvalues));
-    P = np.dot(noisyEigenvectors[:,:k],S[:k,:k]);
+    """
+    noisyLeftSigVectors,noisySingularValues, noisyRightSigVectors = sparse.linalg.svds(noisyC, k=targetDimension, tol=0.001);
+    noisySingularValues = np.real(noisySingularValues);
+    noisyRightSigVectors = np.real(noisyRightSigVectors.T);
+    S = np.diagflat(np.sqrt(noisySingularValues));
+    P = np.dot(noisyRightSigVectors,S);
     return P;
 
 def simulatePrivateGlobalPCA(data,numOfSamples,targetDimension,epsilon):
@@ -92,16 +95,14 @@ def simulatePrivateGlobalPCA(data,numOfSamples,targetDimension,epsilon):
     dataOwnerGroups = np.array_split(data, numOfCopies);
     P = None;
     for singleDataOwnerCopy in dataOwnerGroups:
-
-        PPrime = simulatePrivateLocalPCA(singleDataOwnerCopy, targetDimension, epsilon);
+        k_prime = min(targetDimension,LA.matrix_rank(singleDataOwnerCopy));
+        P_prime = simulatePrivateLocalPCA(singleDataOwnerCopy, k_prime, epsilon);
         if P is not None:
-            k_prime = np.maximum(np.minimum(numOfSamples, targetDimension), LA.matrix_rank(P));
-            if P.shape[1] == PPrime.shape[1]:
-                tmpSummary = np.concatenate((PPrime, P), axis=0);
-                P = simulatePrivateLocalPCA(tmpSummary, k_prime, epsilon);
-            else:
-                print "P and PPrime has different dimension, can't concatenate!"
-        P = PPrime;
+            k_prime = max(k_prime, LA.matrix_rank(P));
+            tmpSummary = np.vstack((P_prime, P));
+            P = simulatePrivateLocalPCA(tmpSummary.T, k_prime, epsilon);
+        else:
+            P = P_prime;
     return P;
 
 def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
@@ -298,7 +299,7 @@ if __name__ == "__main__":
         result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['CNAE_2','Face_15','p53_3000'];
+        datasets = ['Diabetes','CNAE_2','Face_15','p53_3000'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
