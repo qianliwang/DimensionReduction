@@ -36,4 +36,10 @@ class DiffPrivImpl(object):
         wishart = wishartrand(df,sigma);
         #print wishart;
         return wishart;
+
+    @classmethod
+    def OneDimGaussian(cls, epsilon, delta, size, mu=0, l2Sensitivity=1):
+        standardDeviation = np.sqrt(2 * np.log(1.25 / delta)) * l2Sensitivity / epsilon;
+        samples = np.random.normal(mu, standardDeviation, size);
+        return samples;
     

@@ -1,13 +1,30 @@
 from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+from pkg.diffPrivDimReduction import DPModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
 import sys;
 import os;
 from sklearn.preprocessing import StandardScaler;
 
-def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM):
+def DPPro(pureTrainingData,pureTestingData,k,epsilon):
+
+    projMatrixLength = pureTrainingData.shape[1]*k;
+    oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
+    projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
+    delta = np.divide(1.0, pureTrainingData.shape[0]);
+    noiseLength = pureTrainingData.shape[0]*k;
+    oneDimNoise = DPModule.DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength);
+    noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
+
+    projTrainingData = np.dot(pureTrainingData,projMatrix);
+    noisyProjTrainingData = projTrainingData + noiseMatrix;
+    projTestingData = np.dot(pureTestingData,projMatrix);
+
+    return noisyProjTrainingData,projTestingData;
+
+def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon,isLinearSVM):
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
     
@@ -24,7 +41,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinea
     scaler.transform(pureTestingData);
     #print pureTestingData[0];
 
-    cprResult = np.zeros((len(xDimensions),4));
+    cprResult = np.zeros((len(xDimensions),5));
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     
     pcaImpl.getPCs(largestReducedFeature);
@@ -82,6 +99,15 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinea
             result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         cprResult[k][3] += result[2];
         
+        projTrainingData4,projTestingData4 = DPPro(pureTrainingData,pureTestingData, targetDimension,epsilon);
+        # print projTestingData.shape;
+        print "DPPro %d" % targetDimension;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData4, trainingLabel, projTestingData4, testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData4, trainingLabel, projTestingData4, testingLabel);
+        cprResult[k][4] += result[2];
+
         """
         for result in cprResult:
             print "%f,%f,%f" % (result[0],result[1],result[2]);
@@ -120,7 +146,7 @@ def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensio
         testingData = np.concatenate((posiData[numPosSamples:],negData[numNegSamples:]),axis=0);
         #print trainingData.shape;
         #print testingData.shape;
-        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon,isLinearSVM);
         if cprResult is None:
             cprResult = tmpResult;
         else:
@@ -128,7 +154,7 @@ def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensio
     #avgCprResult = cprResult/numOfRounds;
     avgCprResult = cprResult;
     for result in avgCprResult:
-        print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
+        print "%d,%.3f,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3],result[4]);
     return avgCprResult;
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
@@ -154,7 +180,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
         trainingData = data[train_index];
         testingData = data[test_index];
         
-        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon,isLinearSVM);
         if cprResult is None:
             cprResult = tmpResult;
         else:
@@ -162,7 +188,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     #avgCprResult = cprResult/numOfRounds;
     avgCprResult = cprResult;
     for result in avgCprResult:
-        print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
+        print "%d,%.3f,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3],result[4]);
     return avgCprResult;
 
 if __name__ == "__main__":
@@ -173,7 +199,7 @@ if __name__ == "__main__":
     numOfDimensions = 30;
     epsilon = 0.3;
     varianceRatio = 0.9;
-    isLinearSVM = True;
+    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
