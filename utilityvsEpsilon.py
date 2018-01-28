@@ -4,6 +4,7 @@ from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from numpy import linalg as LA;
 from sklearn.model_selection import ShuffleSplit;
+from sklearn.model_selection import StratifiedShuffleSplit;
 import sys;
 import os;
 from sklearn.preprocessing import StandardScaler;
@@ -136,11 +137,13 @@ def doExp_unbalanced(datasetPath, varianceRatio, numOfRounds, isLinearSVM=True):
     return avgCprResult;
 
 def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
-    
-    data = np.loadtxt(datasetPath,delimiter=",");
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
-    rs.get_n_splits(data);
-    globalPCA = PCAModule.PCAImpl(data[:,1:]);
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+    scaler = StandardScaler();
+    data_std = scaler.fit_transform(data[:, 1:]);
+    globalPCA = PCAModule.PCAImpl(data_std);
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
@@ -148,8 +151,9 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     xEpsilons = np.arange(0.1,1.0,0.1);
     cprResult = None;
     #cprResult = np.zeros((len(xEpsilons),10));
-
-    for train_index, test_index in rs.split(data):
+    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data[:,1:],data[:,0]);
+    for train_index, test_index in rs.split(data[:,1:],data[:,0]):
         trainingData = data[train_index];
         testingData = data[test_index];
         tmpResult = singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM);
@@ -182,7 +186,8 @@ if __name__ == "__main__":
         datasetPath = sys.argv[1];
         varianceRatio = 0.8;
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp_unbalanced(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
+        #result = doExp_unbalanced(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
+        result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['B11','Face_15','CNAE_2','Amazon_5','diabetes','ionosphere'];

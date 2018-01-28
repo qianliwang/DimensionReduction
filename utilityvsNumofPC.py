@@ -4,6 +4,7 @@ from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 from pkg.diffPrivDimReduction import DPModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
+from sklearn.model_selection import StratifiedShuffleSplit;
 import sys;
 import os;
 from sklearn.preprocessing import StandardScaler;
@@ -99,7 +100,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
             result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         cprResult[k][3] += result[2];
 
-        projTrainingData4,projTestingData4 = DPPro(pureTrainingData,pureTestingData, targetDimension, dpGaussianPCAImpl.L2Sensitivity, epsilon);
+        projTrainingData4,projTestingData4 = DPPro(pureTrainingData,pureTestingData,dpGaussianPCAImpl.L2Sensitivity, targetDimension, epsilon);
         # print projTestingData.shape;
         print "DPPro %d" % targetDimension;
         if isLinearSVM:
@@ -158,9 +159,14 @@ def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensio
     return avgCprResult;
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
-    data = np.loadtxt(datasetPath,delimiter=",");
-    globalPCA = PCAModule.PCAImpl(data[:,1:]);
-    
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+    scaler = StandardScaler();
+    data_std = scaler.fit_transform(data[:,1:]);
+    globalPCA = PCAModule.PCAImpl(data_std);
+
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
@@ -173,10 +179,10 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     
     #cprResult = np.zeros((len(xDimensions),4));
     cprResult = None;
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
-    rs.get_n_splits(data);
+    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data[:,1:],data[:,0]);
 
-    for train_index, test_index in rs.split(data):    
+    for train_index, test_index in rs.split(data[:,1:],data[:,0]):
         trainingData = data[train_index];
         testingData = data[test_index];
         
@@ -203,7 +209,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+        #result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];

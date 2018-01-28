@@ -6,6 +6,7 @@ from numpy import linalg as LA;
 from pkg.diffPrivDimReduction import invwishart;
 from numpy.linalg import norm;
 from sklearn.model_selection import ShuffleSplit;
+from sklearn.model_selection import StratifiedShuffleSplit;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
 import sys;
 import os;
@@ -15,11 +16,11 @@ from sklearn.preprocessing import StandardScaler;
 from pkg.global_functions import globalFunction as gf;
 
 def getApproxEigval(covMatrix,r1):
-        temp1 = np.dot(covMatrix,r1);
-        v1 = np.dot(r1.T,temp1);
-        v2 = np.dot(r1.T,r1);
-        eigVal = np.divide(v1,v2);
-        return eigVal;
+    temp1 = np.dot(covMatrix,r1);
+    v1 = np.dot(r1.T,temp1);
+    v2 = np.dot(r1.T,r1);
+    eigVal = np.divide(v1,v2);
+    return eigVal;
 
 def genEigenvectors_power(covMatrix,topK):
     '''
@@ -183,28 +184,27 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
     return np.asarray(cprResult);
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis, isLinearSVM=True):
-    data = np.loadtxt(datasetPath,delimiter=",");
-    numOfFeature = data.shape[1]-1;
-
-    scaler = StandardScaler(copy=False);
-    # print pureTrainingData[0];
-    rawData = data[:,1:];
-    scaler.fit(rawData);
-    scaler.transform(rawData);
-    globalPCA = PCAModule.PCAImpl(rawData);
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+    scaler = StandardScaler();
+    data_std = scaler.fit_transform(data[:, 1:]);
+    globalPCA = PCAModule.PCAImpl(data_std);
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
 
+    numOfFeature = data.shape[1]-1;
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     #cprResult = np.zeros((len(xDimensions),4));
     cprResult = None;
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
-    rs.get_n_splits(data);
+    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data[:,1:],data[:,0]);
     
     #p = Pool(numOfRounds);
     normalizedData = gf.normByRow(data[:,1:]);
-
     normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
-    for train_index, test_index in rs.split(data):
+
+    for train_index, test_index in rs.split(data[:,1:],data[:,0]):
 
         trainingData = normalizedData[train_index];
         testingData = normalizedData[test_index];
@@ -296,7 +296,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
+        #result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
+        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['Diabetes','CNAE_2','Face_15','p53_3000'];
