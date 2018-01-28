@@ -8,14 +8,14 @@ import sys;
 import os;
 from sklearn.preprocessing import StandardScaler;
 
-def DPPro(pureTrainingData,pureTestingData,k,epsilon):
+def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
 
     projMatrixLength = pureTrainingData.shape[1]*k;
     oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
     projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
     delta = np.divide(1.0, pureTrainingData.shape[0]);
     noiseLength = pureTrainingData.shape[0]*k;
-    oneDimNoise = DPModule.DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength);
+    oneDimNoise = DPModule.DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength,l2Sensitivity=l2Sensitivity);
     noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
 
     projTrainingData = np.dot(pureTrainingData,projMatrix);
@@ -98,8 +98,8 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         cprResult[k][3] += result[2];
-        
-        projTrainingData4,projTestingData4 = DPPro(pureTrainingData,pureTestingData, targetDimension,epsilon);
+
+        projTrainingData4,projTestingData4 = DPPro(pureTrainingData,pureTestingData, targetDimension, dpGaussianPCAImpl.L2Sensitivity, epsilon);
         # print projTestingData.shape;
         print "DPPro %d" % targetDimension;
         if isLinearSVM:
