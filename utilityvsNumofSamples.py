@@ -12,6 +12,7 @@ import sys;
 import os;
 from multiprocessing import Pool;
 import scipy.sparse as sparse;
+from sklearn import preprocessing;
 from sklearn.preprocessing import StandardScaler;
 from pkg.global_functions import globalFunction as gf;
 
@@ -104,17 +105,20 @@ def simulatePrivateGlobalPCA(data,numOfSamples,targetDimension,epsilon):
             P = simulatePrivateLocalPCA(tmpSummary.T, k_prime, epsilon);
         else:
             P = P_prime;
-    return P;
-
+    #return P;
+    return preprocessing.normalize(P, axis=0, copy=False);
 def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
-    
+
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
     #normalizedTrainingData = normByRow(pureTrainingData);
     
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
-    #normalizedTestingData = normByRow(pureTestingData);
+
+    preprocessing.normalize(pureTrainingData, copy=False);
+    preprocessing.normalize(pureTestingData, copy=False);
+
     scaler = StandardScaler(copy=False);
     #print pureTrainingData[0];
     scaler.fit(pureTrainingData);
