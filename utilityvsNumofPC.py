@@ -5,12 +5,14 @@ from pkg.diffPrivDimReduction import DPModule;
 import numpy as np;
 from sklearn.model_selection import ShuffleSplit;
 from sklearn.model_selection import StratifiedShuffleSplit;
+from sklearn import preprocessing;
 import sys;
 import os;
 from sklearn.preprocessing import StandardScaler;
 
 def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
-
+    preprocessing.normalize(pureTrainingData, copy=False);
+    preprocessing.normalize(pureTestingData, copy=False);
     projMatrixLength = pureTrainingData.shape[1]*k;
     oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
     projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
