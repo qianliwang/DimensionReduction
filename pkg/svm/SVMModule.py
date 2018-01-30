@@ -93,7 +93,8 @@ class SVMClf(object):
         #print "FalsePositive: %d "% FP;
         recall = 1.0*TP/(TP+FN) if (TP+FN)!=0 else 0;
         F1Score = 2.0*precision*recall/(precision+recall) if (precision+recall)!=0 else 0 ;
-        
-        print "Precision,Recall,F1Score: %.3f,%.3f,%.3f" % (precision,recall,F1Score);
-        return precision,recall,F1Score;
+        accuracy = 1.0 * (TP + TN) / (TP + TN + FP + FN);
+
+        print "Precision,Recall,F1Score,Accuracy: %.3f,%.3f,%.3f,%.3f" % (precision, recall, F1Score, accuracy);
+        return precision, recall, F1Score, accuracy;
     

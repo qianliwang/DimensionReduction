@@ -3,12 +3,30 @@ from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 import numpy as np;
 from numpy import linalg as LA;
-from sklearn.model_selection import ShuffleSplit;
 from sklearn.model_selection import StratifiedShuffleSplit;
 import sys;
 import os;
 from sklearn.preprocessing import StandardScaler;
+from pkg.diffPrivDimReduction import DPModule;
+from sklearn import preprocessing;
 
+
+def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
+    #preprocessing.normalize(pureTrainingData, copy=False);
+    #preprocessing.normalize(pureTestingData, copy=False);
+    projMatrixLength = pureTrainingData.shape[1]*k;
+    oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
+    projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
+    delta = np.divide(1.0, pureTrainingData.shape[0]);
+    noiseLength = pureTrainingData.shape[0]*k;
+    oneDimNoise = DPModule.DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength,l2Sensitivity=l2Sensitivity);
+    noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
+
+    projTrainingData = np.dot(pureTrainingData,projMatrix);
+    noisyProjTrainingData = projTrainingData + noiseMatrix;
+    projTestingData = np.dot(pureTestingData,projMatrix);
+
+    return noisyProjTrainingData,projTestingData;
 
 def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM):
     pureTrainingData = trainingData[:,1:];
@@ -39,35 +57,44 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     projTrainingData1 = pcaImpl.transform(pureTrainingData,largestReducedFeature);
     projTestingData1 = pcaImpl.transform(pureTestingData,largestReducedFeature);
     #print projTrainingData.shape;
-    cprResult = np.zeros((len(xEpsilons),10)); 
+    cprResult = [];
     print "non noise PCA SVM training";
     if isLinearSVM:
         result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
     else:
         result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-    cprResult[0][1] += result[0];
-    cprResult[0][2] += result[1];
-    cprResult[0][3] += result[2];
+    #cprResult[0][1] += result[0];
+    #cprResult[0][2] += result[1];
+    #cprResult[0][3] += result[2];
+    pcaAccuracy = result[3];
+
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
         #print pcaImpl.projMatrix[:,0];    
         print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
-                
+
+        cprResult.append(targetEpsilon);
+        cprResult.append(pcaAccuracy);
+
         isGaussianDist = True;
         dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
         dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
         
-        isGaussianDist = False;
-        dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
         '''
         We don't need to project the data multiple times.
         '''
 
+        """
+        isGaussianDist = False;
+        dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
+        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
+        
         cprResult[k][0] += targetEpsilon;
         if k>0:
             cprResult[k][1] += cprResult[0][1];
             cprResult[k][2] += cprResult[0][2];
             cprResult[k][3] += cprResult[0][3];
+
+        """
 
         projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
         projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
@@ -77,10 +104,11 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
             result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-        cprResult[k][4] += result[0];
-        cprResult[k][5] += result[1];
-        cprResult[k][6] += result[2];
-        
+        #cprResult[k][4] += result[0];
+        #cprResult[k][5] += result[1];
+        #cprResult[k][6] += result[2];
+        cprResult.append(result[3]);
+        """
         projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,largestReducedFeature);
         projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,largestReducedFeature);
         #print projTestingData.shape;
@@ -93,48 +121,21 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
         cprResult[k][8] += result[1];
         cprResult[k][9] += result[2];
         
-    return cprResult;
-
-
-def doExp_unbalanced(datasetPath, varianceRatio, numOfRounds, isLinearSVM=True):
-    if os.path.basename(datasetPath).endswith('npy'):
-        data = np.load(datasetPath);
-    else:
-        data = np.loadtxt(datasetPath, delimiter=",");
-
-    globalPCA = PCAModule.PCAImpl(data[:, 1:]);
-
-    numOfFeature = data.shape[1] - 1;
-    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature, numOfFeature, varianceRatio);
-    xEpsilons = np.arange(0.1, 1.0, 0.1);
-    cprResult = None;
-
-    posiData = data[np.where(data[:, 0] == 1)];
-    negData = data[np.where(data[:, 0] == -1)];
-    splitRatio = 0.8;
-    numPosSamples = int(posiData.shape[0] * splitRatio);
-    numNegSamples = int(negData.shape[0] * splitRatio);
-    cprResult = None;
-    # print posiData.shape;
-    # print negData.shape;
-    for i in range(numOfRounds):
-        np.random.shuffle(posiData);
-        np.random.shuffle(negData);
-        trainingData = np.concatenate((posiData[:numPosSamples], negData[:numNegSamples]), axis=0);
-        testingData = np.concatenate((posiData[numPosSamples:], negData[numNegSamples:]), axis=0);
-        # print trainingData.shape;
-        # print testingData.shape;
-        tmpResult = singleExp(xEpsilons, trainingData, testingData, largestReducedFeature, isLinearSVM);
-        if cprResult is None:
-            cprResult = tmpResult;
+        """
+        projTrainingData4, projTestingData4 = DPPro(pureTrainingData, pureTestingData, dpGaussianPCAImpl.L2Sensitivity,
+                                                    largestReducedFeature, targetEpsilon);
+        # print projTestingData.shape;
+        print "DPPro SVM training";
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData4, trainingLabel, projTestingData4, testingLabel);
         else:
-            cprResult = np.concatenate((cprResult, tmpResult), axis=0);
-    # avgCprResult = cprResult/numOfRounds;
-    avgCprResult = cprResult;
-    for result in avgCprResult:
-        print ','.join(['%.3f' % num for num in result]);
-    return avgCprResult;
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData4, trainingLabel, projTestingData4, testingLabel);
+        cprResult.append(result[3]);
+
+    resultArray = np.asarray(cprResult);
+    resultArray = np.reshape(resultArray,(len(xEpsilons),-1));
+    return resultArray;
+
 
 def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     if os.path.basename(datasetPath).endswith('npy'):
@@ -148,9 +149,8 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
 
-    xEpsilons = np.arange(0.1,1.0,0.1);
+    xEpsilons = np.arange(0.1,1.1,0.1);
     cprResult = None;
-    #cprResult = np.zeros((len(xEpsilons),10));
     rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data[:,1:],data[:,0]);
     for train_index, test_index in rs.split(data[:,1:],data[:,0]):
@@ -161,24 +161,16 @@ def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
             cprResult = tmpResult;
         else:
             cprResult = np.concatenate((cprResult,tmpResult),axis=0);
-    # To record the mean and standard deviation.
-    avgResult = cprResult;
-    #avgResult = cprResult/numOfRounds;
-    for result in avgResult:
+
+    for result in cprResult:
         print ','.join(['%.3f' % num for num in result]);
     
-    return avgResult;
+    return cprResult;
 
-def normByRow(data):
-    for i in range(data.shape[0]):
-        rowNorm = LA.norm(data[i,:], ord=2);
-        data[i,:] = data[i,:]/rowNorm;
-    return data;
-  
 if __name__ == "__main__":
     
     numOfRounds = 2;
-    varianceRatio = 0.9;
+    varianceRatio = 0.8;
     figSavedPath = "./log/";
     resultSavedPath = "./log/";
     isLinearSVM = False;
@@ -186,11 +178,10 @@ if __name__ == "__main__":
         datasetPath = sys.argv[1];
         varianceRatio = 0.8;
         print "+++ using passed in arguments: %s" % (datasetPath);
-        #result = doExp_unbalanced(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['B11','Face_15','CNAE_2','Amazon_5','diabetes','ionosphere'];
+        datasets = ['CNAE_2','Face_15','Amazon_5','diabetes','ionosphere'];
         for dataset in datasets:    
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";

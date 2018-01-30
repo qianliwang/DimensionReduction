@@ -16,75 +16,12 @@ from sklearn import preprocessing;
 from sklearn.preprocessing import StandardScaler;
 from pkg.global_functions import globalFunction as gf;
 
-def getApproxEigval(covMatrix,r1):
-    temp1 = np.dot(covMatrix,r1);
-    v1 = np.dot(r1.T,temp1);
-    v2 = np.dot(r1.T,r1);
-    eigVal = np.divide(v1,v2);
-    return eigVal;
-
-def genEigenvectors_power(covMatrix,topK):
-    '''
-    Compute the eigenvector with power iteration method, multiplying covariance with random vector, 
-    converge threshold is setted through epsilon.
-    '''
-#    r0 = np.random.rand(covMatrix.shape[0],1);
-    epsilon = 0.01;
-    eigValues = np.zeros(topK);
-    eigVectors = None;
-    k=0;
-    vecLength = covMatrix.shape[0];
-    bound = min(1000,max(100,vecLength));
-    while k<topK:
-        r0 = np.random.rand(vecLength,1);
-        count=0;
-        while count<bound:
-            r1 = np.dot(covMatrix, r0);
-            # Get the second norm of r1;
-            scale = LA.norm(r1,2);
-            r1 = np.divide(r1,scale);
-            #dist = LA.norm(r1-r0,2);
-            # Note the formula to calculate the distance 
-            eigVal = getApproxEigval(covMatrix,r1);
-            dist = LA.norm(np.dot(covMatrix,r1)-eigVal*r1,2);
-            #print dist;
-            
-            if dist < epsilon:
-                #print count;
-                #print "No.%d eigenvalue: %f" % (k,eigVal);
-                break;
-            else:    
-                r0 = r1;
-                count += 1;
-        if eigVectors is None:
-            eigVectors = r1;
-        else:
-            eigVectors = np.append(eigVectors,r1,axis=1);
-        np.put(eigValues,k,eigVal);
-        covMatrix -= eigVal*np.outer(r1,r1);
-        k += 1;            
-    return eigValues,eigVectors;
-
-
 def simulatePrivateLocalPCA(data,targetDimension,epsilon):
-    #k = np.minimum(targetDimension,LA.matrix_rank(data));
-    #print "In each data owner, the k is: %d" % k;
 
     C = data.T.dot(data);
     WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,data.shape[1]);
     noisyC = C + WishartNoiseMatrix;
-    """
-    if data.shape[1]<100:
-        noisyEigenvalues,noisyEigenvectors = LA.eig(noisyC);
-        idx = np.absolute(noisyEigenvalues).argsort()[::-1];
-        # print idx;
-        noisyEigenvalues = noisyEigenvalues[idx];
-        # print sortedW;
-        noisyEigenvectors = noisyEigenvectors[:, idx];
-    else:
-        noisyEigenvalues,noisyEigenvectors = sparse.linalg.eigs(noisyC, k=max(k-1,1),tol=0.001);
-    #noisyEigenvalues,noisyEigenvectors = genEigenvectors_power(noisyC, k);
-    """
+
     noisyLeftSigVectors,noisySingularValues, noisyRightSigVectors = sparse.linalg.svds(noisyC, k=targetDimension, tol=0.001);
     noisySingularValues = np.real(noisySingularValues);
     noisyRightSigVectors = np.real(noisyRightSigVectors.T);
@@ -107,17 +44,15 @@ def simulatePrivateGlobalPCA(data,numOfSamples,targetDimension,epsilon):
             P = P_prime;
     #return P;
     return preprocessing.normalize(P, axis=0, copy=False);
+
 def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
 
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
-    #normalizedTrainingData = normByRow(pureTrainingData);
-    
+
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
 
-    preprocessing.normalize(pureTrainingData, copy=False);
-    preprocessing.normalize(pureTestingData, copy=False);
 
     scaler = StandardScaler(copy=False);
     #print pureTrainingData[0];
@@ -129,8 +64,11 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
     scaler.transform(pureTestingData);
     #print pureTestingData[0];
 
+    preprocessing.normalize(pureTrainingData, copy=False);
+    preprocessing.normalize(pureTestingData, copy=False);
+
     numOfFeature = trainingData.shape[1]-1;
-    cprResult = []
+
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     pcaImpl.getPCs(topK);
     
@@ -139,25 +77,11 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
     '''
     WishartNoiseMatrix = DiffPrivImpl.SymmWishart(epsilon,numOfFeature);
     noisyCovMatrix = pcaImpl.covMatrix + WishartNoiseMatrix;
-    #w, v = LA.eig(noisyCovMatrix);  
-    # Sorting the eigenvalues in descending order.
-    #idx = np.absolute(w).argsort()[::-1];
-    #noisyProjMatrix = np.real(v[:,idx]);
 
-    noisyEigValues,noisyProjMatrix = sparse.linalg.eigs(noisyCovMatrix, k=topK, tol=0.001);
-    noisyProjMatrix = np.real(noisyProjMatrix);
+    noisyLeftSigVectors, noisyEigValues,noisyProjMatrix = sparse.linalg.svds(noisyCovMatrix, k=topK, tol=0.001);
+    noisyProjMatrix = np.real(noisyProjMatrix.T);
 
-    # Project the data using different projection matrix.
-    projTrainingData1 = pcaImpl.transform(pureTrainingData, topK);
-    projTestingData1 = pcaImpl.transform(pureTestingData, topK);
-    print "Non-noise PCA %d" % topK;
-    if isLinearSVM:
-        result = SVMModule.SVMClf.linearSVM(projTrainingData1, trainingLabel, projTestingData1, testingLabel);
-    else:
-        result = SVMModule.SVMClf.rbfSVM(projTrainingData1, trainingLabel, projTestingData1, testingLabel);
-
-    cprResult.append(result[2]);
-
+    """
     projTrainingData2 = np.dot(pureTrainingData, noisyProjMatrix);
     projTestingData2 = np.dot(pureTestingData, noisyProjMatrix);
 
@@ -168,50 +92,77 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
         result = SVMModule.SVMClf.rbfSVM(projTrainingData2, trainingLabel, projTestingData2, testingLabel);
 
     cprResult.append(result[2]);
+    """
+
+    cprResult = [];
 
     for k, numOfSamples in np.ndenumerate(xSamples):
-        pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
-        #print projTrainingData.shape;
 
-        #print pcaImpl.projMatrix[:,0];
+        cprResult.append(numOfSamples);
+        # Project the data using different projection matrix.
+        projTrainingData1 = pcaImpl.transform(pureTrainingData, numOfSamples);
+        projTestingData1 = pcaImpl.transform(pureTestingData, numOfSamples);
+        print "Non-noise PCA %d" % numOfSamples;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData1, trainingLabel, projTestingData1, testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData1, trainingLabel, projTestingData1, testingLabel);
+
+        cprResult.append(result[2]);
+
+        projTrainingData2 = np.dot(pureTrainingData, noisyProjMatrix[:, :numOfSamples]);
+        projTestingData2 = np.dot(pureTestingData, noisyProjMatrix[:, :numOfSamples]);
+
+        print "DPDPCA %d" % numOfSamples;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData2, trainingLabel, projTestingData2, testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData2, trainingLabel, projTestingData2, testingLabel);
+
+        cprResult.append(result[2]);
+
+        pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
 
         projTrainingData3 = np.dot(pureTrainingData,pgProjMatrix);
         projTestingData3 = np.dot(pureTestingData,pgProjMatrix);
         
-        print "PrivateLocalPCA with %d data held by each data owner" % numOfSamples;
+        print "\nPrivateLocalPCA with %d data held by each data owner" % numOfSamples;
         if isLinearSVM:
             result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         cprResult.append(result[2]);
-        
-    return np.asarray(cprResult);
+
+    resultArray = np.asarray(cprResult);
+    resultArray = np.reshape(resultArray, (len(xSamples), -1));
+    return resultArray;
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis, isLinearSVM=True):
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
         data = np.loadtxt(datasetPath, delimiter=",");
+    numOfFeature = data.shape[1] - 1;
     scaler = StandardScaler();
     data_std = scaler.fit_transform(data[:, 1:]);
     globalPCA = PCAModule.PCAImpl(data_std);
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
 
-    numOfFeature = data.shape[1]-1;
+
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
-    #cprResult = np.zeros((len(xDimensions),4));
     cprResult = None;
-    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
-    rs.get_n_splits(data[:,1:],data[:,0]);
-    
+
+
+    #rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    #rs.get_n_splits(data[:,1:],data[:,0]);
+    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data);
     #p = Pool(numOfRounds);
-    normalizedData = gf.normByRow(data[:,1:]);
-    normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
+    for train_index, test_index in rs.split(data):
+    #for train_index, test_index in rs.split(data[:,1:],data[:,0]):
 
-    for train_index, test_index in rs.split(data[:,1:],data[:,0]):
-
-        trainingData = normalizedData[train_index];
-        testingData = normalizedData[test_index];
+        trainingData = data[train_index];
+        testingData = data[test_index];
         print "number of training samples %d" % trainingData.shape[0];
         #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,topK,isLinearSVM));
         #cprResult += tmpResult.get();
@@ -223,73 +174,17 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis, isLi
             cprResult = tmpResult;
         else:
             cprResult = np.concatenate((cprResult,tmpResult),axis=0);
-        """
-        for i in range(0,len(cprResult)):
-            print ','.join(['%.3f' % num for num in cprResult[i]]);
-        """
-    #avgResult = cprResult/numOfRounds;
-    avgResult = cprResult;
+
     #p.close();
     #p.join();
-    for result in avgResult:
+    for result in cprResult:
         print ','.join(['%.3f' % num for num in result]);
 
-    return avgResult;
-
-def doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=True):
-    if os.path.basename(datasetPath).endswith('npy'):
-        data = np.load(datasetPath);
-    else:
-        data = np.loadtxt(datasetPath, delimiter=",");
-
-    numOfFeature = data.shape[1] - 1;
-
-    scaler = StandardScaler(copy=False);
-    # print pureTrainingData[0];
-    rawData = data[:, 1:];
-    scaler.fit(rawData);
-    scaler.transform(rawData);
-    globalPCA = PCAModule.PCAImpl(rawData);
-    largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature, numOfFeature, varianceRatio);
-    xDimensions = None;
-
-    normalizedData = gf.normByRow(data[:, 1:]);
-    normalizedData = np.concatenate((data[:, [0, ]], normalizedData), axis=1);
-    posiData = data[np.where(normalizedData[:,0]==1)];
-    negData = data[np.where(normalizedData[:,0]==-1)];
-    splitRatio = 0.8;
-    numPosSamples = int(posiData.shape[0]*splitRatio);
-    numNegSamples = int(negData.shape[0]*splitRatio);
-    cprResult = None;
-    #print posiData.shape;
-    #print negData.shape;
-    for i in range(numOfRounds):
-        np.random.shuffle(posiData);
-        np.random.shuffle(negData);
-        trainingData = np.concatenate((posiData[:numPosSamples],negData[:numNegSamples]),axis=0);
-        testingData = np.concatenate((posiData[numPosSamples:],negData[numNegSamples:]),axis=0);
-        #print trainingData.shape;
-        #print testingData.shape;
-        mostSamplesPerDataOwner = trainingData.shape[0] / 2;
-        xSamples = np.arange(2, mostSamplesPerDataOwner, max(mostSamplesPerDataOwner / numOfPointsinXAxis, 1));
-        print "number of samples be tested: %s" % xSamples;
-        tmpResult = singleExp(xSamples, trainingData, testingData, largestReducedFeature, epsilon, isLinearSVM);
-        if cprResult is None:
-            cprResult = tmpResult;
-        else:
-            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
-    #avgCprResult = cprResult/numOfRounds;
-    avgCprResult = cprResult;
-    for result in avgCprResult:
-        print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
-    #p.close();
-    #p.join();
-    return avgCprResult;
+    return cprResult;
 
 if __name__ == "__main__":
     
-    numOfRounds = 3;
+    numOfRounds = 2;
     epsilon = 0.3;
     varianceRatio = 0.8
     #numOfSamples = 2;
@@ -300,7 +195,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        #result = doExp_unbalanced(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
