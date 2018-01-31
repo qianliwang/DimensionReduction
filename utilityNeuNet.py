@@ -86,7 +86,7 @@ def MLP(x_train,y_train,x_test,y_test):
     print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
     return scores[1];
 
-def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon,isLinearSVM):
+def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
     
@@ -149,7 +149,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
     resultArray = np.reshape(resultArray, (len(xDimensions), -1));
     return resultArray;
 
-def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
+def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
@@ -189,22 +189,20 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     return cprResult;
 if __name__ == "__main__":
     numOfRounds = 4;
-    figSavedPath = "./log/";
     resultSavedPath = "./log/";
-    numOfDimensions = 30;
+    numOfDimensions = 15;
     epsilon = 0.3;
     varianceRatio = 0.9;
-    isLinearSVM = False;
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
-        np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
+        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions);
+        np.savetxt(resultSavedPath+"numPC_NN_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         #datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
-            np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions);
+            np.savetxt(resultSavedPath+"numPC_NN_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
