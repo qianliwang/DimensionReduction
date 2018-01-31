@@ -1,18 +1,42 @@
 from keras.models import Sequential;
 from keras.layers import Dense,Activation,Dropout;
 from keras.utils import np_utils;
-import numpy as np;
+from keras import backend as K;
+
 from pkg.dimReduction import PCAModule;
+from pkg.diffPrivDimReduction import DPModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+
+from sklearn.model_selection import StratifiedShuffleSplit;
+from sklearn.model_selection import StratifiedKFold;
+from sklearn import preprocessing;
+from sklearn.preprocessing import StandardScaler;
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score;
+
 import numpy as np;
 from numpy import linalg as LA;
-from sklearn.model_selection import StratifiedShuffleSplit;
 import sys;
 import os;
-from sklearn.preprocessing import StandardScaler;
-from pkg.diffPrivDimReduction import DPModule;
-from sklearn import preprocessing;
-from keras import backend as K;
+
+class Metrics_callback(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.val_f1s = []
+        self.val_recalls = []
+        self.val_precisions = []
+ 
+    def on_epoch_end(self, epoch, logs={}):
+        val_predict = (np.asarray(self.model.predict(self.model.validation_data[0]))).round()
+        val_targ = self.model.validation_data[1]
+        _val_f1 = f1_score(val_targ, val_predict)
+        _val_recall = recall_score(val_targ, val_predict)
+        _val_precision = precision_score(val_targ, val_predict)
+        self.val_f1s.append(_val_f1)
+        self.val_recalls.append(_val_recall)
+        self.val_precisions.append(_val_precision)
+        print “ — val_f1: %f — val_precision: %f — val_recall %f” %(_val_f1, _val_precision, _val_recall)
+        return;
+
+myCallback = Metrics_callback();
 
 def f1(y_true, y_pred):
     def recall(y_true, y_pred):
@@ -44,15 +68,33 @@ def f1(y_true, y_pred):
     recall = recall(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall));
 
-def MLP(x_train,y_train,x_test,y_test):
+def create_MLP():
+    NUM_FEATURE = x_train.shape[1];
+    N_HIDDEN = NUM_FEATURE;
+    model = Sequential();
+    model.add(Dense(N_HIDDEN, input_dim=NUM_FEATURE,activation='sigmoid'));
+    #model.add(Activation('sigmoid'));
+    #model.add(Dropout(DROPOUT));
+    #model.add(Dense(N_HIDDEN,activation='relu'));
+    #model.add(Activation('relu'));
+    #model.add(Dropout(DROPOUT));
+    model.add(Dense(1,activation='sigmoid'));
+    #model.summary();
+    # Compile model
+    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
+    return model;
+
+def fit_MLP(x_train,y_train,x_test,y_test):
     EPOCH = 100;
     BATCH_SIZE = 100;
     NUM_FEATURE = x_train.shape[1];
     N_HIDDEN = NUM_FEATURE;
-    VALIDATION_SPLIT = 0.2;
+    VALIDATION_SPLIT = 0.1;
     #RESHAPED = 856;
     NB_CLASSES = 2;
     DROPOUT = 0.1;
+    KFOLD_SPLITS = 10;
     # load pima indians dataset
     #dataset = numpy.loadtxt("pima-indians-diabetes.csv", delimiter=",")
     # split into input (X) and output (Y) variables
@@ -77,13 +119,19 @@ def MLP(x_train,y_train,x_test,y_test):
     model.add(Dense(1,activation='sigmoid'));
     #model.summary();
     # Compile model
-    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
+    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
     # Fit the model
-    model.fit(x_train, y_train, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=1,validation_split = VALIDATION_SPLIT)
-    # evaluate the model
-    scores = model.evaluate(x_test, y_test)
-    print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+
+    skf = StratifiedKFold(n_splits=KFOLD_SPLITS, shuffle=True);
+    
+    for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
+        x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
+        y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
+        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT,callbacks=[myCallback]);
+        # evaluate the model
+        scores = model.evaluate(x_test, y_test)
+        print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
     return scores[1];
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
@@ -131,7 +179,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,targetDimension);
         print "Gaussian-noise PCA %d" % targetDimension;
         
-        result = MLP(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+        result = fit_MLP(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         
         cprResult.append(result);
         """
@@ -176,7 +224,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
         trainingData = data[train_index];
         testingData = data[test_index];
         
-        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon,isLinearSVM);
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon);
         if cprResult is None:
             cprResult = tmpResult;
         else:
@@ -193,6 +241,7 @@ if __name__ == "__main__":
     numOfDimensions = 15;
     epsilon = 0.3;
     varianceRatio = 0.9;
+    
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
