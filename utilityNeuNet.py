@@ -1,11 +1,20 @@
-from __future__ import print_function;
 from keras.models import Sequential;
-from keras.layers import Dense;
+from keras.layers import Dense,Activation;
 from keras.utils import np_utils;
 import numpy as np;
+from pkg.dimReduction import PCAModule;
+from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+import numpy as np;
+from numpy import linalg as LA;
+from sklearn.model_selection import StratifiedShuffleSplit;
+import sys;
+import os;
+from sklearn.preprocessing import StandardScaler;
+from pkg.diffPrivDimReduction import DPModule;
+from sklearn import preprocessing;
 
-def MLP(x_train,y_train,x_test,y_test)
-    EPOCH = 20;
+def MLP(x_train,y_train,x_test,y_test):
+    EPOCH = 200;
     BATCH_SIZE = 100;
     NUM_FEATURE = x_train.shape[1];
     N_HIDDEN = NUM_FEATURE;
@@ -19,21 +28,22 @@ def MLP(x_train,y_train,x_test,y_test)
     #X = dataset[:,0:8]
     #Y = dataset[:,8]
 
-    y_train = np_utils.to_categorical(y_train,NB_CLASSES);
-    y_test = np_utils.to_categorical(y_test,NB_CLASSES);
+    #y_train = np_utils.to_categorical(y_train,NB_CLASSES);
+    #y_test = np_utils.to_categorical(y_test,NB_CLASSES);
     # create model
     model = Sequential();
     model.add(Dense(N_HIDDEN, input_dim=NUM_FEATURE,));
     model.add(Activation('sigmoid'));
+    model.add(Dense(1));
     #model.add(Dropout(DROPOUT));
     #model.add(Dense(N_HIDDEN));
     #model.add(Activation('relu'));
     #model.add(Dropout(DROPOUT));
     model.summary();
     # Compile model
-    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'],validation_split = VALIDATION_SPLIT)
+    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
     # Fit the model
-    model.fit(x_train, y_train, epochs=EPOCH, batch_size=BATCH_SIZE)
+    model.fit(x_train, y_train, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=1,validation_split = VALIDATION_SPLIT)
     # evaluate the model
     scores = model.evaluate(x_test, y_test)
     print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
@@ -86,7 +96,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         
         result = MLP(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         
-        cprResult.append(result[3]);
+        cprResult.append(result);
         """
         projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
         projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,targetDimension);
