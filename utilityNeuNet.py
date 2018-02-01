@@ -37,7 +37,7 @@ class Metrics_callback(Callback):
         print "--val_f1: %f , val_precision: %f , val_recall %f" % (_val_f1, _val_precision, _val_recall)
         return;
 
-myCallback = Metrics_callback();
+#myCallback = Metrics_callback();
 
 def f1(y_true, y_pred):
     def recall(y_true, y_pred):
@@ -129,10 +129,14 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
         x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
         y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
-        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT,callbacks=[myCallback]);
+        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT);
         # evaluate the model
         scores = model.evaluate(x_test, y_test)
+        
         print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+        y_pred = model.predict(x_test);
+        f1Score = f1_score(y_pred, y_test);
+        print("f1 Score: %f" % (f1Score));
     return scores[1];
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
