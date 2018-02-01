@@ -26,7 +26,8 @@ class Metrics_callback(Callback):
         self.val_precisions = []
  
     def on_epoch_end(self, epoch, logs={}):
-        val_predict = (np.asarray(self.model.predict(self.validation_data[0]))).round()
+        #val_predict = (np.asarray(self.model.predict(self.validation_data[0]))).round()
+        val_predict = self.model.predict_classes(self.validation_data[0]);
         val_targ = self.validation_data[1]
         _val_f1 = f1_score(val_targ, val_predict)
         _val_recall = recall_score(val_targ, val_predict)
@@ -37,7 +38,7 @@ class Metrics_callback(Callback):
         print "--val_f1: %f , val_precision: %f , val_recall %f" % (_val_f1, _val_precision, _val_recall)
         return;
 
-#myCallback = Metrics_callback();
+myCallback = Metrics_callback();
 
 def f1(y_true, y_pred):
     def recall(y_true, y_pred):
@@ -69,11 +70,14 @@ def f1(y_true, y_pred):
     recall = recall(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall));
 
-def create_MLP():
-    NUM_FEATURE = x_train.shape[1];
-    N_HIDDEN = NUM_FEATURE;
+def build_MLP(numOfSamples,numOfFeatures,numOfOutputs):
+    # alpha is in [2,10];
+    alpha = 2;
+    #DROPOUT = 0.1;
+    N_HIDDEN = (numOfSamples/(alpha*(numOfFeatures+numOfOutputs))).round();
+    print "neurons in hidden layer: %d" % N_HIDDEN;
     model = Sequential();
-    model.add(Dense(N_HIDDEN, input_dim=NUM_FEATURE,activation='sigmoid'));
+    model.add(Dense(N_HIDDEN, input_dim=numOfFeatures,activation='sigmoid'));
     #model.add(Activation('sigmoid'));
     #model.add(Dropout(DROPOUT));
     #model.add(Dense(N_HIDDEN,activation='relu'));
@@ -82,19 +86,16 @@ def create_MLP():
     model.add(Dense(1,activation='sigmoid'));
     #model.summary();
     # Compile model
-    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
+    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
     return model;
 
 def fit_MLP(x_train,y_train,x_test,y_test):
     EPOCH = 100;
     BATCH_SIZE = 100;
-    NUM_FEATURE = x_train.shape[1];
-    N_HIDDEN = NUM_FEATURE;
     VALIDATION_SPLIT = 0.1;
     #RESHAPED = 856;
-    NB_CLASSES = 2;
-    DROPOUT = 0.1;
+    #NB_CLASSES = 2;
     KFOLD_SPLITS = 10;
     # load pima indians dataset
     #dataset = numpy.loadtxt("pima-indians-diabetes.csv", delimiter=",")
@@ -106,22 +107,10 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     #y_test = np_utils.to_categorical(y_test,NB_CLASSES);
 
     # good trick to change values in ndArray.
+    # convert labels from [1,-1] to [1,0].
     y_train[y_train < 0]=0;
     y_test[y_test < 0]=0;
-    # create model
-    model = Sequential();
 
-    model.add(Dense(N_HIDDEN, input_dim=NUM_FEATURE,activation='sigmoid'));
-    #model.add(Activation('sigmoid'));
-    #model.add(Dropout(DROPOUT));
-    #model.add(Dense(N_HIDDEN,activation='relu'));
-    #model.add(Activation('relu'));
-    #model.add(Dropout(DROPOUT));
-    model.add(Dense(1,activation='sigmoid'));
-    #model.summary();
-    # Compile model
-    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
     # Fit the model
 
     skf = StratifiedKFold(n_splits=KFOLD_SPLITS, shuffle=True);
@@ -129,14 +118,14 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
         x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
         y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
-        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT);
+        model = build_MLP(x_train_cv.shape[0],x_train_cv.shape[1],1);
+        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT,callbacks=[myCallback]);
         # evaluate the model
         scores = model.evaluate(x_test, y_test)
-        
-        print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-        y_pred = model.predict(x_test);
+        #print("\nCross validation-%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+        y_pred = model.predict_classes(x_test);
         f1Score = f1_score(y_pred, y_test);
-        print("f1 Score: %f" % (f1Score));
+        print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
     return scores[1];
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
@@ -176,7 +165,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
         projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
         print "Non-noise PCA %d" % targetDimension;
-        result = MLP(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        result = fit_MLP(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
         
         cprResult.append(result);
 
