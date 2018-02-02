@@ -74,7 +74,8 @@ def build_MLP(numOfSamples,numOfFeatures,numOfOutputs):
     # alpha is in [2,10];
     alpha = 2;
     #DROPOUT = 0.1;
-    N_HIDDEN = (numOfSamples/(alpha*(numOfFeatures+numOfOutputs))).round();
+    #N_HIDDEN = numOfSamples/(alpha*(numOfFeatures+numOfOutputs));
+    N_HIDDEN = numOfFeatures;
     print "neurons in hidden layer: %d" % N_HIDDEN;
     model = Sequential();
     model.add(Dense(N_HIDDEN, input_dim=numOfFeatures,activation='sigmoid'));
@@ -96,7 +97,7 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     VALIDATION_SPLIT = 0.1;
     #RESHAPED = 856;
     #NB_CLASSES = 2;
-    KFOLD_SPLITS = 10;
+    KFOLD_SPLITS = 5;
     # load pima indians dataset
     #dataset = numpy.loadtxt("pima-indians-diabetes.csv", delimiter=",")
     # split into input (X) and output (Y) variables
@@ -112,26 +113,32 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     y_test[y_test < 0]=0;
 
     # Fit the model
-
-    skf = StratifiedKFold(n_splits=KFOLD_SPLITS, shuffle=True);
-    res = [];
-    for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
-        x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
-        y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
-        model = build_MLP(x_train_cv.shape[0],x_train_cv.shape[1],1);
-        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT);
-        # evaluate the model
-        scores = model.evaluate(x_test, y_test);
-        res.append(scores[1]);
-        #print("\nCross validation-%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-        y_pred = model.predict_classes(x_test);
-        f1Score = f1_score(y_pred, y_test);
-        res.append(f1Score);
-        #print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
-    resArray = np.asarray(res);
-    resArray = np.reshape(resArray,(-1,2));
-    print("Avg cross validation: accuracy: %f, f1 Score: %f" % (np.mean(resArray)));
-    return scores[1];
+    expRes = [];
+    epoches = np.arange(100,1100,100);
+    for singleEpoch in epoches:
+        skf = StratifiedKFold(n_splits=KFOLD_SPLITS, shuffle=True);
+        res = [];
+        for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
+            x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
+            y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
+            model = build_MLP(x_train_cv.shape[0],x_train_cv.shape[1],1);
+            model.fit(x_train_cv, y_train_cv, epochs=singleEpoch, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT);
+            # evaluate the model
+            scores = model.evaluate(x_test, y_test);
+            res.append(scores[1]);
+            #print("\nCross validation-%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+            y_pred = model.predict_classes(x_test);
+            f1Score = f1_score(y_pred, y_test);
+            res.append(f1Score);
+            #print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
+        resArray = np.asarray(res);
+        resArray = np.reshape(resArray,(-1,2));
+        avgRes = np.mean(resArray,axis=0);
+        print("Avg cross validation: accuracy: %f, f1 Score: %f" % (avgRes[0],avgRes[1]));
+        expRes.append(singleEpoch);
+        expRes.append(avgRes[0]);
+        expRes.append(avgRes[1]);
+    return expRes;
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
     pureTrainingData = trainingData[:,1:];
@@ -213,10 +220,10 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
         xDimensions = np.arange(1,numOfFeature);
         largestReducedFeature=numOfFeature;
     else:
-        xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
+        xDimensions = np.arange(10,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
     
     cprResult = None;
-    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.15, random_state=0);
     rs.get_n_splits(data[:,1:],data[:,0]);
 
     for train_index, test_index in rs.split(data[:,1:],data[:,0]):
@@ -235,11 +242,11 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
 
     return cprResult;
 if __name__ == "__main__":
-    numOfRounds = 4;
+    numOfRounds = 10;
     resultSavedPath = "./log/";
-    numOfDimensions = 15;
+    numOfDimensions = 10;
     epsilon = 0.3;
-    varianceRatio = 0.9;
+    varianceRatio = 0.8;
     
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
