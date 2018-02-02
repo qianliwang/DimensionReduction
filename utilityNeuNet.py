@@ -114,18 +114,23 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     # Fit the model
 
     skf = StratifiedKFold(n_splits=KFOLD_SPLITS, shuffle=True);
-    
+    res = [];
     for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
         x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
         y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
         model = build_MLP(x_train_cv.shape[0],x_train_cv.shape[1],1);
-        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT,callbacks=[myCallback]);
+        model.fit(x_train_cv, y_train_cv, epochs=EPOCH, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT);
         # evaluate the model
-        scores = model.evaluate(x_test, y_test)
+        scores = model.evaluate(x_test, y_test);
+        res.append(scores[1]);
         #print("\nCross validation-%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
         y_pred = model.predict_classes(x_test);
         f1Score = f1_score(y_pred, y_test);
-        print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
+        res.append(f1Score);
+        #print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
+    resArray = np.asarray(res);
+    resArray = np.reshape(resArray,(-1,2));
+    print("Avg cross validation: accuracy: %f, f1 Score: %f" % (np.mean(resArray)));
     return scores[1];
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
