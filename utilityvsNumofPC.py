@@ -1,13 +1,16 @@
+from sklearn.model_selection import StratifiedShuffleSplit;
+from sklearn.preprocessing import StandardScaler;
+from sklearn import preprocessing;
+
 from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 from pkg.diffPrivDimReduction import DPModule;
+
 import numpy as np;
-from sklearn.model_selection import StratifiedShuffleSplit;
-from sklearn import preprocessing;
 import sys;
 import os;
-from sklearn.preprocessing import StandardScaler;
+
 
 def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
     preprocessing.normalize(pureTrainingData, copy=False);
