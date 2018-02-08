@@ -1,15 +1,20 @@
+from sklearn.model_selection import StratifiedShuffleSplit;
+from sklearn.preprocessing import StandardScaler;
+from sklearn import preprocessing;
+from sklearn.model_selection import ShuffleSplit;
+
+import matplotlib.pyplot as plt;
+from matplotlib.ticker import MultipleLocator;
+
 from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+from pkg.diffPrivDimReduction import DPModule;
+from pkg.global_functions import globalFunction as gf;
+
 import numpy as np;
-from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
 import sys;
 import os;
-from multiprocessing import Pool;
-from sklearn.preprocessing import StandardScaler;
-from pkg.global_functions import globalFunction as gf;
-from matplotlib.ticker import MultipleLocator;
 
 def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
@@ -83,31 +88,31 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM):
-    pureTrainingData = trainingData[:,1:];
-    trainingLabel = trainingData[:,0];
-    
-    pureTestingData = testingData[:,1:];
-    testingLabel = testingData[:,0];
+def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon,isLinearSVM):
+    pureTrainingData = trainingData[:, 1:];
+    trainingLabel = trainingData[:, 0];
+
+    pureTestingData = testingData[:, 1:];
+    testingLabel = testingData[:, 0];
 
     scaler = StandardScaler(copy=False);
-    #print pureTrainingData[0];
+    # print pureTrainingData[0];
     scaler.fit(pureTrainingData);
     scaler.transform(pureTrainingData);
-    #print pureTrainingData[0];
+    # print pureTrainingData[0];
 
-    #print pureTestingData[0];
+    # print pureTestingData[0];
     scaler.transform(pureTestingData);
-    #print pureTestingData[0];
+    # print pureTestingData[0];
 
-    cprResult = np.zeros((len(xDimensions),4));
+    cprResult = [];
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-    
+
     pcaImpl.getPCs(largestReducedFeature);
     numOfTrainingSamples = trainingData.shape[0];
-    
-    delta = np.divide(1.0,numOfTrainingSamples);
-    print "epsilon: %.2f, delta: %f" % (epsilon,delta);
+
+    delta = np.divide(1.0, numOfTrainingSamples);
+    print "epsilon: %.2f, delta: %f" % (epsilon, delta);
     
     isGaussianDist = True;
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
@@ -165,44 +170,42 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,isLinea
     return cprResult;
 
 def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
-    data = np.loadtxt(datasetPath,delimiter=",");
-    globalPCA = PCAModule.PCAImpl(data[:,1:]);
-    
-    numOfFeature = data.shape[1]-1;
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+    scaler = StandardScaler();
+    data_std = scaler.fit_transform(data[:, 1:]);
+    globalPCA = PCAModule.PCAImpl(data_std);
+
+    numOfFeature = data.shape[1] - 1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature, numOfFeature, varianceRatio);
     xDimensions = None;
     if numOfDimensions > numOfFeature:
-        xDimensions = np.arange(1,numOfFeature);
-        largestReducedFeature=numOfFeature;
+        xDimensions = np.arange(1, numOfFeature);
+        largestReducedFeature = numOfFeature;
     else:
-        xDimensions = np.arange(1,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
-    
-    #cprResult = np.zeros((len(xDimensions),4));
+        xDimensions = np.arange(1, largestReducedFeature, max(largestReducedFeature / numOfDimensions, 1));
+
     cprResult = None;
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
-    rs.get_n_splits(data);
-    #p = Pool(numOfRounds);
-    
-    for train_index, test_index in rs.split(data):    
+    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data[:, 1:], data[:, 0]);
+
+    for train_index, test_index in rs.split(data[:, 1:], data[:, 0]):
         trainingData = data[train_index];
         testingData = data[test_index];
-        
-        #tmpResult = p.apply_async(singleExp, (xDimensions,trainingData,testingData,largestReducedFeature,isLinearSVM));
 
-        #cprResult += tmpResult.get();
-        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, isLinearSVM);
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon, isLinearSVM);
         if cprResult is None:
             cprResult = tmpResult;
         else:
-            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
-    #avgCprResult = cprResult/numOfRounds;
-    avgCprResult = cprResult;
-    for result in avgCprResult:
-        print "%d,%.3f,%.3f,%.3f" % (result[0],result[1],result[2],result[3]);
-    #p.close();
-    #p.join();
-    return avgCprResult;
+            cprResult = np.concatenate((cprResult, tmpResult), axis=0);
+
+    for result in cprResult:
+        print ','.join(['%.3f' % num for num in result]);
+
+    return cprResult;
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];

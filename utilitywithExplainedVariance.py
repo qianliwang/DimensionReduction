@@ -1,14 +1,16 @@
-from pkg.dimReduction import PCAModule;
-from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+from sklearn.model_selection import ShuffleSplit;
+from sklearn.preprocessing import StandardScaler;
+import matplotlib.pyplot as plt;
+
 import numpy as np;
 from numpy import linalg as LA;
-from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
 import sys;
 import os;
 from multiprocessing import Pool;
+
+from pkg.dimReduction import PCAModule;
+from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 from pkg.global_functions import globalFunction as gf;
-from sklearn.preprocessing import StandardScaler;
 
 def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
@@ -129,83 +131,102 @@ def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"explainedVariance_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
-    
-    numOfTrainingSamples = pureTrainingData.shape[0];
-    #scaler = StandardScaler(copy=False);
-    #scaler.fit(pureTrainingData);
-    #scaler.transform(pureTrainingData);
-    pureTrainingData = gf.normByRow(pureTrainingData);
+def calcEigRatios(eigValues):
+    eigSum = np.sum(eigValues);
+    tmpSum = 0;
+    res = [];
+    for eigVal in eigValues:
+        tmpSum += eigVal;
+        res.append(tmpSum/eigSum);
+    return res;
 
+def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
+
+    numOfTrainingSamples = pureTrainingData.shape[0];
+    scaler = StandardScaler(copy=False);
+    # print pureTrainingData[0];
+    scaler.fit(pureTrainingData);
+    scaler.transform(pureTrainingData);
+    # numOfFeature = trainingData.shape[1]-1;
     matrixRank = LA.matrix_rank(pureTrainingData);
 
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-    
-    pcaImpl.getEigValueEnergies();
+
+    pcaEnergies = pcaImpl.getEigValueEnergies();
     cprResult = [];
-    cprResult.append(gf.calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
-    delta = np.divide(1.0,numOfTrainingSamples);
+    cprResult.append(calcEigRatios(pcaImpl.eigValues)[:largestReducedFeature]);
+    delta = np.divide(1.0, numOfTrainingSamples);
     gaussianResult = [];
     wishartResult = [];
-    #print cprResult;
+    # print cprResult;
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
-        #print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
+        # print "epsilon: %.2f, delta: %f" % (targetEpsilon,delta);
         isGaussianDist = True;
-        dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank,onlyEigvalues=True);
-        #print dpGaussianPCAImpl.eigValues;
-        GaussianEigRatio = gf.calcEigRatios(dpGaussianPCAImpl.eigValues);
+        dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon, delta);
+        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist, matrixRank, onlyEigvalues=True);
+        # print dpGaussianPCAImpl.eigValues;
+        GaussianEigRatio = calcEigRatios(dpGaussianPCAImpl.eigValues);
         gaussianResult.append(GaussianEigRatio[:largestReducedFeature]);
-        #print GaussianEigRatio;
+        # print GaussianEigRatio;
         isGaussianDist = False;
-        dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon,delta);
-        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,matrixRank,onlyEigvalues=True);
-        WishartEigRatio = gf.calcEigRatios(dpWishartPCAImpl.eigValues);
+        dpWishartPCAImpl.setEpsilonAndGamma(targetEpsilon, delta);
+        dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist, matrixRank, onlyEigvalues=True);
+        WishartEigRatio = calcEigRatios(dpWishartPCAImpl.eigValues);
         wishartResult.append(WishartEigRatio[:largestReducedFeature]);
-        #print WishartEigRatio;
+        # print WishartEigRatio;
     cprResult.extend(gaussianResult);
     cprResult.extend(wishartResult);
-    #print cprResult;
+    # print cprResult;
     return np.asarray(cprResult);
 
 def doExp(datasetPath,varianceRatio,numOfRounds):
-
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
         data = np.loadtxt(datasetPath, delimiter=",");
 
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=1, random_state=0);
+    rs = ShuffleSplit(n_splits=numOfRounds, test_size=2, random_state=0);
     rs.get_n_splits(data);
-    globalPCA = PCAModule.PCAImpl(data[:,1:]);
+    globalPCA = PCAModule.PCAImpl(data[:, 1:]);
+    numOfFeature = data.shape[1] - 1;
+    matrixRank = LA.matrix_rank(data[:, 1:]);
 
+    print "Matrix rank of the data is %d." % matrixRank;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,data.shape[1]-1,varianceRatio);
-    
-    xEpsilons = np.arange(0.1,1.1,0.1);
-    #cprResult = np.zeros((len(xEpsilons),4));
-    #p = Pool(numOfRounds);
+    print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature, numOfFeature, varianceRatio);
+
+    xEpsilons = np.arange(0.1, 1.1, 0.1);
+    # print xDimensions;
+    # p = Pool(numOfRounds);
+    # allResults = [];
     cprResult = [];
-    m =0;
+    m = 0;
     for train_index, test_index in rs.split(data):
         print "Trail %d" % m;
         trainingData = data[train_index];
-        pureTrainingData = trainingData[:,1:];
-        tmpResult = singleExp(xEpsilons,pureTrainingData,largestReducedFeature);
+        pureTrainingData = trainingData[:, 1:];
+        tmpResult = singleExp(xEpsilons, pureTrainingData, largestReducedFeature);
         cprResult.extend(tmpResult);
         m += 1;
-        #print tmpResult;
-        #tmpResult = p.apply_async(singleExp, (xEpsilons,pureTrainingData,largestReducedFeature));
-        #cprResult.extend(tmpResult.get());
-
+        # print tmpResult.shape;
+        # print tmpResult;
+        # tmpResult = p.apply_async(singleExp, (xEpsilons,pureTrainingData,largestReducedFeature));
+        # cprResult += tmpResult.get();
+    """
+        for i in range(0,len(cprResult)):
+            print "%.4f,%.4f,%.4f" % (cprResult[i][0],cprResult[i][1],cprResult[i][2]);
+        print "******************************";
+    """
     # Compute the average value after numOfRounds experiments.
-    #avgCprResult = cprResult/numOfRounds;
-    #p.close();
-    #p.join();
+    # avgCprResult = cprResult/numOfRounds;
+    # p.close();
+    # p.join();
+    for result in cprResult:
+        print ','.join(['%.3f' % num for num in result]);
 
-    return np.asarray(cprResult);
+    return np.asarray(cprResult, dtype=float);
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german', 'ionosphere'];

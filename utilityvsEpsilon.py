@@ -1,14 +1,17 @@
+from sklearn.model_selection import StratifiedShuffleSplit;
+from sklearn.preprocessing import StandardScaler;
+from sklearn import preprocessing;
+import matplotlib.pyplot as plt;
+
+import numpy as np;
+from numpy import linalg as LA;
+import sys;
+import os;
+
 from pkg.svm import SVMModule;
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
-import numpy as np;
-from numpy import linalg as LA;
-from sklearn.model_selection import ShuffleSplit;
-import matplotlib.pyplot as plt;
-import sys;
-import os;
-from multiprocessing import Pool;
-from sklearn.preprocessing import StandardScaler;
+from pkg.diffPrivDimReduction import DPModule;
 from pkg.global_functions import globalFunction as gf;
 
 def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
@@ -209,23 +212,23 @@ def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
         plt.savefig(figSavedPath+"epsilon_rec_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
 def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM):
-    pureTrainingData = trainingData[:,1:];
-    trainingLabel = trainingData[:,0];
-    
+    pureTrainingData = trainingData[:, 1:];
+    trainingLabel = trainingData[:, 0];
+
     numOfTrainingSamples = trainingData.shape[0];
-    
-    pureTestingData = testingData[:,1:];
-    testingLabel = testingData[:,0];
-    
+
+    pureTestingData = testingData[:, 1:];
+    testingLabel = testingData[:, 0];
+
     scaler = StandardScaler(copy=False);
-    #print pureTrainingData[0];
+    # print pureTrainingData[0];
     scaler.fit(pureTrainingData);
     scaler.transform(pureTrainingData);
-    #print pureTrainingData[0];
-    
-    #print pureTestingData[0];
+    # print pureTrainingData[0];
+
+    # print pureTestingData[0];
     scaler.transform(pureTestingData);
-    #print pureTestingData[0];
+    # print pureTestingData[0];
     
     pcaImpl = PCAModule.PCAImpl(pureTrainingData);
     pcaImpl.getPCs(largestReducedFeature);
@@ -294,42 +297,36 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     return cprResult;
     
 def doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=True):
-    
-    data = np.loadtxt(datasetPath,delimiter=",");
-    rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
-    rs.get_n_splits(data);
-    globalPCA = PCAModule.PCAImpl(data[:,1:]);
+    if os.path.basename(datasetPath).endswith('npy'):
+        data = np.load(datasetPath);
+    else:
+        data = np.loadtxt(datasetPath, delimiter=",");
+    scaler = StandardScaler();
+    data_std = scaler.fit_transform(data[:, 1:]);
+    globalPCA = PCAModule.PCAImpl(data_std);
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
-    
-    xEpsilons = np.arange(0.1,1.0,0.1);
-    cprResult = None;
-    #cprResult = np.zeros((len(xEpsilons),10));
-    #p = Pool(numOfRounds);
-    
-    #normalizedData = normByRow(data[:,1:]);
-    #normalizedData = np.concatenate((data[:,[0,]],normalizedData),axis=1);
 
-    for train_index, test_index in rs.split(data):
+    xEpsilons = np.arange(0.1,1.1,0.1);
+    #xEpsilons = np.logspace(-3,0,10);
+    cprResult = None;
+    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs.get_n_splits(data[:,1:],data[:,0]);
+    for train_index, test_index in rs.split(data[:,1:],data[:,0]):
         trainingData = data[train_index];
         testingData = data[test_index];
-        #tmpResult = p.apply_async(singleExp, (xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM));
-        #cprResult += tmpResult.get();
         tmpResult = singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM);
         if cprResult is None:
             cprResult = tmpResult;
         else:
             cprResult = np.concatenate((cprResult,tmpResult),axis=0);
-    # To record the mean and standard deviation.
-    avgResult = cprResult;
-    #avgResult = cprResult/numOfRounds;
-    #p.close();
-    #p.join();
-    for result in avgResult:
+
+    for result in cprResult:
         print ','.join(['%.3f' % num for num in result]);
+
+    return cprResult;
     
-    return avgResult;    
 if __name__ == "__main__":
     
     numOfRounds = 10;

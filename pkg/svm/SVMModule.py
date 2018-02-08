@@ -42,10 +42,10 @@ class SVMClf(object):
         #print gamma_range;
         param_grid = dict(gamma=gamma_range, C=C_range);
         # Notice here that the svm.SVC is just for searching for the parameter, we didn't really train the model yet.  
-        grid = GridSearchCV(svm.SVC(kernel='rbf',class_weight="balanced"), param_grid=param_grid, scoring="f1", n_jobs = 5, cv=skfCV);
+        grid = GridSearchCV(svm.SVC(kernel='rbf',class_weight="balanced"), param_grid=param_grid, scoring="f1", n_jobs = 10, cv=skfCV);
         #grid.fit(ldaProjTrainingData, trainingLabel);
         grid.fit(trainingData, trainingLabel);
-        
+        #print grid.get_params();
         #print "Grid search support vectors:";
         #print grid.best_estimator_.support_;
         
@@ -93,7 +93,8 @@ class SVMClf(object):
         #print "FalsePositive: %d "% FP;
         recall = 1.0*TP/(TP+FN) if (TP+FN)!=0 else 0;
         F1Score = 2.0*precision*recall/(precision+recall) if (precision+recall)!=0 else 0 ;
-        
-        print "Precision,Recall,F1Score: %.3f,%.3f,%.3f" % (precision,recall,F1Score);
-        return precision,recall,F1Score;
+        accuracy = 1.0 * (TP + TN) / (TP + TN + FP + FN);
+
+        print "Precision,Recall,F1Score,Accuracy: %.3f,%.3f,%.3f,%.3f" % (precision, recall, F1Score, accuracy);
+        return precision, recall, F1Score, accuracy;
     

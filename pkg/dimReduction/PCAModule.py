@@ -24,7 +24,7 @@ class PCAImpl(object):
             #self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
             self.eigValues,self.projMatrix = self.svdSolver(self.centeredData);
         elif topK is not None:
-            self.eigValues,self.projMatrix = self.scipyEvdSolver(self.covMatrix,topK);
+            self.eigValues,self.projMatrix = self.scipySvdSolver(self.covMatrix,topK);
             #print "Power Iteration to find top %d principal components." % topK;
             #self.eigValues,self.projMatrix = self.genEigenvectors_power(self.covMatrix,topK);
         else:
@@ -65,7 +65,11 @@ class PCAImpl(object):
         #print sortedW;
         sortedV = v[:,idx];
         return np.real(sortedW),np.real(sortedV);
-    
+
+    def scipySvdSolver(self,covMatrix,topK):
+        u,s,v = sparse.linalg.svds(covMatrix, k=topK, tol=0.001);
+        return np.real(s),np.real(v.T);
+
     def __getApproxEigval(self,covMatrix,r1):
         temp1 = np.dot(covMatrix,r1);
         v1 = np.dot(r1.T,temp1);
@@ -84,7 +88,7 @@ class PCAImpl(object):
         convergeRounds = [];
         k=0;
         vecLength = covMatrix.shape[0];
-        bound = max(1000,vecLength);
+        bound = min(1000,vecLength);
         while k<topK:
             r0 = np.random.rand(vecLength,1);
             count=0;
