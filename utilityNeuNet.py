@@ -4,6 +4,8 @@ from keras.utils import np_utils;
 from keras import backend as K;
 from keras.callbacks import Callback;
 
+import tensorflow as tf;
+
 from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import DPModule;
 from pkg.diffPrivDimReduction import DiffPrivPCAModule;
@@ -19,6 +21,22 @@ from numpy import linalg as LA;
 import sys;
 import os;
 
+from time import time;
+
+###################################
+# TensorFlow wizardry
+config = tf.ConfigProto()
+ 
+# Don't pre-allocate memory; allocate as-needed
+config.gpu_options.allow_growth = True
+ 
+# Only allow a total of half the GPU memory to be allocated
+config.gpu_options.per_process_gpu_memory_fraction = 0.8
+ 
+# Create a session with the above options specified.
+K.tensorflow_backend.set_session(tf.Session(config=config))
+###################################
+'''
 class Metrics_callback(Callback):
     def on_train_begin(self, logs={}):
         self.val_f1s = []
@@ -70,6 +88,7 @@ def f1(y_true, y_pred):
     recall = recall(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall));
 
+'''
 def build_MLP(numOfSamples,numOfFeatures,numOfOutputs):
     # alpha is in [2,10];
     alpha = 2;
@@ -93,7 +112,7 @@ def build_MLP(numOfSamples,numOfFeatures,numOfOutputs):
 
 def fit_MLP(x_train,y_train,x_test,y_test):
     EPOCH = 100;
-    BATCH_SIZE = 100;
+    BATCH_SIZE = 32;
     VALIDATION_SPLIT = 0.1;
     #RESHAPED = 856;
     #NB_CLASSES = 2;
@@ -114,6 +133,9 @@ def fit_MLP(x_train,y_train,x_test,y_test):
 
     # Fit the model
     expRes = [];
+    model = build_MLP(x_train.shape[0],x_train.shape[1],1);
+    # Fit the model
+    init_weights = model.get_weights();
     epoches = np.arange(100,1100,100);
     for singleEpoch in epoches:
         skf = StratifiedKFold(n_splits=KFOLD_SPLITS, shuffle=True);
@@ -131,10 +153,15 @@ def fit_MLP(x_train,y_train,x_test,y_test):
             f1Score = f1_score(y_pred, y_test);
             res.append(f1Score);
             #print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
+       	    model.set_weights(init_weights); 
         resArray = np.asarray(res);
         resArray = np.reshape(resArray,(-1,2));
         avgRes = np.mean(resArray,axis=0);
         print("Avg cross validation: accuracy: %f, f1 Score: %f" % (avgRes[0],avgRes[1]));
+        resArray = np.asarray(res);
+        resArray = np.reshape(resArray,(-1,2));
+        avgRes = np.mean(resArray,axis=0);
+        print("Avg cross validation: epoch: %d, accuracy: %f, f1 Score: %f" % (singleEpoch, avgRes[0],avgRes[1]));
         expRes.append(singleEpoch);
         expRes.append(avgRes[0]);
         expRes.append(avgRes[1]);
@@ -173,13 +200,13 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
     for k, targetDimension in np.ndenumerate(xDimensions):    
         #print pcaImpl.projMatrix[:,0];
         #print k;
-        cprResult.append(targetDimension);
+        cprResult.extend([targetDimension]);
         projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
         projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
         print "Non-noise PCA %d" % targetDimension;
         result = fit_MLP(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
         
-        cprResult.append(result);
+        cprResult.extend(result);
 
         projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,targetDimension);
         projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,targetDimension);
@@ -187,7 +214,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         
         result = fit_MLP(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         
-        cprResult.append(result);
+        cprResult.extend(result);
         """
         projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
         projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,targetDimension);
@@ -242,7 +269,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
 
     return cprResult;
 if __name__ == "__main__":
-    numOfRounds = 10;
+    numOfRounds = 3;
     resultSavedPath = "./log/";
     numOfDimensions = 10;
     epsilon = 0.3;
@@ -252,12 +279,12 @@ if __name__ == "__main__":
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions);
-        np.savetxt(resultSavedPath+"numPC_NN_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
+        np.savetxt(resultSavedPath+"numPC_NN_"+os.path.basename(datasetPath)+"_"+str(time())+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['CNAE_2'];
         #datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions);
-            np.savetxt(resultSavedPath+"numPC_NN_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            np.savetxt(resultSavedPath+"numPC_NN_"+dataset+"_"+str(time())+".output",result,delimiter=",",fmt='%1.3f');

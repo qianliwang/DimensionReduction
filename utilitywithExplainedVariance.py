@@ -1,12 +1,14 @@
-from pkg.dimReduction import PCAModule;
-from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+from sklearn.model_selection import ShuffleSplit;
+from sklearn.preprocessing import StandardScaler;
+
 import numpy as np;
 from numpy import linalg as LA;
-from sklearn.model_selection import ShuffleSplit;
 import sys;
 import os;
 from multiprocessing import Pool;
-from sklearn.preprocessing import StandardScaler;
+
+from pkg.dimReduction import PCAModule;
+from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 
 def calcEigRatios(eigValues):
     eigSum = np.sum(eigValues);
