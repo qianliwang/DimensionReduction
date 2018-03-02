@@ -42,27 +42,38 @@ def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
         wRes.append(data[tmpRange, tmpDim]);
 
     gMean, gStd = gf.calcMeanandStd(np.asarray(gRes));
-    gErrorLine = plt.errorbar(x, gMean, yerr=gStd, fmt='r', capsize=4);
-    gLine, = plt.plot(x,gMean,'r-');
-    wMean,wStd = gf.calcMeanandStd(np.asarray(wRes));
-    wErrorLine = plt.errorbar(x, wMean, yerr=wStd, fmt='g', capsize=4);
-    wLine, = plt.plot(x,wMean,'g-');
+    #gErrorLine = plt.errorbar(x, gMean, yerr=gStd, fmt='r', capsize=4);
+    #gLine, = plt.plot(x,gMean,'r-');
 
-    yMin = min(np.amin(gMean),np.amin(wMean));
-    yMax = max(np.amax(gMean),np.amax(wMean));
-    plt.axis([0.05, 1.05, 0, 1.1*yMax]);
-    plt.legend([gLine, wLine], ['Gaussian Noise', 'Wishart Noise'], loc=4);
+    wMean,wStd = gf.calcMeanandStd(np.asarray(wRes));
+    #wErrorLine = plt.errorbar(x, wMean, yerr=wStd, fmt='g', capsize=4);
+    #wLine, = plt.plot(x,wMean,'g-');
+
+    #yMin = min(np.amin(gMean),np.amin(wMean));
+    #yMax = max(np.amax(gMean),np.amax(wMean));
+    yMin = np.amin(gMean);
+    yMax = np.amax(gMean);
+    toPlot = [];
+    gResArray = np.asarray(gRes);
+    for i in range(gResArray.shape[1]):
+        toPlot.append(gResArray[:,i]);
+    ax = plt.gca();
+    ax.boxplot(toPlot,widths=0.05,positions=x,showfliers=False,boxprops={'color':'indigo'});
+
+    plt.axis([0.05, 1.05, yMin*0.94, 1.06*yMax]);
+    ax.set_xticklabels(x);
+    #plt.legend([gLine, wLine], ['Gaussian Noise', 'Wishart Noise'], loc=4);
     # plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon', fontsize=18);
     plt.ylabel('Captured Energy', fontsize=18);
     plt.title(datasetTitle, fontsize=18);
-    plt.xticks(x);
+    #plt.xticks(x);
     #plt.tight_layout();
     plt.gcf().subplots_adjust(left=0.15)
     if figSavedPath is None:
         plt.show();
     else:
-        plt.savefig(figSavedPath + "explainedVariance_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
+        plt.savefig(figSavedPath + "explainedVariance_" + datasetTitle + '_box.pdf', format='pdf', dpi=1000);
 
 def drawExplainedVariance(datasetTitle,data=None,path=None,figSavedPath=None):
     plt.clf();
@@ -233,18 +244,18 @@ if __name__ == "__main__":
     numOfRounds = 10;
     varianceRatio = 0.9;
     figSavedPath = "./fig/";
-    resultSavedPath = "./log/";
+    resultSavedPath = "./log/firstRevision/";
     if len(sys.argv) >1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
         result = doExp(datasetPath,varianceRatio,numOfRounds);
         np.savetxt(resultSavedPath+"explainedVariance_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['YaleB','MovieLens','p53 Mutant','Million Song','Aloi','Facebook','letter_1','YaleB','diabetes','Amazon','p53 Mutant','diabetes','MovieLens','ionosphere','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
+        datasets = ['Million Song','Aloi','Facebook','Amazon','YaleB','p53 Mutant','MovieLens','CNAE_3','CNAE_2','CNAE_5','CNAE_7','Amazon_3','madelon'];
         for dataset in datasets:  
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,varianceRatio,numOfRounds);
             #np.savetxt(resultSavedPath+"explainedVariance_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawExplainedVariance(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=None);
-            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=figSavedPath);
+            drawVariance_x_epsilon(dataset,data=None,path=resultSavedPath+"explainedVariance_"+dataset+".output",figSavedPath=resultSavedPath);

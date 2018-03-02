@@ -2,6 +2,9 @@ from sklearn.model_selection import ShuffleSplit;
 from sklearn.model_selection import StratifiedShuffleSplit;
 from sklearn.preprocessing import StandardScaler;
 from sklearn import preprocessing;
+import matplotlib;
+import matplotlib.pyplot as plt;
+from matplotlib.ticker import FuncFormatter
 
 import numpy as np;
 from numpy import linalg as LA;
@@ -16,6 +19,102 @@ from pkg.dimReduction import PCAModule;
 from pkg.diffPrivDimReduction import invwishart;
 from pkg.global_functions import globalFunction as gf;
 from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
+from pkg.global_functions import globalFunction as gf;
+
+def to_percent(y, position):
+    # Display the ylabel in percent.
+    # Ignore the passed in position. This has the effect of scaling the default
+    # tick locations.
+    s = str(100 * y)
+
+    # The percent symbol needs escaping in latex
+    if matplotlib.rcParams['text.usetex'] is True:
+        return s + r'$\%$'
+    else:
+        return s + '%'
+
+def drawAccuracyScore(datasetTitle, data=None, path=None, figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path, delimiter=",");
+
+    numOfTrails = data.shape[0] / 5;
+    """
+    minVector = np.amin(data[:,1:],axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data[:,1:],axis=0);
+    yMax = max(maxVector);
+
+    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
+    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
+    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
+    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
+    if datasetTitle is 'Ionosphere':
+        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=4);
+    else:
+        plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=2);
+    """
+    x = np.arange(2,12,2);
+    pcaF1 = [];
+    dpdpcaF1 = [];
+    privateF1 = [];
+    for i in range(0, len(x)):
+        pcaIndices = np.arange(i, data.shape[0], len(x));
+        print pcaIndices;
+        pcaF1.append(data[pcaIndices, 1]);
+        dpdpcaF1.append(data[pcaIndices, 2]);
+        privateF1.append(data[pcaIndices, 3]);
+    # print np.asarray(gF1);
+
+    ax = plt.gca();
+    width = 0.3;
+
+    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
+    #pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b', capsize=4);
+    #pcaF1Line, = plt.plot(x,pcaF1Mean,'b-');
+    dpdpcaF1Mean, dpdpcaF1Std = gf.calcMeanandStd(np.asarray(dpdpcaF1).T);
+    #dpdpcaF1ErrorLine = plt.errorbar(x, dpdpcaF1Mean, yerr=dpdpcaF1Std, fmt='m', capsize=4);
+    #dpdpcaF1Line, = plt.plot(x,dpdpcaF1Mean,'m-');
+    privateF1Mean, privateF1Std = gf.calcMeanandStd(np.asarray(privateF1).T);
+    #privateF1ErrorLine = plt.errorbar(x, privateF1Mean, yerr=privateF1Std, fmt='c', capsize=4);
+    #privateF1Line, = plt.plot(x,privateF1Mean,'c-');
+
+    dpdpcaBar = ax.bar(x - 0.35, dpdpcaF1Mean, width, color='m', yerr=dpdpcaF1Std, capsize=2);
+    privateBar = ax.bar(x, privateF1Mean, width, color='c', yerr=privateF1Std, capsize=2);
+    pcaBar = ax.bar(x + 0.35, pcaF1Mean, width, color='b', yerr=pcaF1Std, capsize=2);
+
+
+    plt.axis([1, 11, 0, 1]);
+    """
+    if 'p53' in datasetTitle:
+        plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=2, fontsize='small');
+    else:
+        plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
+    """
+    #plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
+    ax.legend((dpdpcaBar[0], privateBar[0], pcaBar[0]), ('DPDPCA', 'PrivateLocalPCA', 'PCA'), loc=2, prop={'size': 7});
+    plt.xlabel('Samples at Each Data Owner', fontsize=18);
+    plt.ylabel('Accuracy', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
+    plt.xticks(x);
+
+    formatter = FuncFormatter(to_percent);
+    plt.gca().yaxis.set_major_formatter(formatter);
+    plt.gcf().subplots_adjust(left=0.15);
+
+    """
+    ax = plt.gca();
+    if x[-1] > 100:
+        majorLocator = MultipleLocator(8);
+    else:
+        majorLocator = MultipleLocator(2);
+    #ax.xaxis.set_major_locator(majorLocator);
+    """
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath + "samples_" + datasetTitle + '_bar.pdf', format='pdf', dpi=1000);
+
 
 def simulatePrivateLocalPCA(data,targetDimension,epsilon):
 
@@ -190,7 +289,7 @@ if __name__ == "__main__":
     varianceRatio = 0.8
     #numOfSamples = 2;
     numOfPointsinXAxis = 20;
-    figSavedPath = "./log/";
+    figSavedPath = "./fig/";
     resultSavedPath = "./log/";
     isLinearSVM = False;
     if len(sys.argv) > 1:
@@ -199,9 +298,10 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['Diabetes','CNAE_2','Face_15','p53_3000'];
+        datasets = ['YaleB','Face_15''CNAE','p53',];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
-            np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
+            #np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
+            drawAccuracyScore(dataset, data=None, path=resultSavedPath+"samples_"+dataset+".output",figSavedPath=figSavedPath);

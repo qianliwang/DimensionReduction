@@ -1,7 +1,9 @@
 from sklearn.model_selection import StratifiedShuffleSplit;
 from sklearn.preprocessing import StandardScaler;
 from sklearn import preprocessing;
+import matplotlib;
 import matplotlib.pyplot as plt;
+from matplotlib.ticker import FuncFormatter
 
 import numpy as np;
 from numpy import linalg as LA;
@@ -14,6 +16,89 @@ from pkg.diffPrivDimReduction import DiffPrivPCAModule;
 from pkg.diffPrivDimReduction import DPModule;
 from pkg.global_functions import globalFunction as gf;
 
+
+
+def to_percent(y, position):
+    # Display the ylabel in percent.
+    # Ignore the passed in position. This has the effect of scaling the default
+    # tick locations.
+    s = str(100 * y)
+
+    # The percent symbol needs escaping in latex
+    if matplotlib.rcParams['text.usetex'] is True:
+        return s + r'$\%$'
+    else:
+        return s + '%'
+
+def drawAccuracy(datasetTitle, data=None, path=None, figSavedPath=None):
+    plt.clf();
+    if path is not None:
+        data = np.loadtxt(path, delimiter=",");
+    numOfEps = data.shape[0] / 10;
+    x = data[:numOfEps, 0];
+    data = 1 - data;
+    print "Number of points on x-axis: %d" % numOfEps;
+    """
+    minVector = np.amin(data[:,1:],axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data[:,1:],axis=0);
+    yMax = max(maxVector);
+
+    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
+    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
+    #x = [10,40,70,100,130,160,190,220,250,280,310,340];
+    y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
+
+    plt.legend([y1Line,y2Line,y3Line], ['PCA', 'Gaussian Noise','Wishart Noise'],loc=4);
+    """
+    minVector = np.amin(data[:, 1:], axis=0);
+    yMin = min(minVector);
+    maxVector = np.amax(data[:, 1:], axis=0);
+    yMax = max(maxVector);
+
+    yMin = (yMin - 0.05) if (yMin - 0.05) > 0 else 0;
+    yMax = (yMax * 1.35) if (yMax * 1.35) < 1 else 1.05;
+    pcaAcc = [];
+    dpdpca = [];
+    dppro = [];
+    for i in range(0, numOfEps):
+        pcaIndices = np.arange(i, data.shape[0], numOfEps);
+        pcaAcc.append(data[pcaIndices, 1]);
+        dpdpca.append(data[pcaIndices, 2]);
+        dppro.append(data[pcaIndices, 3]);
+    # print np.asarray(gF1);
+    largestXVal = x[-1];
+
+    pcaAccMean, pcaAccStd = gf.calcMeanandStd(np.asarray(pcaAcc).T);
+    pcaAccErrorLine = plt.errorbar(x, pcaAccMean, yerr=pcaAccStd, fmt='b', capsize=4);
+    pcaAccLine, = plt.plot(x, pcaAccMean, 'b-')
+
+    dpdpcaMean, dpdpcaStd = gf.calcMeanandStd(np.asarray(dpdpca).T);
+    dpdpcaErrorLine = plt.errorbar(x, dpdpcaMean, yerr=dpdpcaStd, fmt='m', capsize=4);
+    dpdpcaLine, = plt.plot(x, dpdpcaMean, 'm-')
+
+    dpproMean, dpproStd = gf.calcMeanandStd(np.asarray(dppro).T);
+    dpproErrorLine = plt.errorbar(x, dpproMean, yerr=dpproStd, fmt='g', capsize=4);
+    dpproLine, = plt.plot(x, dpproMean, 'g-')
+
+    plt.axis([0.05, x[-1] + 0.05, yMin, yMax]);
+    # plt.axis([0,10,0.4,1.0]);
+    plt.legend([pcaAccLine, dpdpcaLine, dpproLine], ['PCA', 'DPDPCA', 'DPPRO'], loc=1);
+    #plt.legend([dpdpcaLine, dpproLine], ['DPDPCA', 'DPPRO'], loc=1);
+
+    plt.xlabel('Epsilon', fontsize=18);
+    plt.ylabel('Misclassification Rate', fontsize=18);
+    plt.title(datasetTitle, fontsize=18);
+    plt.xticks(x);
+
+    formatter = FuncFormatter(to_percent);
+    plt.gca().yaxis.set_major_formatter(formatter);
+    plt.gcf().subplots_adjust(left=0.15);
+    if figSavedPath is None:
+        plt.show();
+    else:
+        plt.savefig(figSavedPath + "dppro_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
+
 def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     
     plt.clf();
@@ -24,7 +109,7 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     pcaF1Mean = np.full((10,),np.mean(pcaF1));
     pcaF1Std = np.full((10,),0);
     ax = plt.gca();
-    width = 0.03;
+    width = 0.05;
 
     #pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean/2, yerr=pcaF1Std, fmt='bs-',capsize=4);
     #pcaF1Line, = plt.plot(x,pcaF1Mean/2,'bs-')
@@ -51,9 +136,11 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     wF1Mean = wF1Mean[theRange];
     wF1Std = wF1Std[theRange];
 
-    gBar = ax.bar(x-0.035, gF1Mean, width, color='r', yerr=gF1Std,capsize=2);
-    wBar = ax.bar(x, wF1Mean, width, color='g', yerr=wF1Std,capsize=2);
-    pcaBar = ax.bar(x+0.035, pcaF1Mean/2, width, color='b', yerr=pcaF1Std,capsize=2);
+    gBar = ax.bar(x-0.03, gF1Mean, width, color='m', yerr=gF1Std,capsize=2);
+    #gBar = ax.bar(x-0.035, gF1Mean, width, color='r', yerr=gF1Std,capsize=2);
+    #wBar = ax.bar(x, wF1Mean, width, color='g', yerr=wF1Std,capsize=2);
+    #pcaBar = ax.bar(x+0.035, pcaF1Mean/2, width, color='b', yerr=pcaF1Std,capsize=2);
+    pcaBar = ax.bar(x+0.03, pcaF1Mean/2, width, color='b', yerr=pcaF1Std,capsize=2);
 
     """
     data = data[:,[3,6,9]];
@@ -78,7 +165,8 @@ def drawF1Score(datasetTitle, data=None,path=None,figSavedPath=None):
     print yMin,yMax;
     plt.axis([0.12,1.08,0,1.15]);
     #plt.legend([pcaF1Line,gF1Line,wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
-    ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
+    #ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
+    ax.legend((gBar[0], pcaBar[0]), ('DPDPCA','PCA'), loc=1, prop={'size':8});
     #plt.axis([0,10,0.4,1.0]);
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
@@ -114,7 +202,8 @@ def drawPrecision(datasetTitle, data=None, path=None, figSavedPath=None):
     #wPrecErrorLine = plt.errorbar(x, wPrecMean, yerr=wPrecStd, fmt='g',capsize=4);
     #wPrecLine, = plt.plot(x, wPrecMean, 'go-')
     ax = plt.gca();
-    width = 0.03;
+    #width = 0.03;
+    width = 0.05;
     theRange = np.arange(1,10,2);
     x = x[theRange];
     pcaPrecMean = pcaPrecMean[theRange];
@@ -124,13 +213,16 @@ def drawPrecision(datasetTitle, data=None, path=None, figSavedPath=None):
     wPrecMean = wPrecMean[theRange];
     wPrecStd = wPrecStd[theRange];
 
-    gBar = ax.bar(x - 0.035, gPrecMean, width, color='r', yerr=gPrecStd, capsize=2);
-    wBar = ax.bar(x, wPrecMean, width, color='g', yerr=wPrecStd,capsize=2);
-    pcaBar = ax.bar(x + 0.035, pcaPrecMean / 2, width, color='b', yerr=pcaPrecStd,capsize=2);
+    gBar = ax.bar(x - 0.03, gPrecMean, width, color='m', yerr=gPrecStd, capsize=2);
+    #gBar = ax.bar(x - 0.035, gPrecMean, width, color='r', yerr=gPrecStd, capsize=2);
+    #wBar = ax.bar(x, wPrecMean, width, color='g', yerr=wPrecStd,capsize=2);
+    #pcaBar = ax.bar(x + 0.035, pcaPrecMean / 2, width, color='b', yerr=pcaPrecStd,capsize=2);
+    pcaBar = ax.bar(x + 0.03, pcaPrecMean / 2, width, color='b', yerr=pcaPrecStd,capsize=2);
 
     plt.axis([0.12, 1.08, 0, 1.15]);
     #plt.legend([pcaPrecLine, gPrecLine, wPrecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
-    ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
+    #ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
+    ax.legend((gBar[0], pcaBar[0]), ('DPDPCA','PCA'), loc=1, prop={'size':8});
     plt.xlabel('Epsilon', fontsize=18);
     plt.ylabel('Precision', fontsize=18);
     plt.title(datasetTitle, fontsize=18);
@@ -185,7 +277,8 @@ def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
         plt.axis([0.05,0.95,0,1]);
     """
     ax = plt.gca();
-    width = 0.03;
+    #width = 0.03;
+    width = 0.04;
     theRange = np.arange(1,10,2);
     x = x[theRange];
     pcaRecMean = pcaRecMean[theRange];
@@ -195,13 +288,16 @@ def drawRecall(datasetTitle, data=None,path=None,figSavedPath=None):
     wRecMean = wRecMean[theRange];
     wRecStd = wRecStd[theRange];
 
-    gBar = ax.bar(x - 0.035, gRecMean, width, color='r', yerr=gRecStd, capsize=2);
-    wBar = ax.bar(x, wRecMean, width, color='g', yerr=wRecStd,capsize=2);
-    pcaBar = ax.bar(x + 0.035, pcaRecMean / 2, width, color='b', yerr=pcaRecStd,capsize=2);
+    gBar = ax.bar(x - 0.03, gRecMean, width, color='m', yerr=gRecStd, capsize=2);
+    #gBar = ax.bar(x - 0.035, gRecMean, width, color='r', yerr=gRecStd, capsize=2);
+    #wBar = ax.bar(x, wRecMean, width, color='g', yerr=wRecStd,capsize=2);
+    #pcaBar = ax.bar(x + 0.035, pcaRecMean / 2, width, color='b', yerr=pcaRecStd,capsize=2);
+    pcaBar = ax.bar(x + 0.03, pcaRecMean / 2, width, color='b', yerr=pcaRecStd,capsize=2);
 
     plt.axis([0.12,1.08,0,1.15]);
     #plt.legend([pcaRecLine, gRecLine, wRecLine], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
-    ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
+    #ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
+    ax.legend((gBar[0], pcaBar[0]), ('DPDPCA','PCA'), loc=1, prop={'size':8});
     plt.xlabel('Epsilon',fontsize=18);
     plt.ylabel('Recall',fontsize=18);
     plt.title(datasetTitle, fontsize=18);
@@ -341,12 +437,13 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['p53 Mutant','CNAE','YaleB','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['NLTCS-Money','NLTCS-Travel','NLTCS-Outside','Amazon','p53 Mutant','CNAE','YaleB','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,varianceRatio,numOfRounds,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=figSavedPath);
-            drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=figSavedPath);
-            drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);
+            #drawF1Score(dataset,data=None,path = resultSavedPath+"Epsilon_"+dataset+".output",figSavedPath=resultSavedPath);
+            #drawPrecision(dataset,data=None,path =resultSavedPath+"Epsilon_"+dataset+".output", figSavedPath=resultSavedPath);
+            #drawRecall(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=resultSavedPath);
+            drawAccuracy(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".output",figSavedPath=figSavedPath);

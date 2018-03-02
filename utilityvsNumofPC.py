@@ -63,16 +63,17 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
     gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
     gF1Mean = gF1Mean[:displayDim];
     gF1Std = gF1Std[:displayDim];
-    gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='r',capsize=4);
-    gF1Line, = plt.plot(x, gF1Mean, 'r-')
+    gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='m',capsize=4);
+    gF1Line, = plt.plot(x, gF1Mean, 'm-')
     wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
     wF1Mean = wF1Mean[:displayDim];
     wF1Std = wF1Std[:displayDim];
-    wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
-    wF1Line, = plt.plot(x, wF1Mean , 'g-')
+    #wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
+    #wF1Line, = plt.plot(x, wF1Mean , 'g-')
     plt.axis([0,x[-1]+1,yMin,yMax]);
     #plt.axis([0,10,0.4,1.0]);
-    plt.legend([gF1Line, wF1Line,pcaF1Line], ['Gaussian Noise', 'Wishart Noise', 'PCA'], loc=4);
+    #plt.legend([gF1Line, wF1Line,pcaF1Line], ['Gaussian Noise', 'Wishart Noise', 'PCA'], loc=4);
+    plt.legend([gF1Line, pcaF1Line], ['DPDPCA', 'PCA'], loc=4);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
     plt.title(datasetTitle, fontsize=18);
@@ -211,7 +212,7 @@ if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
     numOfRounds = 4;
     figSavedPath = "./fig/";
-    resultSavedPath = "./log/";
+    resultSavedPath = "./log/firstRevision/";
     numOfDimensions = 30;
     epsilon = 0.3;
     varianceRatio = 0.9;
@@ -229,4 +230,4 @@ if __name__ == "__main__":
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",figSavedPath=figSavedPath);
+            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",figSavedPath=resultSavedPath);
