@@ -20,6 +20,7 @@ import numpy as np;
 from numpy import linalg as LA;
 import sys;
 import os;
+
 from time import time;
 
 ###################################
@@ -86,6 +87,7 @@ def f1(y_true, y_pred):
     precision = precision(y_true, y_pred)
     recall = recall(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall));
+
 '''
 def build_MLP(numOfSamples,numOfFeatures,numOfOutputs):
     # alpha is in [2,10];
@@ -128,9 +130,11 @@ def fit_MLP(x_train,y_train,x_test,y_test):
     # convert labels from [1,-1] to [1,0].
     y_train[y_train < 0]=0;
     y_test[y_test < 0]=0;
-    model = build_MLP(x_train.shape[0],x_train.shape[1],1);
+
     # Fit the model
     expRes = [];
+    model = build_MLP(x_train.shape[0],x_train.shape[1],1);
+    # Fit the model
     init_weights = model.get_weights();
     epoches = np.arange(100,1100,100);
     for singleEpoch in epoches:
@@ -139,7 +143,7 @@ def fit_MLP(x_train,y_train,x_test,y_test):
         for index, (train_indices_cv, val_indices_cv) in enumerate(skf.split(x_train, y_train)):
             x_train_cv, x_val_cv = x_train[train_indices_cv], x_train[val_indices_cv]
             y_train_cv, y_val_cv = y_train[train_indices_cv], y_train[val_indices_cv]
-            #model = build_MLP(x_train_cv.shape[0],x_train_cv.shape[1],1);
+            model = build_MLP(x_train_cv.shape[0],x_train_cv.shape[1],1);
             model.fit(x_train_cv, y_train_cv, epochs=singleEpoch, batch_size=BATCH_SIZE,verbose=0,validation_split = VALIDATION_SPLIT);
             # evaluate the model
             scores = model.evaluate(x_test, y_test);
@@ -149,7 +153,11 @@ def fit_MLP(x_train,y_train,x_test,y_test):
             f1Score = f1_score(y_pred, y_test);
             res.append(f1Score);
             #print("Cross validation: f1 Score: %f, accuracy: %f." % (f1Score,scores[1]));
-            model.set_weights(init_weights); 
+       	    model.set_weights(init_weights); 
+        resArray = np.asarray(res);
+        resArray = np.reshape(resArray,(-1,2));
+        avgRes = np.mean(resArray,axis=0);
+        print("Avg cross validation: accuracy: %f, f1 Score: %f" % (avgRes[0],avgRes[1]));
         resArray = np.asarray(res);
         resArray = np.reshape(resArray,(-1,2));
         avgRes = np.mean(resArray,axis=0);
@@ -240,6 +248,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
         largestReducedFeature=numOfFeature;
     else:
         xDimensions = np.arange(10,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
+    
     cprResult = None;
     rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.15, random_state=0);
     rs.get_n_splits(data[:,1:],data[:,0]);
