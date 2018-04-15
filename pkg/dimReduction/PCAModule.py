@@ -12,16 +12,22 @@ class PCAImpl(object):
     
     def __init__(self,rawData):
         self.mean = np.mean(rawData,axis=0);
-        self.centeredData = rawData-self.mean; 
+        self.centeredData = rawData-self.mean;
+        #print "Debug code: %s" % np.may_share_memory(self.centeredData,rawData);
         #self.covMatrix = np.dot(self.centeredData.T,self.centeredData);
         self.covMatrix = np.cov(self.centeredData, rowvar=False);
         self.eigValues = None;
         self.projMatrix = None;
         
     def getPCs(self,topK=None):
+        if topK:
+            self.eigValues, self.projMatrix = self.scipySvdSolver(self.covMatrix, topK);
+        else:
+            tmpK = min(self.centeredData.shape[1],self.centeredData.shape[0]-1);
+            self.eigValues, self.projMatrix = self.scipySvdSolver(self.covMatrix, tmpK);
+        """
         if self.centeredData.shape[1]<500:
             #print "Singular Value Decomposition"
-            #self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
             self.eigValues,self.projMatrix = self.svdSolver(self.centeredData);
         elif topK is not None:
             self.eigValues,self.projMatrix = self.scipySvdSolver(self.covMatrix,topK);
@@ -30,6 +36,8 @@ class PCAImpl(object):
         else:
             #print "Eigenvalue decomposition";
             self.eigValues,self.projMatrix = self.evdSolver(self.covMatrix);
+        """
+
     def svdSolver(self,meanCenteredData):
         '''
         Using Singular Value Decomposition to find the eigenvalues and principal components.
@@ -66,8 +74,8 @@ class PCAImpl(object):
         sortedV = v[:,idx];
         return np.real(sortedW),np.real(sortedV);
 
-    def scipySvdSolver(self,covMatrix,topK):
-        u,s,v = sparse.linalg.svds(covMatrix, k=topK, tol=0.001);
+    def scipySvdSolver(self,meanCenteredData,topK):
+        u,s,v = sparse.linalg.svds(meanCenteredData, k=topK, tol=0.001);
         return np.real(s),np.real(v.T);
 
     def __getApproxEigval(self,covMatrix,r1):
