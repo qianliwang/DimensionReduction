@@ -2,9 +2,6 @@ from sklearn.model_selection import ShuffleSplit;
 from sklearn.model_selection import StratifiedShuffleSplit;
 from sklearn.preprocessing import StandardScaler;
 from sklearn import preprocessing;
-import matplotlib;
-import matplotlib.pyplot as plt;
-from matplotlib.ticker import FuncFormatter
 
 import numpy as np;
 from numpy import linalg as LA;
@@ -14,31 +11,53 @@ import sys;
 import os;
 from multiprocessing import Pool;
 
-from pkg.svm import SVMModule;
-from pkg.dimReduction import PCAModule;
-from pkg.diffPrivDimReduction import invwishart;
+from pkg import SVMModule;
+from pkg.DimReduction import PCAImpl;
+from pkg import invwishart;
 from pkg.global_functions import globalFunction as gf;
-from pkg.diffPrivDimReduction.DPModule import DiffPrivImpl;
+from pkg.DPDimReduction import DiffPrivImpl;
 from pkg.global_functions import globalFunction as gf;
 
-def to_percent(y, position):
-    # Display the ylabel in percent.
-    # Ignore the passed in position. This has the effect of scaling the default
-    # tick locations.
-    s = str(100 * y)
 
-    # The percent symbol needs escaping in latex
-    if matplotlib.rcParams['text.usetex'] is True:
-        return s + r'$\%$'
-    else:
-        return s + '%'
 
-def drawAccuracyScore(datasetTitle, data=None, path=None, figSavedPath=None):
+def drawScore(datasetTitle, data=None, path=None,n_trails=1, type='Accuracy',figSavedPath=None):
+    import matplotlib;
+    import matplotlib.pyplot as plt;
+    from matplotlib.ticker import FuncFormatter
+    def to_percent(y, position):
+        # Display the ylabel in percent.
+        # Ignore the passed in position. This has the effect of scaling the default
+        # tick locations.
+        s = str(100 * y)
+
+        # The percent symbol needs escaping in latex
+        if matplotlib.rcParams['text.usetex'] is True:
+            return s + r'$\%$'
+        else:
+            return s + '%'
+
     plt.clf();
     if path is not None:
         data = np.loadtxt(path, delimiter=",");
+    n_dim = data.shape[0];
+    if n_trails is not 1:
+        n_dim = int(data.shape[0]/n_trails);
+        data = data.reshape(n_trails,-1,data.shape[1]);
+        data_mean,data_std = gf.calcMeanandStd(data);
+    else:
+        data_mean = data;
+        data_std = np.zeros(data.shape);
+    print "Number of points on x-axis: %d" % n_dim;
+    x = data_mean[:, 0];
 
-    numOfTrails = data.shape[0] / 5;
+    if type is 'f1':
+        #drawF1Score(datasetTitle, data=data, path=path, figSavedPath=figSavedPath);
+        data_mean = data_mean[:,[3,7,11]];
+        data_std = data_std[:,[3,7,11]];
+    elif type is 'accuracy':
+        #drawAccuracy(datasetTitle, data=data, path=path, figSavedPath=figSavedPath);
+        data_mean = data_mean[:, [4, 8, 12]];
+        data_std = data_std[:, [4, 8, 12]];
     """
     minVector = np.amin(data[:,1:],axis=0);
     yMin = min(minVector);
@@ -54,37 +73,41 @@ def drawAccuracyScore(datasetTitle, data=None, path=None, figSavedPath=None):
     else:
         plt.legend([y1Line,y2Line,y3Line], ['PCA','DPDPCA','PrivateLocalPCA'],loc=2);
     """
-    x = np.arange(2,12,2);
+    #x = np.arange(10,60,10);
     pcaF1 = [];
     dpdpcaF1 = [];
     privateF1 = [];
+    '''
     for i in range(0, len(x)):
         pcaIndices = np.arange(i, data.shape[0], len(x));
         print pcaIndices;
-        pcaF1.append(data[pcaIndices, 1]);
-        dpdpcaF1.append(data[pcaIndices, 2]);
-        privateF1.append(data[pcaIndices, 3]);
+        pcaF1.append(data[pcaIndices, 3]);
+        dpdpcaF1.append(data[pcaIndices, 7]);
+        privateF1.append(data[pcaIndices, 11]);
     # print np.asarray(gF1);
-
+    '''
     ax = plt.gca();
-    width = 0.3;
+    width = 2.3;
 
-    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
+    #pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
     #pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b', capsize=4);
     #pcaF1Line, = plt.plot(x,pcaF1Mean,'b-');
-    dpdpcaF1Mean, dpdpcaF1Std = gf.calcMeanandStd(np.asarray(dpdpcaF1).T);
+    #dpdpcaF1Mean, dpdpcaF1Std = gf.calcMeanandStd(np.asarray(dpdpcaF1).T);
     #dpdpcaF1ErrorLine = plt.errorbar(x, dpdpcaF1Mean, yerr=dpdpcaF1Std, fmt='m', capsize=4);
     #dpdpcaF1Line, = plt.plot(x,dpdpcaF1Mean,'m-');
-    privateF1Mean, privateF1Std = gf.calcMeanandStd(np.asarray(privateF1).T);
+    #privateF1Mean, privateF1Std = gf.calcMeanandStd(np.asarray(privateF1).T);
     #privateF1ErrorLine = plt.errorbar(x, privateF1Mean, yerr=privateF1Std, fmt='c', capsize=4);
     #privateF1Line, = plt.plot(x,privateF1Mean,'c-');
 
-    dpdpcaBar = ax.bar(x - 0.35, dpdpcaF1Mean, width, color='m', yerr=dpdpcaF1Std, capsize=2);
-    privateBar = ax.bar(x, privateF1Mean, width, color='c', yerr=privateF1Std, capsize=2);
-    pcaBar = ax.bar(x + 0.35, pcaF1Mean, width, color='b', yerr=pcaF1Std, capsize=2);
+    pcaBar = ax.bar(x + 2.5, data_mean[:,0], width, color='b', yerr=data_std[:,0], capsize=2);
+    dpdpcaBar = ax.bar(x - 2.5, data_mean[:,1], width, color='m', yerr=data_std[:,1], capsize=2);
+    privateBar = ax.bar(x, data_mean[:,2], width, color='c', yerr=data_std[:,2], capsize=2);
 
-
-    plt.axis([1, 11, 0, 1]);
+    yMin = round(np.amin(data_mean[:,2]),1)-0.1;
+    if datasetTitle=='GISETTE':
+        plt.axis([5, 55, yMin, 1.05]);
+    else:
+        plt.axis([5, 55, yMin, 1.13]);
     """
     if 'p53' in datasetTitle:
         plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=2, fontsize='small');
@@ -92,15 +115,20 @@ def drawAccuracyScore(datasetTitle, data=None, path=None, figSavedPath=None):
         plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
     """
     #plt.legend([pcaF1Line, dpdpcaF1Line, privateF1Line], ['PCA', 'DPDPCA', 'PrivateLocalPCA'], loc=4, fontsize='small');
-    ax.legend((dpdpcaBar[0], privateBar[0], pcaBar[0]), ('DPDPCA', 'PrivateLocalPCA', 'PCA'), loc=2, prop={'size': 7});
+    ax.legend((dpdpcaBar[0], privateBar[0], pcaBar[0]), ('DPDPCA', 'PrivateLocalPCA', 'PCA'), loc=1, prop={'size': 7});
     plt.xlabel('Samples at Each Data Owner', fontsize=18);
-    plt.ylabel('Accuracy', fontsize=18);
+    #plt.ylabel('Accuracy', fontsize=18);
     plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
 
-    formatter = FuncFormatter(to_percent);
-    plt.gca().yaxis.set_major_formatter(formatter);
-    plt.gcf().subplots_adjust(left=0.15);
+    if type=='Accuracy':
+        plt.ylabel('Accuracy', fontsize=18);
+        formatter = FuncFormatter(to_percent);
+        plt.gca().yaxis.set_major_formatter(formatter);
+        plt.gcf().subplots_adjust(left=0.15);
+    else:
+        plt.ylabel('F1-Score', fontsize=18);
+    plt.yticks(np.arange(yMin, 1.05, 0.1));
 
     """
     ax = plt.gca();
@@ -154,14 +182,14 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
     testingLabel = testingData[:,0];
 
 
-    scaler = StandardScaler(copy=False);
+    scaler = StandardScaler();
     #print pureTrainingData[0];
-    scaler.fit(pureTrainingData);
-    scaler.transform(pureTrainingData);
+    #scaler.fit(pureTrainingData);
+    pureTrainingData=scaler.fit_transform(pureTrainingData);
     #print pureTrainingData[0];
 
     #print pureTestingData[0];
-    scaler.transform(pureTestingData);
+    pureTestingData=scaler.transform(pureTestingData);
     #print pureTestingData[0];
 
     preprocessing.normalize(pureTrainingData, copy=False);
@@ -169,7 +197,7 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
 
     numOfFeature = trainingData.shape[1]-1;
 
-    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
+    pcaImpl = PCAImpl(pureTrainingData);
     pcaImpl.getPCs(topK);
     
     '''
@@ -208,7 +236,7 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData1, trainingLabel, projTestingData1, testingLabel);
 
-        cprResult.append(result[2]);
+        cprResult.extend(result);
 
         projTrainingData2 = np.dot(pureTrainingData, noisyProjMatrix[:, :numOfSamples]);
         projTestingData2 = np.dot(pureTestingData, noisyProjMatrix[:, :numOfSamples]);
@@ -219,7 +247,7 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData2, trainingLabel, projTestingData2, testingLabel);
 
-        cprResult.append(result[2]);
+        cprResult.extend(result);
 
         pgProjMatrix = simulatePrivateGlobalPCA(pureTrainingData,numOfSamples,topK,epsilon);
 
@@ -231,7 +259,7 @@ def singleExp(xSamples,trainingData,testingData,topK,epsilon,isLinearSVM):
             result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-        cprResult.append(result[2]);
+        cprResult.extend(result);
 
     resultArray = np.asarray(cprResult);
     resultArray = np.reshape(resultArray, (len(xSamples), -1));
@@ -245,9 +273,8 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis, isLi
     numOfFeature = data.shape[1] - 1;
     scaler = StandardScaler();
     data_std = scaler.fit_transform(data[:, 1:]);
-    globalPCA = PCAModule.PCAImpl(data_std);
+    globalPCA = PCAImpl(data_std);
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
-
 
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
     cprResult = None;
@@ -257,7 +284,6 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis, isLi
     #rs.get_n_splits(data[:,1:],data[:,0]);
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data);
-    #p = Pool(numOfRounds);
     for train_index, test_index in rs.split(data):
     #for train_index, test_index in rs.split(data[:,1:],data[:,0]):
 
@@ -275,8 +301,6 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis, isLi
         else:
             cprResult = np.concatenate((cprResult,tmpResult),axis=0);
 
-    #p.close();
-    #p.join();
     for result in cprResult:
         print ','.join(['%.3f' % num for num in result]);
 
@@ -298,10 +322,10 @@ if __name__ == "__main__":
         result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"dataOwner_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
-        datasets = ['YaleB','Face_15''CNAE','p53',];
+        datasets = ['CNAE','ISOLET','GISETTE'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
             #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfPointsinXAxis,isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"dataOwner_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawAccuracyScore(dataset, data=None, path=resultSavedPath+"samples_"+dataset+".output",figSavedPath=figSavedPath);
+            drawScore(dataset, data=None, path=resultSavedPath+"samples_"+dataset+".output",type='F1',figSavedPath=figSavedPath);

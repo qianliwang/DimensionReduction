@@ -3,34 +3,25 @@ from sklearn.preprocessing import StandardScaler;
 from sklearn import preprocessing;
 from sklearn.model_selection import ShuffleSplit;
 
-import matplotlib.pyplot as plt;
-from matplotlib.ticker import MultipleLocator;
-
-from pkg.svm import SVMModule;
-from pkg.dimReduction import PCAModule;
-from pkg.diffPrivDimReduction import DiffPrivPCAModule;
-from pkg.diffPrivDimReduction import DPModule;
+from pkg import SVMModule;
+from pkg.DimReduction import PCAImpl;
+from pkg.DPDimReduction import DiffPrivPCAImpl;
+from pkg.DPDimReduction import DiffPrivImpl;
 from pkg.global_functions import globalFunction as gf;
 
 import numpy as np;
 import sys;
 import os;
 
-def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
+def drawF1Score(datasetTitle,data=None,path=None,n_trails=1,figSavedPath=None):
+    import matplotlib.pyplot as plt;
+    from matplotlib.ticker import MultipleLocator;
+
     plt.clf();
     if path is not None:
         data = np.loadtxt(path,delimiter=",");
-    numOfDim = data.shape[0]/10;
-    x = data[:numOfDim, 0];
-    print "Number of points on x-axis: %d" % numOfDim;
+
     """
-    minVector = np.amin(data[:,1:],axis=0);
-    yMin = min(minVector);
-    maxVector = np.amax(data[:,1:],axis=0);
-    yMax = max(maxVector);
-    
-    yMin = (yMin-0.1) if (yMin-0.1)>0 else 0;
-    yMax = (yMax+0.1) if (yMax+0.1)<1 else 1;
     #x = [10,40,70,100,130,160,190,220,250,280,310,340];
     y1Line,y2Line,y3Line = plt.plot(x, data[:,1], 'bo-', x, data[:,2], 'r^-',x, data[:,3], 'gs-');
     
@@ -43,31 +34,34 @@ def drawF1Score(datasetTitle,data=None,path=None,figSavedPath=None):
 
     yMin = (yMin - 0.05) if (yMin - 0.05) > 0 else 0;
     yMax = (yMax + 0.05) if (yMax + 0.05) < 1 else 1.05;
-    pcaF1 = [];
-    gF1 = [];
-    wF1 = [];
-    for i in range(0, numOfDim):
-        pcaIndices = np.arange(i, data.shape[0], numOfDim);
-        pcaF1.append(data[pcaIndices, 1]);
-        gF1.append(data[pcaIndices, 2]);
-        wF1.append(data[pcaIndices, 3]);
-    # print np.asarray(gF1);
-    displayDim = 24;
-    x = x[:displayDim];
+    n_dim = data.shape[0];
+
+    if n_trails is not 1:
+        n_dim = int(data.shape[0] / n_trails);
+        data = data.reshape(n_trails,-1,data.shape[1]);
+        data_mean,data_std = gf.calcMeanandStd(data);
+    else:
+        data_mean = data;
+        data_std = np.zeros(data.shape);
+    print "Number of points on x-axis: %d" % n_dim;
+    #print(data_mean);
+    #print(data_std);
+    x = data_mean[:, 0];
+
+    pcaF1Mean = data_mean[:,3];
+    pcaF1Std = data_std[:,3];
     largestXVal = x[-1];
-    pcaF1Mean, pcaF1Std = gf.calcMeanandStd(np.asarray(pcaF1).T);
-    pcaF1Mean = pcaF1Mean[:displayDim];
-    pcaF1Std = pcaF1Std[:displayDim];
+
     pcaF1ErrorLine = plt.errorbar(x, pcaF1Mean, yerr=pcaF1Std, fmt='b',capsize=4);
     pcaF1Line, = plt.plot(x, pcaF1Mean, 'b-')
-    gF1Mean, gF1Std = gf.calcMeanandStd(np.asarray(gF1).T);
-    gF1Mean = gF1Mean[:displayDim];
-    gF1Std = gF1Std[:displayDim];
+
+    gF1Mean = data_mean[:, 7];
+    gF1Std = data_std[:, 7];
     gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='m',capsize=4);
     gF1Line, = plt.plot(x, gF1Mean, 'm-')
-    wF1Mean, wF1Std = gf.calcMeanandStd(np.asarray(wF1).T);
-    wF1Mean = wF1Mean[:displayDim];
-    wF1Std = wF1Std[:displayDim];
+
+    gF1Mean = data_mean[:, 11];
+    gF1Std = data_std[:, 11];
     #wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
     #wF1Line, = plt.plot(x, wF1Mean , 'g-')
     plt.axis([0,x[-1]+1,yMin,yMax]);
@@ -96,18 +90,18 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
     pureTestingData = testingData[:, 1:];
     testingLabel = testingData[:, 0];
 
-    scaler = StandardScaler(copy=False);
+    scaler = StandardScaler();
     # print pureTrainingData[0];
-    scaler.fit(pureTrainingData);
-    scaler.transform(pureTrainingData);
+    #scaler.fit(pureTrainingData);
+    pureTrainingData = scaler.fit_transform(pureTrainingData);
     # print pureTrainingData[0];
 
     # print pureTestingData[0];
-    scaler.transform(pureTestingData);
+    pureTestingData = scaler.transform(pureTestingData);
     # print pureTestingData[0];
 
     cprResult = [];
-    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
+    pcaImpl = PCAImpl(pureTrainingData);
 
     pcaImpl.getPCs(largestReducedFeature);
     numOfTrainingSamples = trainingData.shape[0];
@@ -116,12 +110,12 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
     print "epsilon: %.2f, delta: %f" % (epsilon, delta);
     
     isGaussianDist = True;
-    dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    dpGaussianPCAImpl = DiffPrivPCAImpl(pureTrainingData);
     dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
     dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
     
     isGaussianDist = False;
-    dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    dpWishartPCAImpl = DiffPrivPCAImpl(pureTrainingData);
     dpWishartPCAImpl.setEpsilonAndGamma(epsilon,delta);
     dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
     
@@ -129,7 +123,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         #print pcaImpl.projMatrix[:,0];
         #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
         #print k;
-        cprResult[k][0] += targetDimension;
+        cprResult.append(targetDimension);
         projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
         projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
         print "Non-noise PCA %d" % targetDimension;
@@ -138,7 +132,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
         
-        cprResult[k][1] += result[2];
+        cprResult.extend(result);
         
         isGaussianDist = True;
         #dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
@@ -150,8 +144,8 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
             result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-        cprResult[k][2] += result[2];
-        
+        cprResult.extend(result);
+
         isGaussianDist = False;
         #dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
         projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
@@ -162,22 +156,24 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
             result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
         else:
             result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-        cprResult[k][3] += result[2];
-        
+        cprResult.extend(result);
+
         """
         for result in cprResult:
             print "%f,%f,%f" % (result[0],result[1],result[2]);
         """
-    return cprResult;
+    #print(cprResult);
+    cprResult = np.asarray(cprResult);
+    return cprResult.reshape((len(xDimensions),-1));
 
-def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=True):
+def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,logPath,isLinearSVM=True):
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
         data = np.loadtxt(datasetPath, delimiter=",");
     scaler = StandardScaler();
     data_std = scaler.fit_transform(data[:, 1:]);
-    globalPCA = PCAModule.PCAImpl(data_std);
+    globalPCA = PCAImpl(data_std);
 
     numOfFeature = data.shape[1] - 1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
@@ -189,7 +185,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
     else:
         xDimensions = np.arange(1, largestReducedFeature, max(largestReducedFeature / numOfDimensions, 1));
 
-    cprResult = None;
+    cprResult = [];
     rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
     rs.get_n_splits(data[:, 1:], data[:, 0]);
 
@@ -197,12 +193,12 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
         trainingData = data[train_index];
         testingData = data[test_index];
 
-        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon, isLinearSVM);
-        if cprResult is None:
-            cprResult = tmpResult;
-        else:
-            cprResult = np.concatenate((cprResult, tmpResult), axis=0);
+        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon,isLinearSVM);
+        with open(logPath, "a") as f:
+            np.savetxt(f,tmpResult,delimiter=",",fmt='%1.3f');
+        cprResult.append(tmpResult);
 
+    cprResult = np.vstack(cprResult);
     for result in cprResult:
         print ','.join(['%.3f' % num for num in result]);
 
@@ -210,9 +206,10 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinear
 
 if __name__ == "__main__":
     #datasets = ['diabetes','german','ionosphere'];
-    numOfRounds = 4;
+    numOfRounds = 2;
     figSavedPath = "./fig/";
-    resultSavedPath = "./log/firstRevision/";
+    logSavedPath = "./log/";
+    resultSavedPath = logSavedPath+"/firstRevision/";
     numOfDimensions = 30;
     epsilon = 0.3;
     varianceRatio = 0.9;
@@ -224,10 +221,10 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['CNAE','YaleB','p53 Mutant','Amazon_2','Australian','german','ionosphere'];
+        datasets = ['CNAE','Australian','YaleB','p53 Mutant','Amazon_2','german','ionosphere'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+            #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,logPath=logSavedPath+'numPC_'+dataset+".out",isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",figSavedPath=resultSavedPath);
+            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",n_trails=10,figSavedPath=None);

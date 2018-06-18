@@ -8,8 +8,8 @@ import sys;
 import os;
 from multiprocessing import Pool;
 
-from pkg.dimReduction import PCAModule;
-from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+from pkg.DimReduction import PCAImpl
+from pkg.DPDimReduction import DiffPrivPCAImpl;
 from pkg.global_functions import globalFunction as gf;
 
 def drawVariance_x_epsilon(datasetTitle,data=None,path=None,figSavedPath=None):
@@ -161,9 +161,9 @@ def singleExp(xEpsilons,pureTrainingData,largestReducedFeature):
     # numOfFeature = trainingData.shape[1]-1;
     matrixRank = LA.matrix_rank(pureTrainingData);
 
-    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-    dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-    dpWishartPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
+    pcaImpl = PCAImpl(pureTrainingData);
+    dpGaussianPCAImpl = DiffPrivPCAImpl(pureTrainingData);
+    dpWishartPCAImpl = DiffPrivPCAImpl(pureTrainingData);
 
     pcaEnergies = pcaImpl.getEigValueEnergies();
     cprResult = [];
@@ -200,7 +200,7 @@ def doExp(datasetPath,varianceRatio,numOfRounds):
 
     rs = ShuffleSplit(n_splits=numOfRounds, test_size=2, random_state=0);
     rs.get_n_splits(data);
-    globalPCA = PCAModule.PCAImpl(data[:, 1:]);
+    globalPCA = PCAImpl(data[:, 1:]);
     numOfFeature = data.shape[1] - 1;
     matrixRank = LA.matrix_rank(data[:, 1:]);
 
