@@ -83,6 +83,24 @@ def drawF1Score(datasetTitle,data=None,path=None,n_trails=1,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
+
+def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
+    preprocessing.normalize(pureTrainingData, copy=False);
+    preprocessing.normalize(pureTestingData, copy=False);
+    projMatrixLength = pureTrainingData.shape[1]*k;
+    oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
+    projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
+    delta = np.divide(1.0, pureTrainingData.shape[0]);
+    noiseLength = pureTrainingData.shape[0]*k;
+    oneDimNoise = DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength,l2Sensitivity=l2Sensitivity);
+    noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
+
+    projTrainingData = np.dot(pureTrainingData,projMatrix);
+    noisyProjTrainingData = projTrainingData + noiseMatrix;
+    projTestingData = np.dot(pureTestingData,projMatrix);
+
+    return noisyProjTrainingData,projTestingData;
+
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon,isLinearSVM):
     pureTrainingData = trainingData[:, 1:];
     trainingLabel = trainingData[:, 0];
@@ -124,40 +142,48 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
         #result = SVMModule.SVMClf.rbfSVM(pureTrainingData,trainingLabel,pureTestingData,testingLabel);
         #print k;
         cprResult.append(targetDimension);
-        projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
-        projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
+        projTrainingData = pcaImpl.transform(pureTrainingData,targetDimension);
+        projTestingData = pcaImpl.transform(pureTestingData,targetDimension);
         print "Non-noise PCA %d" % targetDimension;
         if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+            result = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         
         cprResult.extend(result);
         
         isGaussianDist = True;
         #dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist);
-        projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,targetDimension);
-        projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,targetDimension);
+        projTrainingData = dpGaussianPCAImpl.transform(pureTrainingData,targetDimension);
+        projTestingData = dpGaussianPCAImpl.transform(pureTestingData,targetDimension);
         #print projTestingData.shape;
         print "Gaussian-noise PCA %d" % targetDimension;
         if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+            result = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         cprResult.extend(result);
 
         isGaussianDist = False;
         #dpWishartPCAImpl.getDiffPrivPCs(isGaussianDist);
-        projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
-        projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,targetDimension);
+        projTrainingData = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
+        projTestingData = dpWishartPCAImpl.transform(pureTestingData,targetDimension);
         #print projTestingData.shape;
         print "Wishart-noise PCA %d" % targetDimension;
         if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+            result = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         cprResult.extend(result);
 
+        projTrainingData, projTestingData = DPPro(pureTrainingData, pureTestingData, dpGaussianPCAImpl.L2Sensitivity, targetDimension, epsilon);
+
+        print "DPPro %d" % targetDimension;
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData, trainingLabel, projTestingData, testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData, trainingLabel, projTestingData, testingLabel);
+        cprResult.extend(result);
         """
         for result in cprResult:
             print "%f,%f,%f" % (result[0],result[1],result[2]);
@@ -166,7 +192,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
     cprResult = np.asarray(cprResult);
     return cprResult.reshape((len(xDimensions),-1));
 
-def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,logPath,isLinearSVM=True):
+def doExp(datasetPath,epsilon,varianceRatio,n_trails,numOfDimensions,logPath,isLinearSVM=True):
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
@@ -186,7 +212,7 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,logPath,
         xDimensions = np.arange(1, largestReducedFeature, max(largestReducedFeature / numOfDimensions, 1));
 
     cprResult = [];
-    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.2, random_state=0);
+    rs = StratifiedShuffleSplit(n_splits=n_trails, test_size=.2, random_state=0);
     rs.get_n_splits(data[:, 1:], data[:, 0]);
 
     for train_index, test_index in rs.split(data[:, 1:], data[:, 0]):
@@ -204,9 +230,9 @@ def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,logPath,
 
     return cprResult;
 
+
 if __name__ == "__main__":
-    #datasets = ['diabetes','german','ionosphere'];
-    numOfRounds = 2;
+    n_trails = 2;
     figSavedPath = "./fig/";
     logSavedPath = "./log/";
     resultSavedPath = logSavedPath+"/firstRevision/";
@@ -217,14 +243,14 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,isLinearSVM=isLinearSVM);
+        result = doExp(datasetPath,epsilon,varianceRatio,n_trails,numOfDimensions,isLinearSVM=isLinearSVM);
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['CNAE','Australian','YaleB','p53 Mutant','Amazon_2','german','ionosphere'];
+        datasets = ['Australian','CNAE_2','YaleB','spokenLetter_A'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            #result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions,logPath=logSavedPath+'numPC_'+dataset+".out",isLinearSVM=isLinearSVM);
+            result = doExp(datasetPath,epsilon,varianceRatio,n_trails,numOfDimensions,logPath=logSavedPath+'numPC_'+dataset+".out",isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",n_trails=10,figSavedPath=None);
+            #drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",n_trails=10,figSavedPath=None);

@@ -122,6 +122,22 @@ def drawFig(datasetTitle, data=None, path=None, n_trails=1, type='f1',figSavedPa
     else:
         plt.savefig(figSavedPath + "dppro_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
 
+def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
+    #preprocessing.normalize(pureTrainingData, copy=False);
+    #preprocessing.normalize(pureTestingData, copy=False);
+    projMatrixLength = pureTrainingData.shape[1]*k;
+    oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
+    projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
+    delta = np.divide(1.0, pureTrainingData.shape[0]);
+    noiseLength = pureTrainingData.shape[0]*k;
+    oneDimNoise = DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength,l2Sensitivity=l2Sensitivity);
+    noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
+
+    projTrainingData = np.dot(pureTrainingData,projMatrix);
+    noisyProjTrainingData = projTrainingData + noiseMatrix;
+    projTestingData = np.dot(pureTestingData,projMatrix);
+
+    return noisyProjTrainingData,projTestingData;
 
 def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM):
     pureTrainingData = trainingData[:, 1:];
@@ -149,15 +165,15 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
     dpWishartPCAImpl = DiffPrivPCAImpl(pureTrainingData);
     
     delta = np.divide(1.0,numOfTrainingSamples);
-    projTrainingData1 = pcaImpl.transform(pureTrainingData,largestReducedFeature);
-    projTestingData1 = pcaImpl.transform(pureTestingData,largestReducedFeature);
+    projTrainingData = pcaImpl.transform(pureTrainingData,largestReducedFeature);
+    projTestingData = pcaImpl.transform(pureTestingData,largestReducedFeature);
     #print projTrainingData.shape;
     cprResult = [];
     print "non noise PCA SVM training";
     if isLinearSVM:
-        pcaResult = SVMModule.SVMClf.linearSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        pcaResult = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
     else:
-        pcaResult = SVMModule.SVMClf.rbfSVM(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
+        pcaResult = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
 
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
         #print pcaImpl.projMatrix[:,0];    
@@ -175,24 +191,33 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
         '''
         cprResult.extend(pcaResult);
 
-        projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
-        projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
+        projTrainingData = dpGaussianPCAImpl.transform(pureTrainingData,largestReducedFeature);
+        projTestingData = dpGaussianPCAImpl.transform(pureTestingData,largestReducedFeature);
         print "Gaussian-DPDPCA SVM training";
         
         if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+            result = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         cprResult.extend(result);
 
-        projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,largestReducedFeature);
-        projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,largestReducedFeature);
+        projTrainingData = dpWishartPCAImpl.transform(pureTrainingData,largestReducedFeature);
+        projTestingData = dpWishartPCAImpl.transform(pureTestingData,largestReducedFeature);
         #print projTestingData.shape;
         print "Wishart-DPPCA SVM training";
         if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+            result = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
+        cprResult.extend(result);
+
+        projTrainingData, projTestingData = DPPro(pureTrainingData, pureTestingData, dpGaussianPCAImpl.L2Sensitivity, largestReducedFeature, targetEpsilon);
+        # print projTestingData.shape;
+        print "DPPro SVM training";
+        if isLinearSVM:
+            result = SVMModule.SVMClf.linearSVM(projTrainingData, trainingLabel, projTestingData, testingLabel);
+        else:
+            result = SVMModule.SVMClf.rbfSVM(projTrainingData, trainingLabel, projTestingData, testingLabel);
         cprResult.extend(result);
     cprResult = np.asarray(cprResult);
     return cprResult.reshape((len(xEpsilons), -1));
@@ -234,8 +259,9 @@ if __name__ == "__main__":
     n_trails = 1;
     varianceRatio = 0.9;
     xEpsilons = np.arange(0.1,1.1,0.1);
-    figSavedPath = "./fig/";
-    resultSavedPath = "./log/";
+    figSavedPath = './fig/';
+    resultSavedPath = './log/';
+    logSavedPath = './log/';
     isLinearSVM = True;
 
     if len(sys.argv) > 1:
@@ -245,10 +271,10 @@ if __name__ == "__main__":
         #np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['Australian','CNAE_2','NLTCS-Money','NLTCS-Travel','NLTCS-Outside','Amazon','p53 Mutant','CNAE','YaleB','Amazon_3','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
+        datasets = ['Australian','CNAE_2','spokenLetter_A','YaleB','NLTCS-Money','NLTCS-Travel','NLTCS-Outside'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,varianceRatio,xEpsilons,n_trails,logPath=resultSavedPath+'eps_'+dataset+".out",isLinearSVM=isLinearSVM);
+            result = doExp(datasetPath,varianceRatio,xEpsilons,n_trails,logPath=logSavedPath+'eps_'+dataset+".out",isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
             #drawFig(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".csv",n_trails=10,type='precision',figSavedPath=None);
