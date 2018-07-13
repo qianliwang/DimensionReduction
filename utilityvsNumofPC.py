@@ -5,7 +5,7 @@ from sklearn.model_selection import ShuffleSplit;
 
 from pkg import SVMModule;
 from pkg.DimReduction import PCAImpl;
-from pkg.DPDimReduction import DiffPrivPCAImpl;
+from pkg.DPDimReduction import DiffPrivPCAImpl,DPPro;
 from pkg.DPDimReduction import DiffPrivImpl;
 from pkg.global_functions import globalFunction as gf;
 
@@ -83,7 +83,7 @@ def drawF1Score(datasetTitle,data=None,path=None,n_trails=1,figSavedPath=None):
     else:
         plt.savefig(figSavedPath+"numOfPC_"+datasetTitle+'.pdf', format='pdf', dpi=1000);
 
-
+'''
 def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
     preprocessing.normalize(pureTrainingData, copy=False);
     preprocessing.normalize(pureTestingData, copy=False);
@@ -100,6 +100,7 @@ def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
     projTestingData = np.dot(pureTestingData,projMatrix);
 
     return noisyProjTrainingData,projTestingData;
+'''
 
 def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon,isLinearSVM):
     pureTrainingData = trainingData[:, 1:];
@@ -176,7 +177,7 @@ def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon
             result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         cprResult.extend(result);
 
-        projTrainingData, projTestingData = DPPro(pureTrainingData, pureTestingData, dpGaussianPCAImpl.L2Sensitivity, targetDimension, epsilon);
+        projTrainingData, projTestingData = DPPro(pureTrainingData, pureTestingData, targetDimension, epsilon);
 
         print "DPPro %d" % targetDimension;
         if isLinearSVM:

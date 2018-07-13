@@ -1,6 +1,7 @@
 from sklearn.model_selection import StratifiedShuffleSplit;
 from sklearn.preprocessing import StandardScaler;
 from sklearn import preprocessing;
+from sklearn.random_projection import GaussianRandomProjection;
 
 import numpy as np;
 from numpy import linalg as LA;
@@ -10,7 +11,7 @@ import os;
 from pkg import SVMModule;
 from pkg.DimReduction import PCAImpl;
 from pkg.DPDimReduction import DiffPrivPCAImpl;
-from pkg.DPDimReduction import DiffPrivImpl;
+from pkg.DPDimReduction import DiffPrivImpl,DPPro;
 from pkg.global_functions import globalFunction as gf;
 
 
@@ -122,23 +123,6 @@ def drawFig(datasetTitle, data=None, path=None, n_trails=1, type='f1',figSavedPa
     else:
         plt.savefig(figSavedPath + "dppro_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
 
-def DPPro(pureTrainingData,pureTestingData,l2Sensitivity,k,epsilon):
-    #preprocessing.normalize(pureTrainingData, copy=False);
-    #preprocessing.normalize(pureTestingData, copy=False);
-    projMatrixLength = pureTrainingData.shape[1]*k;
-    oneDimNormalSamples = np.random.normal(0, np.divide(1.0,k), projMatrixLength);
-    projMatrix = np.reshape(oneDimNormalSamples,(pureTrainingData.shape[1],-1));
-    delta = np.divide(1.0, pureTrainingData.shape[0]);
-    noiseLength = pureTrainingData.shape[0]*k;
-    oneDimNoise = DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength,l2Sensitivity=l2Sensitivity);
-    noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
-
-    projTrainingData = np.dot(pureTrainingData,projMatrix);
-    noisyProjTrainingData = projTrainingData + noiseMatrix;
-    projTestingData = np.dot(pureTestingData,projMatrix);
-
-    return noisyProjTrainingData,projTestingData;
-
 def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearSVM):
     pureTrainingData = trainingData[:, 1:];
     trainingLabel = trainingData[:, 0];
@@ -174,6 +158,9 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
         pcaResult = SVMModule.SVMClf.linearSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
     else:
         pcaResult = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
+
+    randomProjector = GaussianRandomProjection(n_components=largestReducedFeature);
+    randomProjector.fit(pureTrainingData);
 
     for k, targetEpsilon in np.ndenumerate(xEpsilons):
         #print pcaImpl.projMatrix[:,0];    
@@ -211,7 +198,7 @@ def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature,isLinearS
             result = SVMModule.SVMClf.rbfSVM(projTrainingData,trainingLabel,projTestingData,testingLabel);
         cprResult.extend(result);
 
-        projTrainingData, projTestingData = DPPro(pureTrainingData, pureTestingData, dpGaussianPCAImpl.L2Sensitivity, largestReducedFeature, targetEpsilon);
+        projTrainingData, projTestingData = DPPro(pureTrainingData, pureTestingData, largestReducedFeature, targetEpsilon,randomProjector=randomProjector);
         # print projTestingData.shape;
         print "DPPro SVM training";
         if isLinearSVM:
@@ -257,7 +244,7 @@ def doExp(datasetPath,varianceRatio,xEpsilons,n_trails,logPath,isLinearSVM=True)
 if __name__ == "__main__":
     
     n_trails = 1;
-    varianceRatio = 0.9;
+    varianceRatio = 0.95;
     xEpsilons = np.arange(0.1,1.1,0.1);
     figSavedPath = './fig/';
     resultSavedPath = './log/';

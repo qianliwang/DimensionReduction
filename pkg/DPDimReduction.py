@@ -2,10 +2,42 @@ import numpy as np;
 from numpy import linalg as LA;
 from invwishart import *;
 from DimReduction import PCAImpl,evdSolver,scipyEvdSolver;
+from sklearn.random_projection import GaussianRandomProjection;
 '''
 Two differentially private noise to add into the covariance, one using Gaussian distribution, the other one is based on 
 Wishart distribution, from two different papers respectively, mentioned in README.
 '''
+
+def DPPro(pureTrainingData,pureTestingData,k,epsilon,randomProjector=None):
+    '''
+    projMatrixLength = pureTrainingData.shape[1] * k;
+    oneDimNormalSamples = np.random.normal(0, np.divide(1.0, k), projMatrixLength);
+    projMatrix = np.reshape(oneDimNormalSamples, (pureTrainingData.shape[1], -1));
+    projTrainingData = np.dot(pureTrainingData, projMatrix);
+    projTestingData = np.dot(pureTestingData, projMatrix);
+    '''
+    if randomProjector is None:
+        print('Initialize random projector');
+        randomProjector = GaussianRandomProjection(n_components=k);
+        randomProjector.fit(pureTrainingData);
+
+
+    projTrainingData = randomProjector.transform(pureTrainingData);
+    projTestingData = randomProjector.transform(pureTestingData);
+
+    projMatrix_norms = np.linalg.norm(randomProjector.components_,axis=0);
+    # The dimension of projMatrix_norms should be n_features, pureTrainingData.shape[1];
+    #print(projMatrix_norms.shape);
+    l2Sensitivity = np.amax(projMatrix_norms);
+    delta = np.divide(1.0, pureTrainingData.shape[0]);
+    noiseLength = pureTrainingData.shape[0]*k;
+    oneDimNoise = DiffPrivImpl.OneDimGaussian(epsilon,delta,noiseLength,l2Sensitivity=l2Sensitivity);
+    noiseMatrix = np.reshape(oneDimNoise,(pureTrainingData.shape[0],-1));
+
+    noisyProjTrainingData = projTrainingData + noiseMatrix;
+
+    return noisyProjTrainingData,projTestingData;
+
 class DiffPrivImpl(object):
     @classmethod
     def SymmGaussian(cls,epsilon,delta,dimension,deltaF):
