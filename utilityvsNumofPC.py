@@ -10,6 +10,7 @@ from pkg.DPDimReduction import DiffPrivImpl;
 from pkg.global_functions import globalFunction as gf;
 
 import numpy as np;
+import pandas as pd;
 import sys;
 import os;
 
@@ -197,7 +198,8 @@ def doExp(datasetPath,epsilon,varianceRatio,n_trails,numOfDimensions,logPath,isL
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
-        data = np.loadtxt(datasetPath, delimiter=",");
+        #data = np.loadtxt(datasetPath, delimiter=",");
+        data = pd.read_csv(datasetPath, delimiter=",", header=None).values;
     scaler = StandardScaler();
     data_std = scaler.fit_transform(data[:, 1:]);
     globalPCA = PCAImpl(data_std);

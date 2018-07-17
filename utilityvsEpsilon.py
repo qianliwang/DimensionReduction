@@ -4,6 +4,7 @@ from sklearn import preprocessing;
 from sklearn.random_projection import GaussianRandomProjection;
 
 import numpy as np;
+import pandas as pd;
 from numpy import linalg as LA;
 import sys;
 import os;
@@ -214,8 +215,8 @@ def doExp(datasetPath,varianceRatio,xEpsilons,n_trails,logPath,isLinearSVM=True)
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
-        data = np.loadtxt(datasetPath, delimiter=",");
-
+        #data = np.loadtxt(datasetPath, delimiter=",");
+        data = pd.read_csv(datasetPath, delimiter=",", header=None).values;
     scaler = StandardScaler();
     data_std_scale = scaler.fit_transform(data[:, 1:]);
     globalPCA = PCAImpl(data_std_scale);
