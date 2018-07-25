@@ -11,8 +11,7 @@ import os;
 
 from pkg import SVMModule;
 from pkg.DimReduction import PCAImpl;
-from pkg.DPDimReduction import DiffPrivPCAImpl;
-from pkg.DPDimReduction import DiffPrivImpl,DPPro;
+from pkg.DPDimReduction import DiffPrivPCAImpl,DiffPrivImpl,DPPro;
 from pkg.global_functions import globalFunction as gf;
 
 
@@ -35,58 +34,72 @@ def drawFig(datasetTitle, data=None, path=None, n_trails=1, type='f1',figSavedPa
 
     plt.clf();
     if path is not None:
-        data = np.loadtxt(path, delimiter=",");
+        rawData = np.loadtxt(path, delimiter=",");
+
+    if type is 'f1':
+        data = rawData[:,[3,7,11,15]];
+    elif type is 'accuracy':
+        data = rawData[:, [4,8,12,16]];
+    elif type is 'misclassRate':
+        data = 1-rawData[:, [4,8,12,16]];
+    elif type is 'precision':
+        data = rawData[:, [1,5,9,13]];
+    elif type is 'recall':
+        data = rawData[:, [2,6,10,14]];
+    print(data.shape);
     n_dim = data.shape[0];
     if n_trails is not 1:
         n_dim = int(data.shape[0]/n_trails);
-        data = data.reshape(n_trails,-1,data.shape[1]);
+        data = data.reshape(n_trails,n_dim,data.shape[1]);
         data_mean,data_std = gf.calcMeanandStd(data);
+        print(data_mean.shape);
+        print(data_std.shape)
     else:
         data_mean = data;
         data_std = np.zeros(data.shape);
     print "Number of points on x-axis: %d" % n_dim;
-    x = data_mean[:, 0];
-
+    x = rawData[:n_dim, 0];
+    '''
     if type is 'f1':
-        #drawF1Score(datasetTitle, data=data, path=path, figSavedPath=figSavedPath);
-        data_mean = data_mean[:,[3,7,11]];
-        data_std = data_std[:,[3,7,11]];
+        data_mean = data_mean[:,[3,7,11,15]];
+        data_std = data_std[:,[3,7,11,15]];
     elif type is 'accuracy':
         #drawAccuracy(datasetTitle, data=data, path=path, figSavedPath=figSavedPath);
-        data_mean = data_mean[:, [4, 8, 12]];
-        data_std = data_std[:, [4, 8, 12]];
+        data_mean = data_mean[:, [4, 8, 12,16]];
+        data_std = data_std[:, [4, 8, 12,16]];
     elif type is 'precision':
         #drawPrecision(datasetTitle, data=data, path=path, figSavedPath=figSavedPath)
-        data_mean = data_mean[:, [1, 5, 9]];
-        data_std = data_std[:, [1, 5, 9]];
+        data_mean = data_mean[:, [1, 5, 9,13]];
+        data_std = data_std[:, [1, 5, 9,13]];
     elif type is 'recall':
         #drawRecall(datasetTitle, data=data, path=path, figSavedPath=figSavedPath)
-        data_mean = data_mean[:, [2, 6, 10]];
-        data_std = data_std[:, [2, 6, 10]];
-
+        data_mean = data_mean[:, [2, 6, 10,14]];
+        data_std = data_std[:, [2, 6, 10,14]];
+    '''
     minVector = np.amin(data_mean, axis=0);
     yMin = min(minVector);
     maxVector = np.amax(data_mean, axis=0);
     yMax = max(maxVector);
 
     yMin = (yMin - 0.05) if (yMin - 0.05) > 0 else 0;
-    yMax = (yMax * 1.35) if (yMax * 1.35) < 1 else 1.05;
+    yMax = (yMax * 1.25) if (yMax * 1.25) < 1 else 1.05;
 
-    if type is 'accuracy':
+    if type is '':
         pcaAccErrorLine = plt.errorbar(x, data_mean[:,0], yerr=data_std[:,0], fmt='b', capsize=4);
         pcaAccLine, = plt.plot(x, data_mean[:,0], 'b-')
 
         dpdpcaErrorLine = plt.errorbar(x,data_mean[:,1], yerr=data_std[:,1], fmt='m', capsize=4);
         dpdpcaLine, = plt.plot(x, data_mean[:,1], 'm-')
 
-        dpproErrorLine = plt.errorbar(x, data_mean[:,2], yerr=data_std[:,2], fmt='g', capsize=4);
-        dpproLine, = plt.plot(x, data_mean[:,2], 'g-')
+        wishartErrorLine = plt.errorbar(x,data_mean[:,2], yerr=data_std[:,2], fmt='g', capsize=4);
+        wishartLine, = plt.plot(x, data_mean[:,2], 'g-')
+
+        dpproErrorLine = plt.errorbar(x, data_mean[:,3], yerr=data_std[:,3], fmt='r', capsize=4);
+        dpproLine, = plt.plot(x, data_mean[:,3], 'r-')
 
         #plt.axis([0.05, x[-1] + 0.05, yMin, yMax]);
-        plt.axis([0.05, x[-1] + 0.05, 0, 1]);
-        # plt.axis([0,10,0.4,1.0]);
-        plt.legend([pcaAccLine, dpdpcaLine, dpproLine], ['PCA', 'DPDPCA', 'DPPRO'], loc=1);
-        # plt.legend([dpdpcaLine, dpproLine], ['DPDPCA', 'DPPRO'], loc=1);
+        plt.axis([0,2,yMin,yMax]);
+        plt.legend([pcaAccLine, dpdpcaLine, wishartLine, dpproLine], ['PCA', 'DPDPCA','Wishart','DPPro'], loc=1);
 
         plt.xlabel('Epsilon', fontsize=18);
         plt.ylabel('Classification Accuracy', fontsize=18);
@@ -103,17 +116,16 @@ def drawFig(datasetTitle, data=None, path=None, n_trails=1, type='f1',figSavedPa
         data_std = data_std[theRange,:];
 
         ax = plt.gca();
-        width = 0.05;
-        gBar = ax.bar(x - 0.03, data_mean[:,1], width, color='m', yerr=data_std[:,1], capsize=2);
+        width = 0.06;
+        gBar = ax.bar(x - 0.1, data_mean[:,1], width, color='m', yerr=data_std[:,1], capsize=2);
         # gBar = ax.bar(x-0.035, gF1Mean, width, color='r', yerr=gF1Std,capsize=2);
-        # wBar = ax.bar(x, wF1Mean, width, color='g', yerr=wF1Std,capsize=2);
-        # pcaBar = ax.bar(x+0.035, pcaF1Mean/2, width, color='b', yerr=pcaF1Std,capsize=2);
-        pcaBar = ax.bar(x + 0.03, data_mean[:,0], width, color='b', yerr=data_std[:,0], capsize=2);
-        plt.axis([0.12, 1.08, 0, 1.15]);
+        wBar = ax.bar(x-0.03, data_mean[:,2], width, color='g', yerr=data_std[:,2],capsize=2);
+        dpproBar = ax.bar(x+0.03, data_mean[:,3], width, color='r', yerr=data_std[:,3],capsize=2);
+        pcaBar = ax.bar(x + 0.1, data_mean[:,0], width, color='b', yerr=data_std[:,0], capsize=2);
+        plt.axis([0, 2.1, yMin, yMax]);
         # plt.legend([pcaF1Line,gF1Line,wF1Line], ['PCA', 'Gaussian Noise', 'Wishart Noise'], loc=4);
         # ax.legend((gBar[0], wBar[0], pcaBar[0]), ('Gaussian Noise','Wishart Noise','PCA'), loc=1, prop={'size':6});
-        ax.legend((gBar[0], pcaBar[0]), ('DPDPCA', 'PCA'), loc=1, prop={'size': 8});
-        # plt.axis([0,10,0.4,1.0]);
+        ax.legend((pcaBar[0],gBar[0],wBar[0],dpproBar[0]), ('PCA','DPDPCA','Wishart','DPPro'), loc=1, prop={'size': 8});
         plt.xlabel('Epsilon', fontsize=18);
         plt.ylabel(type, fontsize=18);
         plt.title(datasetTitle, fontsize=18);
@@ -248,7 +260,7 @@ if __name__ == "__main__":
     varianceRatio = 0.95;
     xEpsilons = np.arange(0.1,1.1,0.1);
     figSavedPath = './fig/';
-    resultSavedPath = './log/';
+    resultSavedPath = './log/eps_result/';
     logSavedPath = './log/';
     isLinearSVM = True;
 
@@ -259,10 +271,12 @@ if __name__ == "__main__":
         #np.savetxt(resultSavedPath+"Epsilon_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','ionosphere','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['Australian','CNAE_2','spokenLetter_A','YaleB','NLTCS-Money','NLTCS-Travel','NLTCS-Outside'];
+        #datasets = ['Australian','CNAE_2','spokenLetter_A','YaleB','NLTCS-Money','NLTCS-Travel','NLTCS-Outside'];
+        #datasets = ['CNAE_2','spokenLetter_A','NLTCS-Money','NLTCS-Travel','NLTCS-Outside'];
+        datasets=['yaleB'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,varianceRatio,xEpsilons,n_trails,logPath=logSavedPath+'eps_'+dataset+".out",isLinearSVM=isLinearSVM);
+            #result = doExp(datasetPath,varianceRatio,xEpsilons,n_trails,logPath=logSavedPath+'eps_'+dataset+".out",isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"Epsilon_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawFig(dataset, data=None, path=resultSavedPath + "Epsilon_" + dataset + ".csv",n_trails=10,type='precision',figSavedPath=None);
+            drawFig(dataset, data=None, path=resultSavedPath + "eps_" + dataset + ".out",n_trails=5,type='misclassRate',figSavedPath=None);

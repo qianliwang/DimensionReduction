@@ -1,23 +1,22 @@
+import keras;
+from keras import optimizers, regularizers;
 from keras.models import Sequential;
 from keras.layers import Dense,Activation,Dropout;
-from keras.utils import np_utils;
 from keras import backend as K;
-from keras.callbacks import Callback;
+from keras.callbacks import Callback, ModelCheckpoint,ReduceLROnPlateau;
 
 import tensorflow as tf;
 
-from pkg.dimReduction import PCAModule;
-from pkg.diffPrivDimReduction import DPModule;
-from pkg.diffPrivDimReduction import DiffPrivPCAModule;
+from pkg.DimReduction import PCAImpl;
+from pkg.DPDimReduction import DiffPrivPCAImpl,DiffPrivImpl,DPPro;
 from pkg.global_functions import globalFunction as gf;
 
-from sklearn.model_selection import StratifiedShuffleSplit;
-from sklearn.model_selection import StratifiedKFold;
-from sklearn import preprocessing;
+from sklearn.model_selection import StratifiedShuffleSplit,StratifiedKFold;
 from sklearn.preprocessing import StandardScaler;
-from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score;
+from sklearn.metrics import accuracy_score,confusion_matrix, f1_score, precision_score, recall_score;
 
 import numpy as np;
+import pandas as pd;
 from numpy import linalg as LA;
 import sys;
 import os;
@@ -32,7 +31,7 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
  
 # Only allow a total of half the GPU memory to be allocated
-config.gpu_options.per_process_gpu_memory_fraction = 0.8
+config.gpu_options.per_process_gpu_memory_fraction = 0.95
  
 # Create a session with the above options specified.
 K.tensorflow_backend.set_session(tf.Session(config=config))
@@ -144,51 +143,56 @@ def drawF1Score(datasetTitle, data=None, path=None, figSavedPath=None):
         plt.savefig(figSavedPath + "NN_" + datasetTitle + '.pdf', format='pdf', dpi=1000);
 
 
+def build_MLP(n_hiddenNeurons,n_features,n_classes):
 
-def build_MLP(numOfSamples,numOfFeatures,numOfOutputs):
-    # alpha is in [2,10];
-    alpha = 2;
-    #DROPOUT = 0.1;
-    #N_HIDDEN = numOfSamples/(alpha*(numOfFeatures+numOfOutputs));
-    N_HIDDEN = numOfFeatures;
-    print "neurons in hidden layer: %d" % N_HIDDEN;
+    print "neurons in hidden layer: %d" % n_hiddenNeurons;
     model = Sequential();
-    model.add(Dense(N_HIDDEN, input_dim=numOfFeatures,activation='sigmoid'));
+    model.add(Dense(n_hiddenNeurons, input_dim=n_features,activation='sigmoid'));
     #model.add(Activation('sigmoid'));
     #model.add(Dropout(DROPOUT));
-    #model.add(Dense(N_HIDDEN,activation='relu'));
+    model.add(Dense(n_hiddenNeurons/2,activation='sigmoid'));
     #model.add(Activation('relu'));
     #model.add(Dropout(DROPOUT));
-    model.add(Dense(1,activation='sigmoid'));
+    model.add(Dense(n_classes,activation='sigmoid'));
     #model.summary();
-    # Compile model
-    model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    #model.compile(loss='binary_crossentropy', optimizer='sgd', metrics=[f1])
     return model;
 
-def fit_MLP(x_train,y_train,x_test,y_test):
-    EPOCH = 100;
+def fit_MLP(x_train,y_train,x_test,y_test,n_classes,model=None):
+    EPOCH = 50;
     BATCH_SIZE = 32;
-    VALIDATION_SPLIT = 0.1;
-    #RESHAPED = 856;
-    #NB_CLASSES = 2;
-    KFOLD_SPLITS = 5;
-    # load pima indians dataset
-    #dataset = numpy.loadtxt("pima-indians-diabetes.csv", delimiter=",")
+    LEARNING_RATE = 0.001
     # split into input (X) and output (Y) variables
     #X = dataset[:,0:8]
     #Y = dataset[:,8]
 
     #y_train = np_utils.to_categorical(y_train,NB_CLASSES);
     #y_test = np_utils.to_categorical(y_test,NB_CLASSES);
+    if model is None:
+        model = build_MLP(1000, x_train.shape[1], n_classes);
+    model.compile(loss='categorical_crossentropy', optimizer=optimizers.Adam(lr=LEARNING_RATE),metrics=['accuracy']);
 
     # good trick to change values in ndArray.
     # convert labels from [1,-1] to [1,0].
-    y_train[y_train < 0]=0;
-    y_test[y_test < 0]=0;
-    model = build_MLP(x_train.shape[0],x_train.shape[1],1);
+    #y_train[y_train < 0]=0;
+    #y_test[y_test < 0]=0;
+
+    # Convert class vectors to binary class matrices.
+    y_train_oneHot = keras.utils.to_categorical(y_train, n_classes)
+    y_test_oneHot = keras.utils.to_categorical(y_test, n_classes)
+
     # Fit the model
-    expRes = [];
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, min_lr=0.0000000001)
+    callbacks_list = [reduce_lr];
+    model.fit(x_train, y_train_oneHot, epochs=EPOCH, batch_size=BATCH_SIZE, verbose=1, callbacks=callbacks_list,
+              validation_data=(x_test, y_test_oneHot));
+    # evaluate the model
+    scores = model.evaluate(x_test, y_test_oneHot);
+    # print("\nCross validation-%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+    y_pred = model.predict_classes(x_test);
+    acc = accuracy_score(y_test, y_pred);
+    print("Neural net accuracy: %.3f" % (acc,));
+    ''' 
+    expRes =[];
     init_weights = model.get_weights();
     epoches = np.arange(100,1100,100);
     for singleEpoch in epoches:
@@ -215,125 +219,110 @@ def fit_MLP(x_train,y_train,x_test,y_test):
         expRes.append(singleEpoch);
         expRes.append(avgRes[0]);
         expRes.append(avgRes[1]);
-    return expRes;
+    '''
+    return acc;
 
-def singleExp(xDimensions,trainingData,testingData,largestReducedFeature,epsilon):
+def singleExp(xEpsilons,trainingData,testingData,largestReducedFeature):
     pureTrainingData = trainingData[:,1:];
     trainingLabel = trainingData[:,0];
-    
+
+    numOfTrainingSamples = trainingData.shape[0];
+
     pureTestingData = testingData[:,1:];
     testingLabel = testingData[:,0];
 
-    scaler = StandardScaler(copy=False);
-    #print pureTrainingData[0];
-    scaler.fit_transform(pureTrainingData);
-    #print pureTrainingData[0];
+    scaler = StandardScaler();
+    # print pureTrainingData[0];
+    # scaler.fit(pureTrainingData);
+    pureTrainingData = scaler.fit_transform(pureTrainingData);
+    # print pureTrainingData[0];
 
-    #print pureTestingData[0];
-    scaler.transform(pureTestingData);
-    #print pureTestingData[0];
+    # print pureTestingData[0];
+    pureTestingData = scaler.transform(pureTestingData);
+    # print pureTestingData[0];
 
-    cprResult = [];
-    pcaImpl = PCAModule.PCAImpl(pureTrainingData);
-    
+    pcaImpl = PCAImpl(pureTrainingData);
     pcaImpl.getPCs(largestReducedFeature);
-    numOfTrainingSamples = trainingData.shape[0];
-    
+
+    projTrainingData = pcaImpl.transform(pureTrainingData, largestReducedFeature);
+    projTestingData = pcaImpl.transform(pureTestingData, largestReducedFeature);
+    pcaResult = fit_MLP(projTrainingData, trainingLabel, projTestingData, testingLabel, n_classes=40);
+
+    dpGaussianPCAImpl = DiffPrivPCAImpl(pureTrainingData);
     delta = np.divide(1.0,numOfTrainingSamples);
-    print "epsilon: %.2f, delta: %f" % (epsilon,delta);
-    
-    isGaussianDist = True;
-    dpGaussianPCAImpl = DiffPrivPCAModule.DiffPrivPCAImpl(pureTrainingData);
-    dpGaussianPCAImpl.setEpsilonAndGamma(epsilon,delta);
-    dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist,largestReducedFeature);
-    
-    for k, targetDimension in np.ndenumerate(xDimensions):    
+
+    # print projTrainingData.shape;
+    cprResult = [];
+    print "non noise PCA NN training";
+
+    for k, targetEpsilon in np.ndenumerate(xEpsilons):
         #print pcaImpl.projMatrix[:,0];
         #print k;
-        cprResult.extend([targetDimension]);
-        projTrainingData1 = pcaImpl.transform(pureTrainingData,targetDimension);
-        projTestingData1 = pcaImpl.transform(pureTestingData,targetDimension);
-        print "Non-noise PCA %d" % targetDimension;
-        result = fit_MLP(projTrainingData1,trainingLabel,projTestingData1,testingLabel);
-        
-        cprResult.extend(result);
+        print "epsilon: %.2f, delta: %f" % (targetEpsilon, delta);
+        cprResult.append(targetEpsilon);
+        isGaussianDist = True;
+        dpGaussianPCAImpl.setEpsilonAndGamma(targetEpsilon, delta);
+        dpGaussianPCAImpl.getDiffPrivPCs(isGaussianDist, largestReducedFeature);
 
-        projTrainingData2 = dpGaussianPCAImpl.transform(pureTrainingData,targetDimension);
-        projTestingData2 = dpGaussianPCAImpl.transform(pureTestingData,targetDimension);
-        print "Gaussian-noise PCA %d" % targetDimension;
-        
-        result = fit_MLP(projTrainingData2,trainingLabel,projTestingData2,testingLabel);
-        
-        cprResult.extend(result);
-        """
-        projTrainingData3 = dpWishartPCAImpl.transform(pureTrainingData,targetDimension);
-        projTestingData3 = dpWishartPCAImpl.transform(pureTestingData,targetDimension);
-        print "Wishart-noise PCA %d" % targetDimension;
-        if isLinearSVM:
-            result = SVMModule.SVMClf.linearSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-        else:
-            result = SVMModule.SVMClf.rbfSVM(projTrainingData3,trainingLabel,projTestingData3,testingLabel);
-        cprResult.append(result[3]);
-        """
+        cprResult.append(pcaResult);
 
-    resultArray = np.asarray(cprResult);
-    resultArray = np.reshape(resultArray, (len(xDimensions), -1));
-    return resultArray;
+        projTrainingData = dpGaussianPCAImpl.transform(pureTrainingData, largestReducedFeature);
+        projTestingData = dpGaussianPCAImpl.transform(pureTestingData, largestReducedFeature);
 
-def doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions):
+        result = fit_MLP(projTrainingData,trainingLabel,projTestingData,testingLabel,n_classes=40);
+        
+        cprResult.append(result);
+
+    cprResult = np.asarray(cprResult);
+    return cprResult.reshape((len(xEpsilons), -1));
+
+def doExp(datasetPath,varianceRatio,xEpsilons,n_trials,logPath):
     if os.path.basename(datasetPath).endswith('npy'):
         data = np.load(datasetPath);
     else:
-        data = np.loadtxt(datasetPath, delimiter=",");
+        #data = np.loadtxt(datasetPath, delimiter=",");
+        data = pd.read_csv(datasetPath, delimiter=",", header=None).values;
     scaler = StandardScaler();
     data_std = scaler.fit_transform(data[:,1:]);
-    globalPCA = PCAModule.PCAImpl(data_std);
+    globalPCA = PCAImpl(data_std);
 
     numOfFeature = data.shape[1]-1;
     largestReducedFeature = globalPCA.getNumOfPCwithKPercentVariance(varianceRatio);
     print "%d/%d dimensions captures %.2f variance." % (largestReducedFeature,numOfFeature,varianceRatio);
-    xDimensions = None;
-    if numOfDimensions > numOfFeature:
-        xDimensions = np.arange(1,numOfFeature);
-        largestReducedFeature=numOfFeature;
-    else:
-        xDimensions = np.arange(10,largestReducedFeature,max(largestReducedFeature/numOfDimensions,1));
-    cprResult = None;
-    rs = StratifiedShuffleSplit(n_splits=numOfRounds, test_size=.15, random_state=0);
+    cprResult = [];
+    rs = StratifiedShuffleSplit(n_splits=n_trials, test_size=.15, random_state=0);
     rs.get_n_splits(data[:,1:],data[:,0]);
 
     for train_index, test_index in rs.split(data[:,1:],data[:,0]):
         trainingData = data[train_index];
         testingData = data[test_index];
         
-        tmpResult = singleExp(xDimensions, trainingData, testingData, largestReducedFeature, epsilon);
-        if cprResult is None:
-            cprResult = tmpResult;
-        else:
-            cprResult = np.concatenate((cprResult,tmpResult),axis=0);
+        tmpResult = singleExp(xEpsilons, trainingData, testingData, largestReducedFeature);
+        with open(logPath, "a") as f:
+            np.savetxt(f, tmpResult, delimiter=",", fmt='%1.3f');
+        cprResult.append(tmpResult);
 
-
+    cprResult = np.vstack(cprResult);
     for result in cprResult:
         print ','.join(['%.3f' % num for num in result]);
 
     return cprResult;
+
+
 if __name__ == "__main__":
-    numOfRounds = 3;
-    resultSavedPath = "./log/";
-    numOfDimensions = 10;
-    epsilon = 0.3;
-    varianceRatio = 0.8;
-    
+    n_trials = 1;
+    logPath = './log/';
+    varianceRatio = 0.95;
+    xEpsilons = [0.1,0.3,0.5,0.7,0.9]
+
     if len(sys.argv) > 1:
         datasetPath = sys.argv[1];
         print "+++ using passed in arguments: %s" % (datasetPath);
-        result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions);
-        np.savetxt(resultSavedPath+"numPC_NN_"+os.path.basename(datasetPath)+"_"+str(time())+".output",result,delimiter=",",fmt='%1.3f');
+        result = doExp(datasetPath,varianceRatio,xEpsilons,n_trials,logPath=logPath+"nn_"+os.path.basename(datasetPath)+'.out');
     else:
-        datasets = ['CNAE_2'];
         #datasets = ['diabetes','Amazon_2','Australian','german','ionosphere'];
+        datasets = ['YaleB'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,numOfRounds,numOfDimensions);
-            np.savetxt(resultSavedPath+"numPC_NN_"+dataset+"_"+str(time())+".output",result,delimiter=",",fmt='%1.3f');
+            result = doExp(datasetPath,varianceRatio,xEpsilons,n_trials,logPath=logPath+'nn_'+dataset+'.out');

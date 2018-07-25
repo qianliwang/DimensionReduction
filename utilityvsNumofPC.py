@@ -61,24 +61,27 @@ def drawF1Score(datasetTitle,data=None,path=None,n_trails=1,figSavedPath=None):
     gF1ErrorLine = plt.errorbar(x, gF1Mean, yerr=gF1Std, fmt='m',capsize=4);
     gF1Line, = plt.plot(x, gF1Mean, 'm-')
 
-    gF1Mean = data_mean[:, 11];
-    gF1Std = data_std[:, 11];
-    #wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
-    #wF1Line, = plt.plot(x, wF1Mean , 'g-')
+    wF1Mean = data_mean[:, 11];
+    wF1Std = data_std[:, 11];
+    wF1ErrorLine = plt.errorbar(x, wF1Mean, yerr=wF1Std, fmt='g',capsize=4);
+    wF1Line, = plt.plot(x, wF1Mean , 'g-')
     plt.axis([0,x[-1]+1,yMin,yMax]);
     #plt.axis([0,10,0.4,1.0]);
-    #plt.legend([gF1Line, wF1Line,pcaF1Line], ['Gaussian Noise', 'Wishart Noise', 'PCA'], loc=4);
-    plt.legend([gF1Line, pcaF1Line], ['DPDPCA', 'PCA'], loc=4);
+    plt.legend([gF1Line, wF1Line,pcaF1Line], ['DPDPCA', 'Wishart', 'PCA'], loc=4);
+    #plt.legend([gF1Line, pcaF1Line], ['DPDPCA', 'PCA'], loc=4);
     plt.xlabel('Number of Principal Components',fontsize=18);
     plt.ylabel('F1-Score',fontsize=18);
     plt.title(datasetTitle, fontsize=18);
     plt.xticks(x);
+
+    '''
     ax = plt.gca();
-    if largestXVal>50:
-        majorLocator = MultipleLocator(8);
+    if largestXVal>200:
+        majorLocator = MultipleLocator(24);
     else:
-        majorLocator = MultipleLocator(2);
+        majorLocator = MultipleLocator(8);
     ax.xaxis.set_major_locator(majorLocator);
+    '''
     if figSavedPath is None:
         plt.show();
     else:
@@ -238,7 +241,7 @@ if __name__ == "__main__":
     n_trails = 2;
     figSavedPath = "./fig/";
     logSavedPath = "./log/";
-    resultSavedPath = logSavedPath+"/firstRevision/";
+    resultSavedPath = logSavedPath+"/numPC_result/";
     numOfDimensions = 30;
     epsilon = 0.3;
     varianceRatio = 0.9;
@@ -250,10 +253,12 @@ if __name__ == "__main__":
         np.savetxt(resultSavedPath+"numPC_"+os.path.basename(datasetPath)+".output",result,delimiter=",",fmt='%1.3f');
     else:
         #datasets = ['diabetes','CNAE_2','CNAE_5','CNAE_7','face2','Amazon_3','madelon'];
-        datasets = ['Australian','CNAE_2','YaleB','spokenLetter_A'];
+        #datasets = ['Australian','CNAE_2','YaleB','spokenLetter_A'];
+        #datasets = ['CNAE','ISOLET','YaleB'];
+        datasets = ['YaleB'];
         for dataset in datasets:
             print "++++++++++++++++++++++++++++  "+dataset+"  +++++++++++++++++++++++++";
             datasetPath = "./input/"+dataset+"_prePCA";
-            result = doExp(datasetPath,epsilon,varianceRatio,n_trails,numOfDimensions,logPath=logSavedPath+'numPC_'+dataset+".out",isLinearSVM=isLinearSVM);
+            #result = doExp(datasetPath,epsilon,varianceRatio,n_trails,numOfDimensions,logPath=logSavedPath+'numPC_'+dataset+".out",isLinearSVM=isLinearSVM);
             #np.savetxt(resultSavedPath+"numPC_"+dataset+".output",result,delimiter=",",fmt='%1.3f');
-            #drawF1Score(dataset,data=None,path = resultSavedPath+"numPC_"+dataset+".output",n_trails=10,figSavedPath=None);
+            drawF1Score(dataset,data=None,path=resultSavedPath+"numPC_"+dataset+".out",n_trails=9,figSavedPath=figSavedPath);
